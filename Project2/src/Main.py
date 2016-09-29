@@ -42,7 +42,7 @@ def worldCreation(gridSize = 5, pPit = 0.1, pObstacle = 0.1, pWumpus = 0.1):
                 emptyCount += 1
                 
     # Pick random start position and gold location from empty cells
-    startCell = random.randint(0, emptyCount-1)
+    startCell = random.randint(1, emptyCount)
     for i in range(gridSize):
         for j in range(gridSize):
             if worldMaker[i][j] == '-':
@@ -50,7 +50,7 @@ def worldCreation(gridSize = 5, pPit = 0.1, pObstacle = 0.1, pWumpus = 0.1):
                 if startCell == 0:
                     worldMaker[i][j] = 'x'
                     
-    goldCell = random.randint(0, emptyCount-2)
+    goldCell = random.randint(1, emptyCount-1)
     for i in range(gridSize):
         for j in range(gridSize):
             if worldMaker[i][j] == '-':
@@ -64,7 +64,7 @@ def worldCreation(gridSize = 5, pPit = 0.1, pObstacle = 0.1, pWumpus = 0.1):
 def printWorld(world):
     ''' Prints a representation of the current Wumpus World.
     Key:    - - Empty Space
-            < > ^ v - Player (represents direction)
+            x - Player (maybe use > < ^ V to represent direction?)
             O - Obstacle
             W - Wumpus
             P - Pit
