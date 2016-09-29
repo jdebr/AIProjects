@@ -42,7 +42,21 @@ def worldCreation(gridSize = 5, pPit = 0.1, pObstacle = 0.1, pWumpus = 0.1):
                 emptyCount += 1
                 
     # Pick random start position and gold location from empty cells
-    startCell = random.randint(1, emptyCount)
+    startCell = random.randint(0, emptyCount-1)
+    for i in range(gridSize):
+        for j in range(gridSize):
+            if worldMaker[i][j] == '-':
+                startCell -= 1
+                if startCell == 0:
+                    worldMaker[i][j] = 'x'
+                    
+    goldCell = random.randint(0, emptyCount-2)
+    for i in range(gridSize):
+        for j in range(gridSize):
+            if worldMaker[i][j] == '-':
+                goldCell -= 1
+                if goldCell == 0:
+                    worldMaker[i][j] = 'G'
             
     return worldMaker
 
