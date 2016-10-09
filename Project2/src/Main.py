@@ -77,8 +77,35 @@ def printWorld(world):
             print(world[i][j], end=' ')
         print('|')
         #print(sys.version)
-            
+
+'''
+Unification Algorithm
+'''
+def unify(x,y,theta):
+    #not using type() because type fails whereas isinstance tells properly about type https://stereochro.me/ideas/type-vs-isinstance
     
+    if s is None:
+        return None
+    elif x == y:
+        return s
+    elif Variable(x):
+        return unify_var(x,y,s)
+    elif Variable(y):
+        return unift_var(y,x,s)
+    #Compound
+    elif isinstance(x, Expr) and isinstance(y, Expr):
+        '''
+        doSomething for compound variable
+        http://www.ibm.com/support/knowledgecenter/SSLTBW_2.1.0/com.ibm.zos.v2r1.ikjc300/ikj2g2_What_is_a_Compound_Variable_.htm
+        '''
+        return unify(x.args, y.args, unify(x.op, y.op, theta))
+    #List
+    elif type(x) is list and type(y) is list:
+        return unify(x[1:], y[1:], unify(x[0], y[0], theta))
+        #doSomething
+    else:
+        return None;
+
         
 def main():
     # Generate 5x5 world with 10% chance of Pits, Obstacles, and Wumpi
