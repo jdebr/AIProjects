@@ -11,7 +11,7 @@ Group 3
 
 import random
 import sys
-
+from _ast import Expr
 
 def worldCreation(gridSize = 5, pPit = 0.1, pObstacle = 0.1, pWumpus = 0.1):
     '''  Generates a grid of rooms that make up a Wumpus World Cave instance.
@@ -84,14 +84,14 @@ Unification Algorithm
 def unify(x,y,theta):
     #not using type() because type fails whereas isinstance tells properly about type https://stereochro.me/ideas/type-vs-isinstance
     
-    if s is None:
+    if theta is None:
         return None
     elif x == y:
-        return s
+        return theta
     elif Variable(x):
-        return unify_var(x,y,s)
+        return unify_var(x,y,theta)
     elif Variable(y):
-        return unift_var(y,x,s)
+        return unift_var(y,x,theta)
     #Compound
     elif isinstance(x, Expr) and isinstance(y, Expr):
         '''
@@ -104,8 +104,10 @@ def unify(x,y,theta):
         return unify(x[1:], y[1:], unify(x[0], y[0], theta))
         #doSomething
     else:
-        return None;
-
+        return None;               
+                
+                    
+def unify_var(var,x,theta):
         
 def main():
     # Generate 5x5 world with 10% chance of Pits, Obstacles, and Wumpi
