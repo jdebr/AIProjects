@@ -91,7 +91,7 @@ def unify(x,y,theta):
     elif Variable(x):
         return unify_var(x,y,theta)
     elif Variable(y):
-        return unift_var(y,x,theta)
+        return unify_var(y,x,theta)
     #Compound
     elif isinstance(x, Expr) and isinstance(y, Expr):
         '''
@@ -104,7 +104,7 @@ def unify(x,y,theta):
         return unify(x[1:], y[1:], unify(x[0], y[0], theta))
         #doSomething
     else:
-        return None;               
+        return None               
                 
                     
 def unify_var(var,x,theta):
