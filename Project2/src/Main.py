@@ -98,7 +98,7 @@ def unify(x,y,theta):
         doSomething for compound variable
         http://www.ibm.com/support/knowledgecenter/SSLTBW_2.1.0/com.ibm.zos.v2r1.ikjc300/ikj2g2_What_is_a_Compound_Variable_.htm
         '''
-        return unify(x.args, y.args, unify(x.op, y.op, theta))
+        return 
     #List
     elif type(x) is list and type(y) is list:
         return unify(x[1:], y[1:], unify(x[0], y[0], theta))
