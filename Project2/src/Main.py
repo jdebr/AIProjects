@@ -108,16 +108,82 @@ def unify(x,y,theta):
                 
                     
 def unify_var(var,x,theta):
-        
-def main():
+    if var[1] in theta:
+        return try_unify((2, theta[var]), x, theta)
+    elif x[1] in theta:
+        return try_unify(var, (2,theta[x]), theta)
+    # OCCURS CHECK MAYBE
+    else:
+        theta[var[1]] = x[1] 
+        return theta
+
+def try_unify(x,y,theta):
+    ''' Attempt at unification algorithm.  Tuples for atomic vars, (int, string)
+    as all possible inputs - var (1), constant/predicate(2)
+    List of tuples for compound/strings
+    return theta as dictionary of substitutions {var:val}
+    '''
+    if theta == False: return False
+    if type(x) is tuple and type(y) is tuple:
+        # String equality for atomic terms
+        if x[1] == y[1]: return theta
+    # X or Y is variable (code 1)
+    if type(x) is tuple:
+        if x[0] == 1:
+            return unify_var(x, y, theta)
+    if type(y) is tuple:
+        if y[0] == 1:
+            return unify_var(y, x, theta)
+    # X and Y are compound/lists (do these need to be handled differently???)
+    elif type(x) is list and type(y) is list:
+        # Empty list check
+        if not x and not y:
+            return theta
+        return try_unify(x[1:], y[1:], try_unify(x[0], y[0], theta))
+    # Otherwise we fail
+    else: return False
+    
+def worldGeneratorTest():
     # Generate 5x5 world with 10% chance of Pits, Obstacles, and Wumpi
     worldMatrix = worldCreation()
-    
     printWorld(worldMatrix)
     
     # Generate 25x25 world with 5% chance of pits, obs, and wumpi
     newWorld = worldCreation(25, .05, .05, .05)
     printWorld(newWorld)
+    
+def unificationTest():
+    # Example unification 
+    # - all terms are tuples with integer code 1 for var, 2 for constant,
+    # - place compound terms in a list
+    x = (1, "x")
+    y = (2, "joe")
+    print(try_unify(x, y, {}))
+    
+    # Examples from book page 332
+    x = [(2, "Knows"),(2,"John"),(1,"x")]
+    y = [(2, "Knows"),(2,"John"),(2,"Jane")]
+    print(try_unify(x, y, {}))
+    
+    x = [(2, "Knows"),(2,"John"),(1,"x")]
+    y = [(2, "Knows"),(1,"y"),(2,"Bill")]
+    print(try_unify(x, y, {}))
+    
+    # Uses nested compound term...not working, needs debug
+    x = [(2, "Knows"),(2,"John"),(1,"x")]
+    y = [(2, "Knows"),(1,"y"),[(2,"Mother"),(1,"y")]]
+    print(try_unify(x, y, {}))
+    
+    # Should fail
+#     x = [(2, "Knows"),(2,"John"),(1,"x")]
+#     y = [(2, "Knows"),(1,"x"),(2,"Elizabeth")]
+#     print(try_unify(x, y, {}))
+    
+        
+def main():
+    #worldGeneratorTest()
+    unificationTest()
+    
     
 if __name__ == '__main__':
     main()
