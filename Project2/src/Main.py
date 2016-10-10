@@ -178,7 +178,33 @@ def unificationTest():
 #     x = [(2, "Knows"),(2,"John"),(1,"x")]
 #     y = [(2, "Knows"),(1,"x"),(2,"Elizabeth")]
 #     print(try_unify(x, y, {}))
-    
+
+coordinates = [2]
+#W = Wumpus
+#o = or
+#a = and
+#I = Imply
+#B = Breeze
+#Gl = Glitter
+#Go = Gold
+#O = obstacle 
+#P = Pit 
+#Bu = Bump
+#A = arrow
+#K = Kill
+#D = Dead 
+#V = Victory
+#S = Stench 
+#C = Current position
+#G = Grab
+#L = Left
+#R = Right
+#M = Move
+#Sh = Shoot
+#Sc = Scream 
+
+rule2 = "W" + coordinates + "o" 
+rules = ["", ""]
         
 def main():
     #worldGeneratorTest()
