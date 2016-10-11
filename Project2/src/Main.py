@@ -108,15 +108,27 @@ def unify(x,y,theta):
                 
                     
 def unify_var(var,x,theta):
-    if var[1] in theta:
-        return try_unify((2, theta[var]), x, theta)
-    elif x[1] in theta:
-        return try_unify(var, (2,theta[x]), theta)
-    # OCCURS CHECK MAYBE
+    print(type(var))
+    print(type(x))
+    print(type(theta))
+    if type(var) == type(x):
+        if var[1] in theta:
+            return try_unify((2, theta[var]), x, theta)
+        elif x[1] in theta:
+            return try_unify(var, (2,theta[x]), theta)
+        # OCCURS CHECK MAYBE
+        else:
+            theta[var[1]] = x[1] 
+            return theta
     else:
-        theta[var[1]] = x[1] 
-        return theta
-
+        if type(x[0]) is tuple:
+            if x[0][0] == 1:
+                x = (x[0][1],x[1][1])
+        if type(x[1]) is tuple:
+            if x[1][0] == 1:
+                x = (x[1][1],x[0][1])
+        return unify_var(var, x, theta)
+            
 def try_unify(x,y,theta):
     ''' Attempt at unification algorithm.  Tuples for atomic vars, (int, string)
     as all possible inputs - var (1), constant/predicate(2)
