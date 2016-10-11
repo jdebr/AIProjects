@@ -108,26 +108,26 @@ def unify(x,y,theta):
                 
                     
 def unify_var(var,x,theta):
-    print(type(var))
-    print(type(x))
-    print(type(theta))
-    if type(var) == type(x):
-        if var[1] in theta:
-            return try_unify((2, theta[var]), x, theta)
-        elif x[1] in theta:
-            return try_unify(var, (2,theta[x]), theta)
-        # OCCURS CHECK MAYBE
-        else:
-            theta[var[1]] = x[1] 
-            return theta
+    #print(type(var))
+    #print(type(x))
+    #print(type(theta))
+    #if type(var) == type(x):
+    if var in theta:
+        return try_unify(theta[var], x, theta)
+    elif type(x) is tuple and x in theta:
+        return try_unify(var, theta[x], theta)
+    # OCCURS CHECK MAYBE
     else:
-        if type(x[0]) is tuple:
-            if x[0][0] == 1:
-                x = (x[0][1],x[1][1])
-        if type(x[1]) is tuple:
-            if x[1][0] == 1:
-                x = (x[1][1],x[0][1])
-        return unify_var(var, x, theta)
+        theta[var] = x
+        return theta
+#     else:
+#         if type(x[0]) is tuple:
+#             if x[0][0] == 1:
+#                 x = (x[0][1],x[1][1])
+#         if type(x[1]) is tuple:
+#             if x[1][0] == 1:
+#                 x = (x[1][1],x[0][1])
+#         return unify_var(var, x, theta)
             
 def try_unify(x,y,theta):
     ''' Attempt at unification algorithm.  Tuples for atomic vars, (int, string)
@@ -181,12 +181,12 @@ def unificationTest():
     y = [(2, "Knows"),(1,"y"),(2,"Bill")]
     print(try_unify(x, y, {}))
     
-    # Uses nested compound term...not working, needs debug
+    # Working, doesn't unify interior terms but we can just substitute later if needed
     x = [(2, "Knows"),(2,"John"),(1,"x")]
     y = [(2, "Knows"),(1,"y"),[(2,"Mother"),(1,"y")]]
     print(try_unify(x, y, {}))
     
-    # Should fail
+    # Should fail, untested
 #     x = [(2, "Knows"),(2,"John"),(1,"x")]
 #     y = [(2, "Knows"),(1,"x"),(2,"Elizabeth")]
 #     print(try_unify(x, y, {}))
@@ -215,8 +215,8 @@ coordinates = [2]
 #Sh = Shoot
 #Sc = Scream 
 
-rule2 = "W" + coordinates + "o" 
-rules = ["", ""]
+#rule2 = "W" + coordinates + "o" 
+#rules = ["", ""]
         
 def main():
     #worldGeneratorTest()
