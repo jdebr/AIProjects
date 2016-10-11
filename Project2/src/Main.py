@@ -13,6 +13,18 @@ import random
 import sys
 from _ast import Expr
 
+def adjCells(x,y,gridSize):
+	list_adj = list()
+	if (x+1) < gridSize : 
+		list_adj.append([x+1,y])
+	if (x-1) >= 0 : 
+		list_adj.append([x-1,y])
+	if (y+1) < gridSize : 
+	    list_adj.append([x,y+1])
+	if (y-1) >= 0 :
+	    list_adj.append([x,y-1])
+	return list_adj
+
 def worldCreation(gridSize = 5, pPit = 0.1, pObstacle = 0.1, pWumpus = 0.1):
     '''  Generates a grid of rooms that make up a Wumpus World Cave instance.
     Each room is either Empty, or contains: a pit, a wumpus, an obstacle, or
@@ -32,7 +44,7 @@ def worldCreation(gridSize = 5, pPit = 0.1, pObstacle = 0.1, pWumpus = 0.1):
         for j in range(gridSize):
             # Procedural World Generation
             if random.random() < pPit:
-                worldMaker[i].append("P")
+                worldMaker[i].append("P")					
             elif random.random() < pObstacle:
                 worldMaker[i].append("O")
             elif random.random() < pWumpus:
@@ -45,6 +57,14 @@ def worldCreation(gridSize = 5, pPit = 0.1, pObstacle = 0.1, pWumpus = 0.1):
     startCell = random.randint(1, emptyCount)
     for i in range(gridSize):
         for j in range(gridSize):
+            if worldMaker[i][j] == 'P' : 
+                adj_cell = adjCells(i,j,gridSize)
+                for x in adj_cell :
+                    worldMaker[x[0]][x[1]] = 'B'
+            if worldMaker[i][j] == 'W' : 
+                adj_cell = adjCells(i,j,gridSize)
+                for x in adj_cell :
+                    worldMaker[x[0]][x[1]] = 'S'
             if worldMaker[i][j] == '-':
                 startCell -= 1
                 if startCell == 0:
@@ -215,12 +235,12 @@ coordinates = [2]
 #Sh = Shoot
 #Sc = Scream 
 
-rule2 = "W" + coordinates + "o" 
+#rule2 = "W" + coordinates + "o" 
 rules = ["", ""]
         
 def main():
-    #worldGeneratorTest()
-    unificationTest()
+    worldGeneratorTest()
+    #unificationTest()
     
     
 if __name__ == '__main__':
