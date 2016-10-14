@@ -13,6 +13,47 @@ import random
 import sys
 from _ast import Expr
 
+
+
+'''
+Explorer Class
+'''
+class Explorer:
+    def __init__(self, world):
+        # Initial Score
+        self.score = 0
+        
+        # Count wumpuses and give the explorer that many arrows, also init location
+        arrowCount = 0
+        for i in range(len(world)):
+            for j in range(len(world)):
+                if world[i][j] == "W":
+                    arrowCount += 1
+                elif world[i][j] == "x":
+                    self.x = i
+                    self.y = j 
+                
+        self.arrowCount = arrowCount
+        
+        # Randomize initial orientation
+        self.orientation = random.choice(['N','S','E','W'])
+        
+        
+    def turn_left(self, world):
+        pass
+    
+    def turn_right(self, world):
+        pass
+    
+    def forward(self, world):
+        pass
+    
+    def shoot(self, world):
+        pass
+    
+    def grab(self, world):
+        pass
+
 def adjCells(x,y,gridSize):
 	list_adj = list()
 	if (x+1) < gridSize : 
@@ -57,14 +98,14 @@ def worldCreation(gridSize = 5, pPit = 0.1, pObstacle = 0.1, pWumpus = 0.1):
     startCell = random.randint(1, emptyCount)
     for i in range(gridSize):
         for j in range(gridSize):
-            if worldMaker[i][j] == 'P' : 
-                adj_cell = adjCells(i,j,gridSize)
-                for x in adj_cell :
-                    worldMaker[x[0]][x[1]] = 'B'
-            if worldMaker[i][j] == 'W' : 
-                adj_cell = adjCells(i,j,gridSize)
-                for x in adj_cell :
-                    worldMaker[x[0]][x[1]] = 'S'
+#             if worldMaker[i][j] == 'P' : 
+#                 adj_cell = adjCells(i,j,gridSize)
+#                 for x in adj_cell :
+#                     worldMaker[x[0]][x[1]] = 'B'
+#             if worldMaker[i][j] == 'W' : 
+#                 adj_cell = adjCells(i,j,gridSize)
+#                 for x in adj_cell :
+#                     worldMaker[x[0]][x[1]] = 'S'
             if worldMaker[i][j] == '-':
                 startCell -= 1
                 if startCell == 0:
@@ -97,58 +138,10 @@ def printWorld(world):
             print(world[i][j], end=' ')
         print('|')
         #print(sys.version)
-
+  
 '''
-Unification Algorithm
-'''
-def unify(x,y,theta):
-    #not using type() because type fails whereas isinstance tells properly about type https://stereochro.me/ideas/type-vs-isinstance
-    
-    if theta is None:
-        return None
-    elif x == y:
-        return theta
-    elif Variable(x):
-        return unify_var(x,y,theta)
-    elif Variable(y):
-        return unify_var(y,x,theta)
-    #Compound
-    elif isinstance(x, Expr) and isinstance(y, Expr):
-        '''
-        doSomething for compound variable
-        http://www.ibm.com/support/knowledgecenter/SSLTBW_2.1.0/com.ibm.zos.v2r1.ikjc300/ikj2g2_What_is_a_Compound_Variable_.htm
-        '''
-        return 
-    #List
-    elif type(x) is list and type(y) is list:
-        return unify(x[1:], y[1:], unify(x[0], y[0], theta))
-        #doSomething
-    else:
-        return None               
-                
-                    
-def unify_var(var,x,theta):
-    #print(type(var))
-    #print(type(x))
-    #print(type(theta))
-    #if type(var) == type(x):
-    if var in theta:
-        return try_unify(theta[var], x, theta)
-    elif type(x) is tuple and x in theta:
-        return try_unify(var, theta[x], theta)
-    # OCCURS CHECK MAYBE
-    else:
-        theta[var] = x
-        return theta
-#     else:
-#         if type(x[0]) is tuple:
-#             if x[0][0] == 1:
-#                 x = (x[0][1],x[1][1])
-#         if type(x[1]) is tuple:
-#             if x[1][0] == 1:
-#                 x = (x[1][1],x[0][1])
-#         return unify_var(var, x, theta)
-            
+Unification
+'''            
 def try_unify(x,y,theta):
     ''' Attempt at unification algorithm.  Tuples for atomic vars, (int, string)
     as all possible inputs - var (1), constant/predicate(2)
@@ -175,14 +168,28 @@ def try_unify(x,y,theta):
     # Otherwise we fail
     else: return False
     
+def unify_var(var,x,theta):
+    if var in theta:
+        return try_unify(theta[var], x, theta)
+    elif type(x) is tuple and x in theta:
+        return try_unify(var, theta[x], theta)
+    # OCCURS CHECK MAYBE
+    else:
+        theta[var] = x
+        return theta
+    
 def worldGeneratorTest():
     # Generate 5x5 world with 10% chance of Pits, Obstacles, and Wumpi
     worldMatrix = worldCreation()
     printWorld(worldMatrix)
+    myExplorer = Explorer(worldMatrix)
+    print("Explorer Arrows: " + str(myExplorer.arrowCount))
+    print("Explorer Location: " + str(myExplorer.x) + ", " + str(myExplorer.y))
+    print("Explorer Orientation: " + str(myExplorer.orientation))
     
     # Generate 25x25 world with 5% chance of pits, obs, and wumpi
-    newWorld = worldCreation(25, .05, .05, .05)
-    printWorld(newWorld)
+    #newWorld = worldCreation(25, .05, .05, .05)
+    #printWorld(newWorld)
     
 def unificationTest():
     # Example unification 
@@ -235,8 +242,8 @@ coordinates = [2]
 #Sh = Shoot
 #Sc = Scream 
 
-rule2 = "W" + coordinates + "o" 
-rules = ["", ""]
+#rule2 = "W" + coordinates + "o" 
+#rules = ["", ""]
 
         
 def main():
