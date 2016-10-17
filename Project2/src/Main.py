@@ -20,6 +20,8 @@ Explorer Class
 '''
 class Explorer:
     def __init__(self, world):
+        # Associate world with this explorer
+        self.world = world
         # Initial Score
         self.score = 0
         
@@ -178,6 +180,20 @@ def unify_var(var,x,theta):
         theta[var] = x
         return theta
     
+def substitute(rule, theta):
+    ''' Called after unification to apply the substitution strings to a
+    rule
+    '''
+    new_rule = []
+    for term in rule:
+        new_term = term
+        if term in theta:
+            new_term = (term[0], theta[term][1])
+        new_rule.append(new_term)
+    return new_rule
+            
+    
+    
 def worldGeneratorTest():
     # Generate 5x5 world with 10% chance of Pits, Obstacles, and Wumpi
     worldMatrix = worldCreation()
@@ -218,6 +234,14 @@ def unificationTest():
 #     y = [(2, "Knows"),(1,"x"),(2,"Elizabeth")]
 #     print(try_unify(x, y, {}))
 
+    # Testing unification + substitution
+    x = [(2, "Knows"),(2,"John"),(1,"x")]
+    y = [(2, "Knows"),(1,"y"),(2,"Bill")]
+    theta = try_unify(x, y, {})
+    print(x)
+    print(theta)
+    print(substitute(x, theta))
+
 coordinates = [2]
 #W = Wumpus
 #o = or
@@ -247,8 +271,8 @@ coordinates = [2]
 
         
 def main():
-    worldGeneratorTest()
-    #unificationTest()
+    #worldGeneratorTest()
+    unificationTest()
     
     
 if __name__ == '__main__':
