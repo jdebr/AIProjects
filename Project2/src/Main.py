@@ -11,12 +11,8 @@ Group 3
 
 import random
 import sys
-from _ast import Expr
-
-
 #Being used  by Reactive Explorer
 percepts = {'stench' : 0, 'breeze' : 0, 'glitter' : 0, 'bump' : 0, 'scream' : 0, 'death' : 0}
-
 '''
 Explorer Class
 '''
@@ -25,7 +21,8 @@ class Explorer:
     def __init__(self, world):
         # Initial Score
         self.score = 0
-        
+        # Randomize initial orientation
+        self.orientation = random.choice(['N','S','E','W'])
         # Count wumpuses and give the explorer that many arrows, also init location
         arrowCount = 0
         for i in range(len(world)):
@@ -38,25 +35,31 @@ class Explorer:
                 
         self.arrowCount = arrowCount
         
-        # Randomize initial orientation
-        self.orientation = random.choice(['N','S','E','W'])
-
         # init the list of percepts to 0 first
-        self.list_percepts = {'Stench' : 0, 'Breeze' : 0, 'Glitter' : 0, 'Bump' : 0, 'Scream' : 0}    def update_percepts(self, world) : 
+        self.list_percepts = {'Stench' : 0, 'Breeze' : 0, 'Glitter' : 0, 'Bump' : 0, 'Scream' : 0, 'Death' : 0}
+
+    def update_percepts(self, world) : 
         '''
         checking the values of adjacent cells so as to update the stench and breeze because for other percepts you need to be on 
         block to identify it
         '''
         adj_cells = adjCells(self.x,self.y,len(world))
+        noWumpus = True
+        noPit = True
+        noGlitter = True
+        noDeath = True
+        noObstacle = True
         for values in adj_cells :
             if world[values[0]][values[1]] == 'W':
                 self.list_percepts['Stench'] = 1
+                noWumpus = False
             if world[values[0]][values[1]] == 'P':
                 self.list_percepts['Breeze'] = 1
-            if world[values[0]][values[1]] != 'P':
-                self.list_percepts['Breeze'] = 0
-            if world[values[0]][values[1]] != 'W':
-                self.list_percepts['Stench'] = 0
+                noPit = False
+        if noWumpus :
+            self.list_percepts['Stench'] = 0
+        if noPit :
+            self.list_percepts['Breeze'] = 0
         '''
         this area will check the current cell value for wumpus, pit, glitter
         we are calling if else each time to make sure it doesn't stick to one in the percept dictionary
@@ -75,35 +78,29 @@ class Explorer:
             self.list_percepts['Bump'] = 1
         elif world[self.x][self.y] != 'O':
             self.list_percepts['Bump'] = 1
-                
+        self.list_percepts['Scream'] = 0       
         
     def turn_left(self, world):
         if self.orientation == 'N' : 
             self.orientation = 'W'
-            self.score += (-1)
         elif self.orientation == 'E' : 
             self.orientation = 'N'
-            self.score += (-1)
         elif self.orientation == 'S' :
             self.orientation = 'E'
-            self.score += (-1) 
         else :
             self.orientation = 'S'
-            self.score += (-1)
+        self.score += (-1)
     
     def turn_right(self, world):
         if self.orientation == 'N' : 
             self.orientation = 'E'
-            self.score += (-1)
         elif self.orientation == 'E' : 
             self.orientation = 'S'
-            self.score += (-1)
         elif self.orientation == 'S' :
             self.orientation = 'W'
-            self.score += (-1) 
         else :
             self.orientation = 'N'
-            self.score += (-1)
+        self.score += (-1)
     
     def forward(self, world):
         row = self.x
@@ -111,19 +108,25 @@ class Explorer:
         if self.orientation == 'N' :
             if (row - 1) < len(world) and (row - 1) >= 0:
                 self.x = row - 1
-                self.score += (-1)
         elif self.orientation == 'E' : 
             if (column + 1) < len(world) and (column + 1) >= 0:
                 self.y = column + 1
-                self.score += (-1)
         elif self.orientation == 'S' :
             if (row + 1) < len(world) and (row + 1) >= 0:
                 self.x = row + 1 
-                self.score += (-1)
         else :
             if (column - 1) < len(world) and (column - 1) >= 0:
                 self.y = column - 1
-                self.score += (-1)
+        self.score += (-1)
+        
+        self.update_percepts(world)
+        
+        if world[self.x][self.y] == 'O' :
+            print("Obstacle, go back to the prevoius cell")
+            self.x = row
+            self.y = column 
+            self.update_percepts(world)
+            self.score += (-1)
         
     def shoot(self, world):
         location_x = self.x 
@@ -131,18 +134,34 @@ class Explorer:
         orientation = self.orientation
         nbarrow = self.arrowCount
         if orientation == 'N' :
-            for i in range(location_y, len(world)) : 
+            for i in range(0,location_y) : 
+                #When we kill a wumpus we display it as a cross '+' 
                 if world[location_x][i] == 'W' :
-                    world[location_x][i] = '-'
-                    self.score += 10
-            self.arrowCount = nbarrow - 1    
-        elif orientation == 'E' :
-            pass        
-        elif orientation == 'S' : 
-            pass
+                    world[location_x][i] = '+'
+                    self.list_percepts['Scream'] = 1
+                    self.score += 10    
+        elif orientation == 'S' :
+            for i in range(location_y, len(world)) : 
+                #When we kill a wumpus we display it as a cross '+' 
+                if world[location_x][i] == 'W' :
+                    world[location_x][i] = '+'
+                    self.list_percepts['Scream'] = 1
+                    self.score += 10         
+        elif orientation == 'E' : 
+            for i in range(location_x,len(world)) : 
+                #When we kill a wumpus we display it as a cross '+' 
+                if world[i][location_y] == 'W' :
+                    world[i][location_y] = '+'
+                    self.list_percepts['Scream'] = 1
+                    self.score += 10  
         else : 
-            pass
-        
+            for i in range(0,location_x) : 
+                #When we kill a wumpus we display it as a cross '+' 
+                if world[i][location_y] == 'W' :
+                    world[i][location_y] = '+'
+                    self.list_percepts['Scream'] = 1
+                    self.score += 10  
+        self.arrowCount = nbarrow - 1
     
     def grab(self, world):
         if world[self.x][self.y] == 'G':
@@ -273,7 +292,6 @@ def reactiveExplorer():
         print(reactiveCalls.y)
         print(reactiveCalls.orientation)
     printWorld(worldMatrix)
-
 def adjCells(x,y,gridSize):
 	list_adj = list()
 	if (x+1) < gridSize : 
