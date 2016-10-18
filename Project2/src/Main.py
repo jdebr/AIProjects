@@ -86,21 +86,30 @@ class Explorer:
         else :
             self.orientation = 'N'
     
+
     def forward(self, world):
         row = self.x
         column = self.y
         if self.orientation == 'N' :
-            if (row - 1) < len(world):
+            if (row - 1) < len(world) and (row - 1) >= 0:
                 self.x = row - 1
         elif self.orientation == 'E' : 
-            if (column + 1) < len(world):
+            if (column + 1) < len(world) and (column + 1) >= 0:
                 self.y = column + 1
         elif self.orientation == 'S' :
-            if (row + 1) < len(world):
+            if (row + 1) < len(world) and (row + 1) >= 0:
                 self.x = row + 1 
         else :
-            if (column - 1) < len(world):
+            if (column - 1) < len(world) and (column - 1) >= 0:
                 self.y = column - 1
+    
+    def currentBlockStatus(self,world):
+        if world[self.x][self.y] == 'G':
+            self.list_percepts['glitter'] = 1
+        if world[self.x][self.y] == 'W' or world[self.x][self.y] == 'P':
+            pass
+        if world[self.x][self.y] == 'O':
+            pass
     
     def shoot(self, world):
         location_x = self.x 
@@ -111,17 +120,18 @@ class Explorer:
             for i in range(y, len(world)) : 
                 if world[location_x][i] == 'W' :
                     world[location_x][i] = '-'
-                    self.arrowCount = nbarrow - 1	
+                    self.arrowCount = nbarrow - 1    
         elif orientation == 'E' :
-            pass		
+            pass        
         elif orientation == 'S' : 
             pass
         else : 
             pass
-		
+        
     
     def grab(self, world):
         pass
+ 
 '''
 Reactive Explorer
 Doesn't use any of the logic purely random based approaches to next cell.
@@ -129,33 +139,49 @@ Will know what is the current cell for instance the player will know whether the
 But which cell to go is purely random. Player has no idea what is safe.
 '''    
 def reactiveExplorer():
-    percepts = {'stench' : 0, 'breeze' : 0, 'glitter' : 0, 'bump' : 0, 'scream' : 0}
+
     listofActions = ["grab","shoot","left","right","forward"]
     worldMatrix = worldCreation()
     printWorld(worldMatrix)
     print(worldMatrix)
     reactiveCalls = Explorer(worldMatrix)
-    rowPosition = reactiveCalls.x
-    columnPosition = reactiveCalls.y
-    print(rowPosition)
-    print(columnPosition)
-    orientation = reactiveCalls.orientation
-    print(orientation)
-    gridSize = len(worldMatrix)
-    currentState = adjCells(rowPosition,columnPosition,gridSize)
-    print(currentState)
-    reactiveCalls.update_percepts(worldMatrix)
-    for values in currentState:
-        print(worldMatrix[values[0]][values[1]])
-        if worldMatrix[values[0]][values[1]] == 'W':
-            percepts['stench'] = 1
-        if worldMatrix[values[0]][values[1]] == 'P':
-            percepts['breeze'] = 1
-        if worldMatrix[values[0]][values[1]] != 'P':
-            percepts['breeze'] = 0
-        if worldMatrix[values[0]][values[1]] != 'W':
-            percepts['stench'] = 0
-    reactiveExplorerActions(percepts, worldMatrix, listofActions)
+    while percepts['glitter'] != 1:
+        rowPosition = reactiveCalls.x
+        columnPosition = reactiveCalls.y
+        #Printing values of row and column for testing purpose
+        print(rowPosition)
+        print(columnPosition)
+        orientation = reactiveCalls.orientation
+        print(orientation)
+        gridSize = len(worldMatrix)
+        currentState = adjCells(rowPosition,columnPosition,gridSize)
+        print(currentState)
+        reactiveCalls.update_percepts(worldMatrix)
+        for values in currentState:
+            print(worldMatrix[values[0]][values[1]])
+            if worldMatrix[values[0]][values[1]] == 'W':
+                percepts['stench'] = 1
+            if worldMatrix[values[0]][values[1]] == 'P':
+                percepts['breeze'] = 1
+            if worldMatrix[values[0]][values[1]] != 'P':
+                percepts['breeze'] = 0
+            if worldMatrix[values[0]][values[1]] != 'W':
+                percepts['stench'] = 0
+        if (percepts['stench'] == 1 or percepts['breeze'] == 1):
+            percept = random.choice(listofActions[1:])
+        else:
+            percept = random.choice(listofActions)
+        print(percept)
+        if percept == 'left':
+            reactiveCalls.turn_left(worldMatrix)
+        elif percept == 'right':
+            reactiveCalls.turn_right(worldMatrix)
+        elif percept == 'forward':
+            reactiveCalls.forward(worldMatrix)
+        print(reactiveCalls.x)
+        print(reactiveCalls.y)
+        print(reactiveCalls.orientation)       
+   	#reactiveExplorerActions(percepts, worldMatrix, listofActions)
         #percept = str(percept).replace('"', '').replace('"', '') 
     
     
