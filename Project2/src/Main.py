@@ -87,7 +87,20 @@ class Explorer:
             self.orientation = 'N'
     
     def forward(self, world):
-        pass
+        row = self.x
+        column = self.y
+        if self.orientation == 'N' :
+            if (column - 1) < len(world):
+                self.y = column - 1
+        elif self.orientation == 'E' : 
+            if (row + 1) < len(world):
+                self.y = row + 1
+        elif self.orientation == 'S' :
+            if (column + 1) < len(world):
+                self.x = column + 1 
+        else :
+            if (row - 1) < len(world):
+                self.y = row - 1
     
     def shoot(self, world):
         location_x = self.x 
