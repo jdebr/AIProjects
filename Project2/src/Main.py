@@ -14,6 +14,8 @@ import sys
 from _ast import Expr
 
 
+#Being used  by Reactive Explorer
+percepts = {'stench' : 0, 'breeze' : 0, 'glitter' : 0, 'bump' : 0, 'scream' : 0, 'death' : 0}
 
 '''
 Explorer Class
