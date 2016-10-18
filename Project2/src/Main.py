@@ -65,10 +65,6 @@ class Explorer:
                 self.list_percepts['Breeze'] = 0
             if world[values[0]][values[1]] != 'W':
                 self.list_percepts['Stench'] = 0
-            if world[values[0]][values[1]] == 'G':
-                self.list_percepts['Glitter'] = 1
-            if world[values[0]][values[1]] != 'G':
-                self.list_percepts['Glitter'] = 0
         
     def turn_left(self, world):
         if self.orientation == 'N' : 
@@ -94,17 +90,17 @@ class Explorer:
         row = self.x
         column = self.y
         if self.orientation == 'N' :
+            if (row - 1) < len(world):
+                self.x = row - 1
+        elif self.orientation == 'E' : 
+            if (column + 1) < len(world):
+                self.y = column + 1
+        elif self.orientation == 'S' :
+            if (row + 1) < len(world):
+                self.x = row + 1 
+        else :
             if (column - 1) < len(world):
                 self.y = column - 1
-        elif self.orientation == 'E' : 
-            if (row + 1) < len(world):
-                self.y = row + 1
-        elif self.orientation == 'S' :
-            if (column + 1) < len(world):
-                self.x = column + 1 
-        else :
-            if (row - 1) < len(world):
-                self.y = row - 1
     
     def shoot(self, world):
         location_x = self.x 
