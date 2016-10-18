@@ -91,22 +91,30 @@ class Explorer:
     def turn_left(self, world):
         if self.orientation == 'N' : 
             self.orientation = 'W'
+            self.score += (-1)
         elif self.orientation == 'E' : 
             self.orientation = 'N'
+            self.score += (-1)
         elif self.orientation == 'S' :
-            self.orientation = 'E' 
+            self.orientation = 'E'
+            self.score += (-1) 
         else :
             self.orientation = 'S'
+            self.score += (-1)
     
     def turn_right(self, world):
         if self.orientation == 'N' : 
             self.orientation = 'E'
+            self.score += (-1)
         elif self.orientation == 'E' : 
             self.orientation = 'S'
+            self.score += (-1)
         elif self.orientation == 'S' :
-            self.orientation = 'W' 
+            self.orientation = 'W'
+            self.score += (-1) 
         else :
             self.orientation = 'N'
+            self.score += (-1)
     
     def forward(self, world):
         row = self.x
@@ -114,24 +122,20 @@ class Explorer:
         if self.orientation == 'N' :
             if (row - 1) < len(world) and (row - 1) >= 0:
                 self.x = row - 1
+                self.score += (-1)
         elif self.orientation == 'E' : 
             if (column + 1) < len(world) and (column + 1) >= 0:
                 self.y = column + 1
+                self.score += (-1)
         elif self.orientation == 'S' :
             if (row + 1) < len(world) and (row + 1) >= 0:
                 self.x = row + 1 
+                self.score += (-1)
         else :
             if (column - 1) < len(world) and (column - 1) >= 0:
                 self.y = column - 1
-
-    def currentBlockStatus(self,world):
-        if world[self.x][self.y] == 'G':
-            self.list_percepts['glitter'] = 1
-        if world[self.x][self.y] == 'W' or world[self.x][self.y] == 'P':
-            pass
-        if world[self.x][self.y] == 'O':
-            pass
-    
+                self.score += (-1)
+        
     def shoot(self, world):
         location_x = self.x 
         location_y = self.y
@@ -151,8 +155,11 @@ class Explorer:
         
     
     def grab(self, world):
-        pass
- 
+        if world[self.x][self.y] == 'G':
+            self.list_percepts['Glitter'] = 1
+            self.score += 1000
+        elif world[self.x][self.y] != 'G':
+            self.list_percepts['Glitter'] = 0
  
 '''
 Reactive Explorer
@@ -178,26 +185,33 @@ def reactiveExplorer():
         gridSize = len(worldMatrix)
         currentState = adjCells(rowPosition,columnPosition,gridSize)
         print(currentState)
-        reactiveCalls.update_percepts(worldMatrix)
+        #reactiveCalls.update_percepts(worldMatrix)
         '''
         this area will check the current cell value for wumpus, pit, glitter
         we are calling if else each time to make sure it doesn't stick to one in the percept dictionary
         '''
         if worldMatrix[rowPosition][columnPosition] == 'G':
-            percepts['Glitter'] = 1
+            percepts['glitter'] = 1
+            print("You got the gold")
+            reactiveCalls.score = reactiveCalls.score + 1000
+            print(reactiveCalls.score)
             break
         elif worldMatrix[rowPosition][columnPosition] != 'G':
-            percepts['Glitter'] = 0
+            percepts['glitter'] = 0
         if worldMatrix[rowPosition][columnPosition] == 'W' or worldMatrix[rowPosition][columnPosition] == 'P':
-            percepts['Death'] = 1
+            percepts['death'] = 1
+            print("You are dead")
+            reactiveCalls.score = reactiveCalls.score - 1000
+            print(reactiveCalls.score)
+            break
         if worldMatrix[rowPosition][columnPosition] != 'W':
-            percepts['Death'] = 0
+            percepts['death'] = 0
         if worldMatrix[rowPosition][columnPosition] != 'P':
-            percepts['Death'] = 0
+            percepts['death'] = 0
         if worldMatrix[rowPosition][columnPosition] == 'O':
-            percepts['Bump'] = 1
+            percepts['bump'] = 1
         elif worldMatrix[rowPosition][columnPosition] != 'O':
-            percepts['Bump'] = 1
+            percepts['bump'] = 1
         '''
         To check the adjacent cells and find if there is stench or breeze in current cell
         '''
@@ -224,27 +238,22 @@ def reactiveExplorer():
         elif percept == 'right':
             reactiveCalls.turn_right(worldMatrix)
         elif percept == 'forward':
+            percepts['stench'] = 0
+            percepts['breeze'] = 0
             reactiveCalls.forward(worldMatrix)
+        elif percept == 'grab':
+            if worldMatrix[rowPosition][columnPosition] == 'G':
+                percepts['glitter'] = 1
+                reactiveCalls.score = reactiveCalls.score + 1000
+                print(reactiveCalls.score)
+                break
+            elif worldMatrix[rowPosition][columnPosition] != 'G':
+                percepts['glitter'] = 0
+        
+        print("Update Values")
         print(reactiveCalls.x)
         print(reactiveCalls.y)
-        print(reactiveCalls.orientation)
-
-def reactiveExplorerActions(percepts, worldMatrix, listofActions):
-    reactiveCalls = Explorer(worldMatrix)
-    if (percepts['stench'] == 1 or percepts['breeze'] == 1):
-        percept = random.choice(listofActions[1:])
-    else:
-        percept = random.choice(listofActions)
-    if percept == 'left':
-        reactiveCalls.turn_left(worldMatrix)
-    elif percept == 'right':
-        reactiveCalls.turn_right(worldMatrix)
-    elif percept == 'forward':
-        reactiveCalls.forward(worldMatrix)
-    elif percept == 'shoot':
-        reactiveCalls.shoot(worldMatrix)
-    elif percept == 'grab' and percepts['grab'] == 1:
-        reactiveCalls.grab(worldMatrix)
+        print(reactiveCalls.orientation) 
 
 def adjCells(x,y,gridSize):
 	list_adj = list()
