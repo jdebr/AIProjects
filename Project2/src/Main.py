@@ -39,50 +39,72 @@ class Explorer:
         # Randomize initial orientation
         self.orientation = random.choice(['N','S','E','W'])
 
-        # init the list of percepts
-		self.list_percepts = {'Stench' : 0; 'Breeze' : 0; 'Glitter' : 0; 'Bump' : 0; 'Bump' : 0; 'Scream' : 0}
-		
+        # init the list of percepts to 0 first
+        self.list_percepts = {'Stench' : 0, 'Breeze' : 0, 'Glitter' : 0, 'Bump' : 0, 'Scream' : 0}
+        #update de list looking at the initial position
+        adj_cells = adjCells(self.x,self.y,len(world))
+        for cell in adj_cells :
+            if adj_cells == 'W' : 
+                self.list_percepts['Stench'] = 1
+            if adj_cells == 'P' : 
+                self.list_percepts['Breeze'] = 1
+            '''if adj_cells == 'G' :
+                self.list_percepts['Glitter'] = 1
+            if adj_cells == 'O' : 
+                self.list_percepts['Bump'] = 1 '''
+
+    def update_percepts(self, world) : 
+		#update de list looking at the initial position
+        adj_cells = adjCells(self.x,self.y,len(world))
+        for cell in adj_cells :
+            if adj_cells == 'W' : 
+                self.list_percepts['Stench'] = 1
+            if adj_cells == 'P' : 
+                self.list_percepts['Breeze'] = 1
+            '''if adj_cells == 'G' :
+                self.list_percepts['Glitter'] = 1
+            if adj_cells == 'O' : 
+                self.list_percepts['Bump'] = 1'''
         
     def turn_left(self, world):
         if self.orientation == 'N' : 
-			self.orientation = 'W'
-		elif self.orientation == 'E' : 
-		    self.orientation = 'N'
-		elif self.orientation == 'S' :
-		    self.orientation = 'E' 
-		else 
-		    self.orientation = 'S'
+            self.orientation = 'W'
+        elif self.orientation == 'E' : 
+            self.orientation = 'N'
+        elif self.orientation == 'S' :
+            self.orientation = 'E' 
+        else :
+            self.orientation = 'S'
     
     def turn_right(self, world):
         if self.orientation == 'N' : 
-			self.orientation = 'E'
-		elif self.orientation == 'E' : 
-		    self.orientation = 'S'
-		elif self.orientation == 'S' :
-		    self.orientation = 'W' 
-		else :
-		    self.orientation = 'N'
+            self.orientation = 'E'
+        elif self.orientation == 'E' : 
+            self.orientation = 'S'
+        elif self.orientation == 'S' :
+            self.orientation = 'W' 
+        else :
+            self.orientation = 'N'
     
     def forward(self, world):
         pass
     
     def shoot(self, world):
         location_x = self.x 
-		location_y = self.y
-		orientation = self.orientation
-		nbarrow = self.arrowCount
-		if orientation == 'N' :
+        location_y = self.y
+        orientation = self.orientation
+        nbarrow = self.arrowCount
+        if orientation == 'N' :
             for i in range(y, len(world)) : 
-                if world[location_x][i] = 'W' :
+                if world[location_x][i] == 'W' :
                     world[location_x][i] = '-'
-                    self.arrowCount = nbarrow - 1
-					
+                    self.arrowCount = nbarrow - 1	
         elif orientation == 'E' :
-            		
+            pass		
         elif orientation == 'S' : 
-            
+            pass
         else : 
-        
+            pass
 		
     
     def grab(self, world):
