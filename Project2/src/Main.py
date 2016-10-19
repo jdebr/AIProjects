@@ -316,7 +316,7 @@ def try_unify(x,y,theta):
             return theta
         return try_unify(x[1:], y[1:], try_unify(x[0], y[0], theta))
     # Otherwise we fail
-    else: return False
+    return False
     
 def unify_var(var,x,theta):
     if var in theta:
@@ -339,6 +339,39 @@ def substitute(rule, theta):
             new_term = (term[0], theta[term][1])
         new_rule.append(new_term)
     return new_rule
+
+def fol_resolution(KB, alpha):
+    '''Resolution algorithm performs FOL Resolution on all clauses in KB, the knowledge base,
+    which is a list of sentences in clause form, and alpha, which is a new clause.
+    Returns true if two clauses can resolve to the empty set and false otherwise.
+    KB form: KB is a list [] of clauses, each clause connected by implicit "AND"
+    Clause form: Each clause is a list [] of terms, each term connected by implicit "OR"
+    Term form: Each term is a list [] of tuples (), first value of tuple is integer code and 2nd value is string representation
+    '''
+    clauses = KB.copy()
+    clauses.append(negate(alpha))
+    new = []
+    while True:    
+        pass
+
+def negate(alpha):
+    '''Takes a term, alpha, in the form of a list of tuples, and adds "NOT" as first item in list, or removes it if
+    it is already there
+    '''
+    if alpha[0] == "NOT":
+        alpha.pop(0)
+    else:
+        alpha.insert(0,"NOT")
+
+
+
+def resolutionTest():
+    a = [(2, "Knows"),(2,"John"),(1,"x")]
+    print(a)
+    negate(a)
+    print(a)
+    negate(a)
+    print(a)
             
     
     
@@ -378,9 +411,9 @@ def unificationTest():
     print(try_unify(x, y, {}))
     
     # Should fail, untested
-#     x = [(2, "Knows"),(2,"John"),(1,"x")]
-#     y = [(2, "Knows"),(1,"x"),(2,"Elizabeth")]
-#     print(try_unify(x, y, {}))
+    x = [(2, "Knows"),(2,"John"),(1,"x")]
+    y = [(2, "Knows"),(1,"x"),(2,"Elizabeth")]
+    print(try_unify(x, y, {}))
 
     # Testing unification + substitution
     x = [(2, "Knows"),(2,"John"),(1,"x")]
@@ -421,6 +454,7 @@ coordinates = [2]
 def main():
     #worldGeneratorTest()
     unificationTest()
+    #resolutionTest()
     
     
 if __name__ == '__main__':
