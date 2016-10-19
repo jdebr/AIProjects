@@ -11,6 +11,7 @@ Group 3
 
 import random
 import sys
+from tables._past import new2oldnames
 #Being used  by Reactive Explorer
 percepts = {'stench' : 0, 'breeze' : 0, 'glitter' : 0, 'bump' : 0, 'scream' : 0, 'death' : 0}
 '''
@@ -445,24 +446,25 @@ def fol_resolution(KB, alpha):
     #negate(alpha)
     clauses.append(alpha)
     #print(clauses)
-    new = []
-    while True:    
+    while True:  
+        new = []
         for i in range(len(clauses)):
             for j in range(i, len(clauses)):
                 if i != j:
                     resolvants = fol_resolve(clauses[i],clauses[j])
                     # If return empty clause then return true
-                    if not resolvants[0]:
-                        return True
-                    new.extend(resolvants)
-        # Subset check
-        isSubset = True
-        for i in range(len(new)):
-            if new[i] not in clauses:
-                isSubset = False
-        if isSubset:
+                    if resolvants:
+                        if not resolvants[0]:
+                            return True
+                        # Union resolvants with new
+                        union(new, resolvants)
+        # Subset check - if no new resolvants have been created, resolution fails
+        if subsetCheck(new, clauses):
             return False
-        clauses.extend(new)
+        # Union new resolvants into clauses
+        union(clauses, new)
+        # Prune clauses
+        #prune(clauses)
                                
 def fol_resolve(C1, C2):
     #print("Resolve " + str(C1) + " and " + str(C2))
@@ -489,7 +491,8 @@ def fol_resolve(C1, C2):
                 c1copy.extend(c2copy)
                 sub = substitute(c1copy, mgu)
                 return [sub]
-    return [C1]
+    # No resolvants possible for two clauses
+    return False
 
 def negate(alpha):
     '''Takes a term, alpha, in the form of a list of tuples, and adds "NOT" as first item in list, or removes it if
@@ -499,8 +502,41 @@ def negate(alpha):
         alpha.pop(0)
     else:
         alpha.insert(0,"NOT")
-
-
+        
+def union(S1, S2):
+    '''Perform union function on two lists, adding unique items from S2 into S1
+    '''
+    for item in S2:
+        if item not in S1:
+            S1.append(item)
+            
+def subsetCheck(S1, S2):
+    ''' Determine if S1 is a subset of S2
+    '''
+    isSubset = True
+    for i in range(len(S1)):
+        if S1[i] not in S2:
+            isSubset = False
+    return isSubset
+            
+def prune(KB):
+    '''Helper function for resolution, prunes clauses from a KB that have two complementary literals,
+    also removes copies to try and ensure KB remains a set
+    '''
+    removalIndex = set()
+    newKB = []
+    
+    for i in range(len(KB)):
+        for j in range(i, len(KB)):
+            if i != j:
+                # Remove copies
+                if KB[i] == KB[j]:
+                    removalIndex.add(j)
+    for i in range(len(KB)):
+        if i not in removalIndex:
+            newKB.append(KB[i])
+    
+                
 
 def resolutionTest():
     # Note a KB will be a triple list!
@@ -511,10 +547,10 @@ def resolutionTest():
     
     # Var - 1 Constant - 2
     a = [
-          [["NOT",(2,"American"),(1,"x")],["NOT",(2,"Weapon"),(1,"y")],["NOT",(2,"Sells"),(1,"x"),(1,"y"),(1,"z")],["NOT",(2,"Hostile"),(1,"z")],[(2,"Criminal"),(1,"x")]],
-          [["NOT",(2,"Missile"),(1,"x")],["NOT",(2,"Owns"),(2,"Nono"),(1,"x")],[(2,"Sells"),(2,"West"),(1,"x"),(2,"Nono")]],
-          [["NOT",(2,"Enemy"),(1,"x"),(2,"America")],[(2,"Hostile"),(1,"x")]],
-          [["NOT",(2,"Missile"),(1,"x")],[(2,"Weapon"),(1,"x")]],
+          [["NOT",(2,"American"),(1,"x1")],["NOT",(2,"Weapon"),(1,"y1")],["NOT",(2,"Sells"),(1,"x1"),(1,"y1"),(1,"z1")],["NOT",(2,"Hostile"),(1,"z1")],[(2,"Criminal"),(1,"x1")]],
+          [["NOT",(2,"Missile"),(1,"x2")],["NOT",(2,"Owns"),(2,"Nono"),(1,"x2")],[(2,"Sells"),(2,"West"),(1,"x2"),(2,"Nono")]],
+          [["NOT",(2,"Enemy"),(1,"x3"),(2,"America")],[(2,"Hostile"),(1,"x3")]],
+          [["NOT",(2,"Missile"),(1,"x4")],[(2,"Weapon"),(1,"x4")]],
           [[(2,"Owns"),(2,"Nono"),(2,"M1")]],
           [[(2,"American"),(2,"West")]],
           [[(2,"Missile"),(2,"M1")]],
