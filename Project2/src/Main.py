@@ -428,7 +428,7 @@ def substitute(clause, theta):
         for var in term:
             new_var = var
             if var in theta:
-                new_var = (var[0], theta[var][1])
+                new_var = theta[var]
             new_term.append(new_var)
         new_clause.append(new_term)
     return new_clause
@@ -482,11 +482,13 @@ def fol_resolve(C1, C2):
                 negate(term2)
             # If they unify, remove them from resolvant and apply mgu substitution
             if mgu != False:
-                C1.remove(term)
-                C2.remove(term2)
-                C1.extend(C2)
-                substitute(C1, mgu)
-                return [C1]
+                c1copy = C1.copy()
+                c1copy.remove(term)
+                c2copy = C2.copy()
+                c2copy.remove(term2)
+                c1copy.extend(c2copy)
+                sub = substitute(c1copy, mgu)
+                return [sub]
     return [C1]
 
 def negate(alpha):
@@ -510,7 +512,7 @@ def resolutionTest():
     # Var - 1 Constant - 2
     a = [
           [["NOT",(2,"American"),(1,"x")],["NOT",(2,"Weapon"),(1,"y")],["NOT",(2,"Sells"),(1,"x"),(1,"y"),(1,"z")],["NOT",(2,"Hostile"),(1,"z")],[(2,"Criminal"),(1,"x")]],
-          [["NOT",(2,"Missile"),(1,"x1")],["NOT",(2,"Owns"),(2,"Nono"),(1,"x1")],[(2,"Sells"),(2,"West"),(1,"x1"),(2,"Nono")]],
+          [["NOT",(2,"Missile"),(1,"x")],["NOT",(2,"Owns"),(2,"Nono"),(1,"x")],[(2,"Sells"),(2,"West"),(1,"x"),(2,"Nono")]],
           [["NOT",(2,"Enemy"),(1,"x"),(2,"America")],[(2,"Hostile"),(1,"x")]],
           [["NOT",(2,"Missile"),(1,"x")],[(2,"Weapon"),(1,"x")]],
           [[(2,"Owns"),(2,"Nono"),(2,"M1")]],
