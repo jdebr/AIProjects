@@ -11,10 +11,8 @@ Group 3
 
 import random
 import sys
-from _ast import Expr
-
-
-
+#Being used  by Reactive Explorer
+percepts = {'stench' : 0, 'breeze' : 0, 'glitter' : 0, 'bump' : 0, 'scream' : 0, 'death' : 0}
 '''
 Explorer Class
 '''
@@ -25,7 +23,8 @@ class Explorer:
         self.world = world
         # Initial Score
         self.score = 0
-        
+        # Randomize initial orientation
+        self.orientation = random.choice(['N','S','E','W'])
         # Count wumpuses and give the explorer that many arrows, also init location
         arrowCount = 0
         for i in range(len(world)):
@@ -38,35 +37,50 @@ class Explorer:
                 
         self.arrowCount = arrowCount
         
-        # Randomize initial orientation
-        self.orientation = random.choice(['N','S','E','W'])
-
         # init the list of percepts to 0 first
-        self.list_percepts = {'Stench' : 0, 'Breeze' : 0, 'Glitter' : 0, 'Bump' : 0, 'Scream' : 0}
-        #update de list looking at the initial position
-        adj_cells = adjCells(self.x,self.y,len(world))
-        for cell in adj_cells :
-            if adj_cells == 'W' : 
-                self.list_percepts['Stench'] = 1
-            if adj_cells == 'P' : 
-                self.list_percepts['Breeze'] = 1
-            '''if adj_cells == 'G' :
-                self.list_percepts['Glitter'] = 1
-            if adj_cells == 'O' : 
-                self.list_percepts['Bump'] = 1 '''
+        self.list_percepts = {'Stench' : 0, 'Breeze' : 0, 'Glitter' : 0, 'Bump' : 0, 'Scream' : 0, 'Death' : 0}
 
     def update_percepts(self, world) : 
-        #update de list looking at the initial position
+        '''
+        checking the values of adjacent cells so as to update the stench and breeze because for other percepts you need to be on 
+        block to identify it
+        '''
         adj_cells = adjCells(self.x,self.y,len(world))
+        noWumpus = True
+        noPit = True
+        noGlitter = True
+        noDeath = True
+        noObstacle = True
         for values in adj_cells :
             if world[values[0]][values[1]] == 'W':
                 self.list_percepts['Stench'] = 1
+                noWumpus = False
             if world[values[0]][values[1]] == 'P':
                 self.list_percepts['Breeze'] = 1
-            if world[values[0]][values[1]] != 'P':
-                self.list_percepts['Breeze'] = 0
-            if world[values[0]][values[1]] != 'W':
-                self.list_percepts['Stench'] = 0
+                noPit = False
+        if noWumpus :
+            self.list_percepts['Stench'] = 0
+        if noPit :
+            self.list_percepts['Breeze'] = 0
+        '''
+        this area will check the current cell value for wumpus, pit, glitter
+        we are calling if else each time to make sure it doesn't stick to one in the percept dictionary
+        '''
+        if world[self.x][self.y] == 'G':
+            self.list_percepts['Glitter'] = 1
+        elif world[self.x][self.y] != 'G':
+            self.list_percepts['Glitter'] = 0
+        if world[self.x][self.y] == 'W' or world[self.x][self.y] == 'P':
+            self.list_percepts['Death'] = 1
+        if world[self.x][self.y] != 'W':
+            self.list_percepts['Death'] = 0
+        if world[self.x][self.y] != 'P':
+            self.list_percepts['Death'] = 0
+        if world[self.x][self.y] == 'O':
+            self.list_percepts['Bump'] = 1
+        elif world[self.x][self.y] != 'O':
+            self.list_percepts['Bump'] = 1
+        self.list_percepts['Scream'] = 0       
         
     def turn_left(self, world):
         if self.orientation == 'N' : 
@@ -74,9 +88,10 @@ class Explorer:
         elif self.orientation == 'E' : 
             self.orientation = 'N'
         elif self.orientation == 'S' :
-            self.orientation = 'E' 
+            self.orientation = 'E'
         else :
             self.orientation = 'S'
+        self.score += (-1)
     
     def turn_right(self, world):
         if self.orientation == 'N' : 
@@ -84,11 +99,11 @@ class Explorer:
         elif self.orientation == 'E' : 
             self.orientation = 'S'
         elif self.orientation == 'S' :
-            self.orientation = 'W' 
+            self.orientation = 'W'
         else :
             self.orientation = 'N'
+        self.score += (-1)
     
-
     def forward(self, world):
         row = self.x
         column = self.y
@@ -104,35 +119,58 @@ class Explorer:
         else :
             if (column - 1) < len(world) and (column - 1) >= 0:
                 self.y = column - 1
-    
-    def currentBlockStatus(self,world):
-        if world[self.x][self.y] == 'G':
-            self.list_percepts['glitter'] = 1
-        if world[self.x][self.y] == 'W' or world[self.x][self.y] == 'P':
-            pass
-        if world[self.x][self.y] == 'O':
-            pass
-    
+        self.score += (-1)
+        
+        self.update_percepts(world)
+        
+        if world[self.x][self.y] == 'O' :
+            print("Obstacle, go back to the prevoius cell")
+            self.x = row
+            self.y = column 
+            self.update_percepts(world)
+            self.score += (-1)
+        
     def shoot(self, world):
         location_x = self.x 
         location_y = self.y
         orientation = self.orientation
         nbarrow = self.arrowCount
         if orientation == 'N' :
-            for i in range(y, len(world)) : 
+            for i in range(0,location_y) : 
+                #When we kill a wumpus we display it as a cross '+' 
                 if world[location_x][i] == 'W' :
-                    world[location_x][i] = '-'
-                    self.arrowCount = nbarrow - 1    
-        elif orientation == 'E' :
-            pass        
-        elif orientation == 'S' : 
-            pass
+                    world[location_x][i] = '+'
+                    self.list_percepts['Scream'] = 1
+                    self.score += 10    
+        elif orientation == 'S' :
+            for i in range(location_y, len(world)) : 
+                #When we kill a wumpus we display it as a cross '+' 
+                if world[location_x][i] == 'W' :
+                    world[location_x][i] = '+'
+                    self.list_percepts['Scream'] = 1
+                    self.score += 10         
+        elif orientation == 'E' : 
+            for i in range(location_x,len(world)) : 
+                #When we kill a wumpus we display it as a cross '+' 
+                if world[i][location_y] == 'W' :
+                    world[i][location_y] = '+'
+                    self.list_percepts['Scream'] = 1
+                    self.score += 10  
         else : 
-            pass
-        
+            for i in range(0,location_x) : 
+                #When we kill a wumpus we display it as a cross '+' 
+                if world[i][location_y] == 'W' :
+                    world[i][location_y] = '+'
+                    self.list_percepts['Scream'] = 1
+                    self.score += 10  
+        self.arrowCount = nbarrow - 1
     
     def grab(self, world):
-        pass
+        if world[self.x][self.y] == 'G':
+            self.list_percepts['Glitter'] = 1
+            self.score += 1000
+        elif world[self.x][self.y] != 'G':
+            self.list_percepts['Glitter'] = 0
  
 '''
 Reactive Explorer
@@ -147,7 +185,10 @@ def reactiveExplorer():
     printWorld(worldMatrix)
     print(worldMatrix)
     reactiveCalls = Explorer(worldMatrix)
-    while percepts['glitter'] != 1:
+    while percepts['glitter'] != 1 or percepts['death'] != 1:
+        print("Values after loop starting")
+        print("Your Score is " + str(reactiveCalls.score))
+        print("you have " + str(reactiveCalls.arrowCount) + " arrows")
         rowPosition = reactiveCalls.x
         columnPosition = reactiveCalls.y
         #Printing values of row and column for testing purpose
@@ -158,52 +199,101 @@ def reactiveExplorer():
         gridSize = len(worldMatrix)
         currentState = adjCells(rowPosition,columnPosition,gridSize)
         print(currentState)
-        reactiveCalls.update_percepts(worldMatrix)
+        #reactiveCalls.update_percepts(worldMatrix)
+        '''
+        this area will check the current cell value for wumpus, pit, glitter
+        we are calling if else each time to make sure it doesn't stick to one in the percept dictionary
+        '''
+        if worldMatrix[rowPosition][columnPosition] == 'G':
+            percepts['glitter'] = 1
+            print("You got the gold")
+            reactiveCalls.score = reactiveCalls.score + 1000
+            print(reactiveCalls.score)
+            break
+        elif worldMatrix[rowPosition][columnPosition] != 'G':
+            percepts['glitter'] = 0
+        if worldMatrix[rowPosition][columnPosition] == 'W' or worldMatrix[rowPosition][columnPosition] == 'P':
+            percepts['death'] = 1
+            print("You are dead")
+            reactiveCalls.score = reactiveCalls.score - 1000
+            print(reactiveCalls.score)
+            break
+        if worldMatrix[rowPosition][columnPosition] != 'W':
+            percepts['death'] = 0
+        if worldMatrix[rowPosition][columnPosition] != 'P':
+            percepts['death'] = 0
+        if worldMatrix[rowPosition][columnPosition] == 'O':
+            percepts['bump'] = 1
+        elif worldMatrix[rowPosition][columnPosition] != 'O':
+            percepts['bump'] = 1
+        '''
+        To check the adjacent cells and find if there is stench or breeze in current cell
+        '''
         for values in currentState:
             print(worldMatrix[values[0]][values[1]])
             if worldMatrix[values[0]][values[1]] == 'W':
                 percepts['stench'] = 1
             if worldMatrix[values[0]][values[1]] == 'P':
                 percepts['breeze'] = 1
+            '''
+            Not making sense    
             if worldMatrix[values[0]][values[1]] != 'P':
                 percepts['breeze'] = 0
             if worldMatrix[values[0]][values[1]] != 'W':
                 percepts['stench'] = 0
+            '''
         if (percepts['stench'] == 1 or percepts['breeze'] == 1):
-            percept = random.choice(listofActions[1:])
+            perceptAction = random.choice(listofActions[1:])
         else:
-            percept = random.choice(listofActions)
-        print(percept)
-        if percept == 'left':
+            perceptAction = random.choice(listofActions)
+        print("Your action is " + str(perceptAction))
+        if perceptAction == 'left':
             reactiveCalls.turn_left(worldMatrix)
-        elif percept == 'right':
+        elif perceptAction == 'right':
             reactiveCalls.turn_right(worldMatrix)
-        elif percept == 'forward':
+        elif perceptAction == 'forward':
+            percepts['stench'] = 0
+            percepts['breeze'] = 0
             reactiveCalls.forward(worldMatrix)
+        elif perceptAction == 'grab':
+            if worldMatrix[rowPosition][columnPosition] == 'G':
+                percepts['glitter'] = 1
+                reactiveCalls.score = reactiveCalls.score + 1000
+                print(reactiveCalls.score)
+                break
+            elif worldMatrix[rowPosition][columnPosition] != 'G':
+                percepts['glitter'] = 0
+        elif perceptAction == 'shoot' and reactiveCalls.arrowCount > 0:
+            if reactiveCalls.orientation == 'N' :
+                for i in range(len(worldMatrix)) : 
+                    if worldMatrix[i][columnPosition] == 'W' :
+                        worldMatrix[i][columnPosition] = '-'
+                        reactiveCalls.score += 10
+                reactiveCalls.arrowCount = reactiveCalls.arrowCount - 1    
+            elif orientation == 'E' :
+                for i in range(len(worldMatrix)) : 
+                    if worldMatrix[rowPosition][i] == 'W' :
+                        worldMatrix[rowPosition][i] = '-'
+                        reactiveCalls.score += 10
+                reactiveCalls.arrowCount = reactiveCalls.arrowCount - 1        
+            elif orientation == 'S' : 
+                for i in range(len(worldMatrix)) : 
+                    if worldMatrix[i][columnPosition] == 'W' :
+                        worldMatrix[i][columnPosition] = '-'
+                        reactiveCalls.score += 10
+                reactiveCalls.arrowCount = reactiveCalls.arrowCount - 1
+            else : 
+                for i in range(len(worldMatrix)) : 
+                    if worldMatrix[rowPosition][i] == 'W' :
+                        worldMatrix[rowPosition][i] = '-'
+                        reactiveCalls.score += 10
+                reactiveCalls.arrowCount = reactiveCalls.arrowCount - 1
+            
+        print("Update Values")
         print(reactiveCalls.x)
         print(reactiveCalls.y)
-        print(reactiveCalls.orientation)       
-   	#reactiveExplorerActions(percepts, worldMatrix, listofActions)
-        #percept = str(percept).replace('"', '').replace('"', '') 
-    
-    
-def reactiveExplorerActions(percepts, worldMatrix, listofActions):
-    reactiveCalls = Explorer(worldMatrix)
-    if (percepts['stench'] == 1 or percepts['breeze'] == 1):
-        percept = random.choice(listofActions[1:])
-    else:
-        percept = random.choice(listofActions)
-    if percept == 'left':
-        reactiveCalls.turn_left(worldMatrix)
-    elif percept == 'right':
-        reactiveCalls.turn_right(worldMatrix)
-    elif percept == 'forward':
-        reactiveCalls.forward(worldMatrix)
-    elif percept == 'shoot':
-        reactiveCalls.shoot(worldMatrix)
-    elif percept == 'grab' and percepts['grab'] == 1:
-        reactiveCalls.grab(worldMatrix)
-
+        print(reactiveCalls.orientation)
+    printWorld(worldMatrix)
 def adjCells(x,y,gridSize):
 	list_adj = list()
 	if (x+1) < gridSize : 
