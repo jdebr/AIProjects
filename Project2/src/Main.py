@@ -418,17 +418,20 @@ def unify_var(var,x,theta):
         theta[var] = x
         return theta
     
-def substitute(rule, theta):
+def substitute(clause, theta):
     ''' Called after unification to apply the substitution strings to a
     rule
     '''
-    new_rule = []
-    for term in rule:
-        new_term = term
-        if term in theta:
-            new_term = (term[0], theta[term][1])
-        new_rule.append(new_term)
-    return new_rule
+    new_clause = []
+    for term in clause:
+        new_term = []
+        for var in term:
+            new_var = var
+            if var in theta:
+                new_var = (var[0], theta[var][1])
+            new_term.append(new_var)
+        new_clause.append(new_term)
+    return new_clause
 
 def fol_resolution(KB, alpha):
     '''Resolution algorithm performs FOL Resolution on all clauses in KB, the knowledge base,
@@ -439,10 +442,52 @@ def fol_resolution(KB, alpha):
     Term form: Each term is a list [] of tuples (), first value of tuple is integer code and 2nd value is string representation
     '''
     clauses = KB.copy()
-    clauses.append(negate(alpha))
+    #negate(alpha)
+    clauses.append(alpha)
+    #print(clauses)
     new = []
     while True:    
-        pass
+        for i in range(len(clauses)):
+            for j in range(i, len(clauses)):
+                if i != j:
+                    resolvants = fol_resolve(clauses[i],clauses[j])
+                    # If return empty clause then return true
+                    if not resolvants[0]:
+                        return True
+                    new.extend(resolvants)
+        # Subset check
+        isSubset = True
+        for i in range(len(new)):
+            if new[i] not in clauses:
+                isSubset = False
+        if isSubset:
+            return False
+        clauses.extend(new)
+                               
+def fol_resolve(C1, C2):
+    #print("Resolve " + str(C1) + " and " + str(C2))
+    mgu = False
+    for term in C1:
+        for term2 in C2:
+            # Try to unify two terms iff one is negated
+            if term[0] == "NOT" and term2[0] != "NOT":
+                # Remove negation for unification algorithm, reapply after
+                negate(term)
+                mgu = try_unify(term, term2, {})
+                negate(term)
+            elif term[0] != "NOT" and term2[0] == "NOT":
+                # Remove negation for unification algorithm, reapply after
+                negate(term2)
+                mgu = try_unify(term, term2, {})
+                negate(term2)
+            # If they unify, remove them from resolvant and apply mgu substitution
+            if mgu != False:
+                C1.remove(term)
+                C2.remove(term2)
+                C1.extend(C2)
+                substitute(C1, mgu)
+                return [C1]
+    return [C1]
 
 def negate(alpha):
     '''Takes a term, alpha, in the form of a list of tuples, and adds "NOT" as first item in list, or removes it if
@@ -456,13 +501,25 @@ def negate(alpha):
 
 
 def resolutionTest():
-    a = [(2, "Knows"),(2,"John"),(1,"x")]
-    print(a)
-    negate(a)
-    print(a)
-    negate(a)
-    print(a)
-            
+    # Note a KB will be a triple list!
+    a = [[[(2, "Knows"),(2,"John")]]]
+    # Note a clause will be a double list!
+    b = [["NOT",(2, "Knows"),(2,"John")]]
+    print("SHOULD BE TRUE - " + str(fol_resolution(a, b)))
+    
+    # Var - 1 Constant - 2
+    a = [
+          [["NOT",(2,"American"),(1,"x")],["NOT",(2,"Weapon"),(1,"y")],["NOT",(2,"Sells"),(1,"x"),(1,"y"),(1,"z")],["NOT",(2,"Hostile"),(1,"z")],[(2,"Criminal"),(1,"x")]],
+          [["NOT",(2,"Missile"),(1,"x1")],["NOT",(2,"Owns"),(2,"Nono"),(1,"x1")],[(2,"Sells"),(2,"West"),(1,"x1"),(2,"Nono")]],
+          [["NOT",(2,"Enemy"),(1,"x"),(2,"America")],[(2,"Hostile"),(1,"x")]],
+          [["NOT",(2,"Missile"),(1,"x")],[(2,"Weapon"),(1,"x")]],
+          [[(2,"Owns"),(2,"Nono"),(2,"M1")]],
+          [[(2,"American"),(2,"West")]],
+          [[(2,"Missile"),(2,"M1")]],
+          [[(2,"Enemy"),(2,"Nono"),(2,"America")]]
+        ]
+    b = [["NOT",(2,"Criminal"),(2,"West")]]
+    print("SHOULD BE TRUE - " + str(fol_resolution(a, b)))        
     
     
 def worldGeneratorTest():
@@ -511,7 +568,7 @@ def unificationTest():
     theta = try_unify(x, y, {})
     print(x)
     print(theta)
-    print(substitute(x, theta))
+    print(substitute([x], theta))
 
 coordinates = [2]
 #W = Wumpus
@@ -543,8 +600,8 @@ coordinates = [2]
         
 def main():
     #worldGeneratorTest()
-    unificationTest()
-    #resolutionTest()
+    #unificationTest()
+    resolutionTest()
     
     
 if __name__ == '__main__':
