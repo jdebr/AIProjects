@@ -535,16 +535,44 @@ def prune(KB):
     for i in range(len(KB)):
         if i not in removalIndex:
             newKB.append(KB[i])
-    
-                
+            
+def buildRule():
+    print("***BUILDING A CLAUSE***")
+    rule = []
+    t = input("Enter number of terms: ")
+    numTerms = int(t)
+    for i in range(numTerms):
+        term = []
+        print("-Term " + str(i+1))
+        neg = input("Negated? (Y/N): ")
+        if neg.lower() == "y":
+            term.append("NOT")
+        pred = input("Enter predicate: ")
+        term.append((2,pred))
+        a = input("Enter number of arguments for predicate: ")
+        numArgs = int(a)
+        for j in range(numArgs):
+            print("--Arg " + str(j+1))
+            isvar = input("Is it a variable or a constant? (V/C): ")
+            arg = input("Enter name of argument: ")
+            if isvar.lower() == "v":
+                term.append((1,arg))
+            elif isvar.lower() == "c":
+                term.append((2,arg))
+        rule.append(term)
+    print(rule)
+    return rule
+ 
 
 def resolutionTest():
+    '''TEST 1'''
     # Note a KB will be a triple list!
     a = [[[(2, "Knows"),(2,"John")]]]
     # Note a clause will be a double list!
     b = [["NOT",(2, "Knows"),(2,"John")]]
     print("SHOULD BE TRUE - " + str(fol_resolution(a, b)))
     
+    '''TEST 2'''
     # Var - 1 Constant - 2
     a = [
           [["NOT",(2,"American"),(1,"x1")],["NOT",(2,"Weapon"),(1,"y1")],["NOT",(2,"Sells"),(1,"x1"),(1,"y1"),(1,"z1")],["NOT",(2,"Hostile"),(1,"z1")],[(2,"Criminal"),(1,"x1")]],
@@ -559,6 +587,23 @@ def resolutionTest():
     b = [["NOT",(2,"Criminal"),(2,"West")]]
     print("SHOULD BE TRUE - " + str(fol_resolution(a, b)))        
     
+    '''TEST 3'''
+    a = [
+          [["NOT",(2,"Glitter"),(1,"x1")],["NOT",(2,"Player"),(1,"x1")],[(2,"Action"),(2,"Grab")]],
+          [[(2,"Glitter"),(2,"(1,1)")]],
+          [[(2,"Player"), (2,"(1,1)")]]
+        ]
+    b = [["NOT",(2,"Action"),(2,"Grab")]]
+    print("SHOULD BE TRUE - " + str(fol_resolution(a, b)))  
+    
+    ''' TEST 4 USING RULE BUILDER'''
+    kb = []
+    for i in range(3):
+        newRule = buildRule()
+        kb.append(newRule)
+    
+    myRule = buildRule()
+    print("ATTEMPTING TO RESOLVE...SUCCESS? - " + str(fol_resolution(kb, myRule)))  
     
 def worldGeneratorTest():
     # Generate 5x5 world with 10% chance of Pits, Obstacles, and Wumpi
