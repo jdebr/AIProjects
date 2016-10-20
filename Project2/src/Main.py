@@ -130,7 +130,7 @@ class Explorer:
         if self.world[self.x][self.y] == 'O':
             self.list_percepts['Bump'] = 1
         elif self.world[self.x][self.y] != 'O':
-            self.list_percepts['Bump'] = 1
+            self.list_percepts['Bump'] = 0
         self.list_percepts['Scream'] = 0       
         
     def turn_left(self):
