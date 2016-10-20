@@ -56,6 +56,8 @@ class Explorer:
         
     def update_kb(self):
         ''' Turns current percepts into clauses for KB'''
+        #Position
+        self.add_rule([[(2,"Visited"),(2,str((self.x,self.y)))]])
         #Stench
         if self.list_percepts['Stench']:
             self.add_rule([[(2,"Stench"),(2,str((self.x,self.y)))]])
@@ -71,6 +73,23 @@ class Explorer:
             self.add_rule([[(2,"Glitter"),(2,str((self.x,self.y)))]])
         else:
             self.add_rule([["NOT",(2,"Glitter"),(2,str((self.x,self.y)))]])
+        #Mark Safe Squares
+        alpha = [["NOT",(2,"Safe"),(2,"N"),(2,str((self.x,self.y)))]]
+        if fol_resolution(self.kb, alpha):
+            # North of current location safe
+            self.add_rule([[(2,"Safe"),(2,str(((self.x-1),self.y)))]])
+        alpha = [["NOT",(2,"Safe"),(2,"S"),(2,str((self.x,self.y)))]]
+        if fol_resolution(self.kb, alpha):
+            # South of current location safe
+            self.add_rule([[(2,"Safe"),(2,str(((self.x+1),self.y)))]])
+        alpha = [["NOT",(2,"Safe"),(2,"E"),(2,str((self.x,self.y)))]]
+        if fol_resolution(self.kb, alpha):
+            # East of current location safe
+            self.add_rule([[(2,"Safe"),(2,str((self.x,(self.y+1))))]])
+        alpha = [["NOT",(2,"Safe"),(2,"W"),(2,str((self.x,self.y)))]]
+        if fol_resolution(self.kb, alpha):
+            # West of current location safe
+            self.add_rule([[(2,"Safe"),(2,str((self.x,(self.y-1))))]])
 
     def update_percepts(self) : 
         '''
@@ -144,21 +163,25 @@ class Explorer:
                 self.x = row - 1
             else:
                 percepts['bump'] = 1
+                self.turn_right()
         elif self.orientation == 'E' : 
             if (column + 1) < len(self.world) and (column + 1) >= 0:
                 self.y = column + 1
             else:
                 percepts['bump'] = 1
+                self.turn_right()
         elif self.orientation == 'S' :
             if (row + 1) < len(self.world) and (row + 1) >= 0:
                 self.x = row + 1
             else:
                 percepts['bump'] = 1
+                self.turn_right()
         else :
             if (column - 1) < len(self.world) and (column - 1) >= 0:
                 self.y = column - 1
             else:
                 percepts['bump'] = 1
+                self.turn_right()
         self.score += (-1)
         
         self.update_percepts()
@@ -170,6 +193,7 @@ class Explorer:
             self.update_percepts()
             percepts['bump'] = 1
             self.score += (-1)
+            self.turn_right()
         
     def shoot(self):
         location_x = self.x 
@@ -645,7 +669,7 @@ def logicExplorer():
     exp = Explorer(world)
     
     ''' KNOWLEDGE BASE'''
-    exp.add_rule([["NOT",(2,"Glitter"),(1,"x1")],[(2,"Action"),(2,"grab")]])
+    exp.add_rule([["NOT",(2,"Glitter"),(1,"x1")],[(2,"Action"),(2,"Grab")]])
     exp.add_rule([[(2,"Stench"),(1,"x2")],[(2,"Breeze"),(1,"x2")],[(2,"Safe"),(2,"N"),(1,"x2")]])
     exp.add_rule([[(2,"Stench"),(1,"x3")],[(2,"Breeze"),(1,"x3")],[(2,"Safe"),(2,"S"),(1,"x3")]])
     exp.add_rule([[(2,"Stench"),(1,"x4")],[(2,"Breeze"),(1,"x4")],[(2,"Safe"),(2,"E"),(1,"x4")]])
@@ -655,8 +679,10 @@ def logicExplorer():
     gameover = False
     while not gameover:
         # Print Info
+        print("______________________________")
         print("X,Y: " + str(exp.x) + str(exp.y))
         print("Orientation: " + str(exp.orientation))
+        print("Score: " + str(exp.score))
         # Update Percepts
         exp.update_percepts()
         exp.update_kb()
@@ -668,9 +694,25 @@ def logicExplorer():
             gameover = True
         alpha = [["NOT",(2,"Safe"),(2,exp.orientation),(2,str((exp.x,exp.y)))]]
         if fol_resolution(exp.kb, alpha):
-            # Best Action is Move Forward
-            exp.forward()
-        
+            # Safe to Move Forward
+            nextCell = None
+            if exp.orientation == "N":
+                nextCell = (exp.x-1,exp.y)
+            if exp.orientation == "S":
+                nextCell = (exp.x+1,exp.y)
+            if exp.orientation == "E":
+                nextCell = (exp.x,exp.y+1)
+            if exp.orientation == "W":
+                nextCell = (exp.x,exp.y-1)
+            # Check if cell ahead has already been explored
+            alpha = [["NOT",(2,"Visited"),(2,str(nextCell))]]
+            if fol_resolution(exp.kb, alpha):
+                exp.turn_right()
+            else:
+                exp.forward()
+                print("*Moving " + str(exp.orientation))
+    print("***GAME OVER***")
+    print("Final Score: " + str(exp.score))    
     
  
 
