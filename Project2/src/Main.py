@@ -76,7 +76,18 @@ class Explorer:
 #             self.add_rule([["NOT",(2,"Glitter"),(2,str((self.x,self.y)))]])
         #Bump
         if self.list_percepts['Bump']:
-            self.add_rule([[(2,"Bump"),(2,str(self.orientation)),(2,str((self.x,self.y)))]])
+            if self.orientation == "N":
+                self.add_rule([[(2,"Obstacle"),(2,str(((self.x-1),self.y)))]])
+                self.add_rule([[(2,"Visited"),(2,str(((self.x-1),self.y)))]])
+            elif self.orientation == "S":
+                self.add_rule([[(2,"Obstacle"),(2,str(((self.x+1),self.y)))]])
+                self.add_rule([[(2,"Visited"),(2,str(((self.x+1),self.y)))]])
+            elif self.orientation == "E":
+                self.add_rule([[(2,"Obstacle"),(2,str((self.x,(self.y+1))))]])
+                self.add_rule([[(2,"Visited"),(2,str((self.x,(self.y+1))))]])
+            elif self.orientation == "W":
+                self.add_rule([[(2,"Obstacle"),(2,str((self.x,(self.y-1))))]])
+                self.add_rule([[(2,"Visited"),(2,str((self.x,(self.y+1))))]])
 #         else:
 #             self.add_rule([["NOT",(2,"Bump"),(2,str(self.orientation)),(2,str((self.x,self.y)))]])
         
@@ -186,6 +197,18 @@ class Explorer:
             self.update_percepts()
             percepts['bump'] = 1
             self.score += (-1)
+        elif self.world[self.x][self.y] == 'W' :
+            print("Killed by Wumpus! -1000 score and go back to the previous cell")
+            self.add_rule([[(2,"Wumpus"),(2,str((self.x,self.y)))]])
+            self.x = row
+            self.y = column
+            self.score += (-1000)  
+        elif self.world[self.x][self.y] == 'P' :
+            print("Killed by Pit! -1000 score and go back to the previous cell")
+            self.add_rule([[(2,"Pit"),(2,str((self.x,self.y)))]])
+            self.x = row
+            self.y = column
+            self.score += (-1000)
         
     def shoot(self):
         location_x = self.x 
@@ -733,7 +756,7 @@ def logicExplorer():
             continue
         
         # Explore!
-        alpha = [["NOT",(2,"Bump"),(2,exp.orientation),(2,str((exp.x,exp.y)))]]
+        alpha = [["NOT",(2,"Obstacle"),(2,str(nextCell))]]
         if fol_resolution(exp.kb, alpha):
             # Impossible to move forward
             exp.turn_right()
