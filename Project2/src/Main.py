@@ -791,10 +791,9 @@ def logicExplorer():
                         # Already visited cell on right, check left
                         alpha = [["NOT",(2,"Visited"),(2,str(leftCell))]]
                         if fol_resolution(exp.kb, alpha):
-                            # Already visited all nearby cells
-                            print("Trapped!")
-                            gameover = True
-                            continue
+                            # Already visited all nearby cells so just move forward
+                            exp.forward()
+                            print("*Moving " + str(exp.orientation))
                         else:
                             # Left cell unvisited, let's go there
                             exp.turn_left()
