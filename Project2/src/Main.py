@@ -62,11 +62,13 @@ class Explorer:
         #Stench
         if self.list_percepts['Stench']:
             self.add_rule([[(2,"Stench"),(2,str((self.x,self.y)))]])
+            self.add_rule([[(2,"Wumpus"),(2,str(((self.x-1),self.y)))],[(2,"Wumpus"),(2,str(((self.x+1),self.y)))],[(2,"Wumpus"),(2,str((self.x,(self.y+1))))],[(2,"Wumpus"),(2,str((self.x,(self.y-1))))]])
         else:
             self.add_rule([["NOT",(2,"Stench"),(2,str((self.x,self.y)))]])
         #Breeze
         if self.list_percepts['Breeze']:
             self.add_rule([[(2,"Breeze"),(2,str((self.x,self.y)))]])
+            self.add_rule([[(2,"Pit"),(2,str(((self.x-1),self.y)))],[(2,"Pit"),(2,str(((self.x+1),self.y)))],[(2,"Pit"),(2,str((self.x,(self.y+1))))],[(2,"Pit"),(2,str((self.x,(self.y-1))))]])
         else:
             self.add_rule([["NOT",(2,"Breeze"),(2,str((self.x,self.y)))]])
         #Glitter
@@ -76,7 +78,18 @@ class Explorer:
 #             self.add_rule([["NOT",(2,"Glitter"),(2,str((self.x,self.y)))]])
         #Bump
         if self.list_percepts['Bump']:
-            self.add_rule([[(2,"Bump"),(2,str(self.orientation)),(2,str((self.x,self.y)))]])
+            if self.orientation == "N":
+                self.add_rule([[(2,"Obstacle"),(2,str(((self.x-1),self.y)))]])
+                self.add_rule([[(2,"Visited"),(2,str(((self.x-1),self.y)))]])
+            elif self.orientation == "S":
+                self.add_rule([[(2,"Obstacle"),(2,str(((self.x+1),self.y)))]])
+                self.add_rule([[(2,"Visited"),(2,str(((self.x+1),self.y)))]])
+            elif self.orientation == "E":
+                self.add_rule([[(2,"Obstacle"),(2,str((self.x,(self.y+1))))]])
+                self.add_rule([[(2,"Visited"),(2,str((self.x,(self.y+1))))]])
+            elif self.orientation == "W":
+                self.add_rule([[(2,"Obstacle"),(2,str((self.x,(self.y-1))))]])
+                self.add_rule([[(2,"Visited"),(2,str((self.x,(self.y+1))))]])
 #         else:
 #             self.add_rule([["NOT",(2,"Bump"),(2,str(self.orientation)),(2,str((self.x,self.y)))]])
         
@@ -186,47 +199,70 @@ class Explorer:
             self.update_percepts()
             percepts['bump'] = 1
             self.score += (-1)
-        
+        '''
+        elif self.world[self.x][self.y] == 'W' :
+            print("Killed by Wumpus! -1000 score and go back to the previous cell")
+            self.add_rule([[(2,"Wumpus"),(2,str((self.x,self.y)))]])
+            self.x = row
+            self.y = column
+            self.score += (-1000)  
+        elif self.world[self.x][self.y] == 'P' :
+            print("Killed by Pit! -1000 score and go back to the previous cell")
+            self.add_rule([[(2,"Pit"),(2,str((self.x,self.y)))]])
+            self.x = row
+            self.y = column
+            self.score += (-1000)
+        '''
     def shoot(self):
+        self.score -= 10
+        self.arrowCount -= 1
         location_x = self.x 
         location_y = self.y
         orientation = self.orientation
-        nbarrow = self.arrowCount
         if orientation == 'N' :
-            for i in range(0,location_y) : 
+            for i in range(len(self.world)) : 
                 #When we kill a wumpus we display it as a cross '+' 
-                if self.world[location_x][i] == 'W' :
-                    self.world[location_x][i] = '+'
-                    self.list_percepts['Scream'] = 1
-                    self.score += 10
-                    percepts['scream'] = 1  
+                if (location_x-i) >= 0:
+                    if self.world[location_x-i][location_y] == 'O':
+                        break
+                    elif self.world[location_x-i][location_y] == 'W' :
+                        self.world[location_x-i][location_y] = '+'
+                        self.list_percepts['Scream'] = 1
+                        self.score += 10
+                        percepts['scream'] = 1  
         elif orientation == 'S' :
-            for i in range(location_y, len(self.world)) : 
+            for i in range(len(self.world)) : 
                 #When we kill a wumpus we display it as a cross '+' 
-                if self.world[location_x][i] == 'W' :
-                    self.world[location_x][i] = '+'
-                    self.list_percepts['Scream'] = 1
-                    self.score += 10
-                    percepts['scream'] = 1       
+                if (location_x+i) < len(self.world):
+                    if self.world[location_x+i][location_y] == 'O':
+                        break
+                    elif self.world[location_x+i][location_y] == 'W':
+                        self.world[location_x+i][location_y] = '+'
+                        self.list_percepts['Scream'] = 1
+                        self.score += 10
+                        percepts['scream'] = 1  
         elif orientation == 'E' : 
-            for i in range(location_x,len(self.world)) : 
+            for i in range(len(self.world)) : 
                 #When we kill a wumpus we display it as a cross '+' 
-                if self.world[i][location_y] == 'W' :
-                    self.world[i][location_y] = '+'
-                    self.list_percepts['Scream'] = 1
-                    self.score += 10
-                    percepts['scream'] = 1 
+                if (location_y+i) < len(self.world) :
+                    if self.world[location_x][location_y+i] == 'O':
+                        break
+                    elif self.world[location_x][location_y+i] == 'W':
+                        self.world[location_x][location_y+i] = '+'
+                        self.list_percepts['Scream'] = 1
+                        self.score += 10
+                        percepts['scream'] = 1  
         else : 
-            for i in range(0,location_x) : 
+            for i in range(len(self.world)) : 
                 #When we kill a wumpus we display it as a cross '+' 
-                if self.world[i][location_y] == 'W' :
-                    self.world[i][location_y] = '+'
-                    self.list_percepts['Scream'] = 1
-                    self.score += 10
-                    percepts['scream'] = 1
-        if self.list_percepts['Scream'] and percepts['scream'] != 1:
-            self.score += -10 
-        self.arrowCount = nbarrow - 1
+                if (location_y-i) >= 0:
+                    if self.world[location_x][location_y-i] == 'O':
+                        break
+                    elif self.world[location_x][location_y-i] == 'W':
+                        self.world[location_x][location_y-i] = '+'
+                        self.list_percepts['Scream'] = 1
+                        self.score += 10
+                        percepts['scream'] = 1  
     
     def grab(self):
         if self.world[self.x][self.y] == 'G':
@@ -415,7 +451,7 @@ def worldCreation(gridSize = 5, pPit = 0.1, pObstacle = 0.1, pWumpus = 0.1):
         for j in range(gridSize):
             # Procedural World Generation
             if random.random() < pPit:
-                worldMaker[i].append("P")					
+                worldMaker[i].append("P")                    
             elif random.random() < pObstacle:
                 worldMaker[i].append("O")
             elif random.random() < pWumpus:
@@ -492,7 +528,7 @@ def try_unify(x,y,theta):
     # X and Y are compound/lists (do these need to be handled differently???)
     elif type(x) is list and type(y) is list:
         # Empty list check
-        if not x and not y:
+        if not x or not y:
             return theta
         return try_unify(x[1:], y[1:], try_unify(x[0], y[0], theta))
     # Otherwise we fail
@@ -531,9 +567,12 @@ def fol_resolution(KB, alpha):
     Clause form: Each clause is a list [] of terms, each term connected by implicit "OR"
     Term form: Each term is a list [] of tuples (), first value of tuple is integer code and 2nd value is string representation
     '''
-    clauses = KB.copy()
+    cl = KB.copy()
     #negate(alpha)
-    clauses.append(alpha)
+    cl.append(alpha)
+    #print(cl)
+    # Sort to attempt unit resolution
+    clauses = sorted(cl, key=len)
     #print(clauses)
     while True:  
         new = []
@@ -656,9 +695,27 @@ def buildRule():
 
 def logicExplorer():
     # Test small world with no pits, wumpus, or obstacles
-    world = worldCreation(5, 0, 0, 0)
+    world = worldCreation(5,0,0.1,0)
     printWorld(world)
     exp = Explorer(world)
+    
+    ''' DEFINE EDGES OF WORLD IN KB '''
+    for j in range(len(world)):
+        # Mark outside of world as obstacle and visited to work with exploration
+        exp.add_rule([[(2,"Obstacle"),(2,str((-1,j)))]])
+        exp.add_rule([[(2,"Visited"),(2,str((-1,j)))]])
+    for j in range(len(world)):
+        # Mark outside of world as obstacle and visited to work with exploration
+        exp.add_rule([[(2,"Obstacle"),(2,str((len(world),j)))]])
+        exp.add_rule([[(2,"Visited"),(2,str((len(world),j)))]])
+    for j in range(len(world)):
+        # Mark outside of world as obstacle and visited to work with exploration
+        exp.add_rule([[(2,"Obstacle"),(2,str((j,-1)))]])
+        exp.add_rule([[(2,"Visited"),(2,str((j,-1)))]])
+    for j in range(len(world)):
+        # Mark outside of world as obstacle and visited to work with exploration
+        exp.add_rule([[(2,"Obstacle"),(2,str((j,len(world))))]])
+        exp.add_rule([[(2,"Visited"),(2,str((j,len(world))))]])
     
     ''' KNOWLEDGE BASE'''
     exp.add_rule([["NOT",(2,"Glitter"),(1,"x1")],[(2,"Action"),(2,"Grab")]])
@@ -666,6 +723,13 @@ def logicExplorer():
     exp.add_rule([[(2,"Stench"),(1,"x3")],[(2,"Breeze"),(1,"x3")],[(2,"Safe"),(2,"S"),(1,"x3")]])
     exp.add_rule([[(2,"Stench"),(1,"x4")],[(2,"Breeze"),(1,"x4")],[(2,"Safe"),(2,"E"),(1,"x4")]])
     exp.add_rule([[(2,"Stench"),(1,"x5")],[(2,"Breeze"),(1,"x5")],[(2,"Safe"),(2,"W"),(1,"x5")]])
+    exp.add_rule([["NOT",(2,"Safe"),(1,"x6")],["NOT",(2,"Wumpus"),(1,"x6")]])
+    exp.add_rule([["NOT",(2,"Safe"),(1,"x7")],["NOT",(2,"Dead"),(1,"x7")],["NOT",(2,"Wumpus"),(1,"x7")]])
+    exp.add_rule([["NOT",(2,"Safe"),(1,"x8")]["NOT",(2,"Dead"),(1,"x8")],["NOT",(2,"Pit"),(1,"x8")]])
+#     exp.add_rule([["NOT",(2,"Safe"),(1,"x7")],["NOT",(2,"Pit"),(1,"x7")]])
+#     exp.add_rule([["NOT",(2,"Obstacle"),(1,"x8")],["NOT",(2,"Wumpus"),(1,"x8")]])
+#     exp.add_rule([["NOT",(2,"Obstacle"),(1,"x9")],["NOT",(2,"Pit"),(1,"x9")]])
+    #exp.add_rule([["NOT",(2,"Stench"),(1,"x6")],[(2,"Wumpus"),(2,"N"),(1,"x6")],[(2,"Wumpus"),(2,"S"),(1,"x6")],[(2,"Wumpus"),(2,"E"),(1,"x6")],[(2,"Wumpus"),(2,"W"),(1,"x6")]])
     
     ''' GAME LOOP'''
     gameover = False
@@ -733,7 +797,7 @@ def logicExplorer():
             continue
         
         # Explore!
-        alpha = [["NOT",(2,"Bump"),(2,exp.orientation),(2,str((exp.x,exp.y)))]]
+        alpha = [["NOT",(2,"Obstacle"),(2,str(nextCell))]]
         if fol_resolution(exp.kb, alpha):
             # Impossible to move forward
             exp.turn_right()
@@ -750,10 +814,9 @@ def logicExplorer():
                         # Already visited cell on right, check left
                         alpha = [["NOT",(2,"Visited"),(2,str(leftCell))]]
                         if fol_resolution(exp.kb, alpha):
-                            # Already visited all nearby cells
-                            print("Trapped!")
-                            gameover = True
-                            continue
+                            # Already visited all nearby cells so just move forward
+                            exp.forward()
+                            print("*Moving " + str(exp.orientation))
                         else:
                             # Left cell unvisited, let's go there
                             exp.turn_left()
@@ -768,6 +831,9 @@ def logicExplorer():
                     # Next cell unvisited, let's go there
                     exp.forward()
                     print("*Moving " + str(exp.orientation))
+            else:
+                # Not safe to move forward
+                pass
     
     print("***GAME OVER***")
     print("Final Score: " + str(exp.score))    
