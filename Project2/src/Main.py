@@ -683,6 +683,24 @@ def logicExplorer():
     printWorld(world)
     exp = Explorer(world)
     
+    ''' DEFINE EDGES OF WORLD IN KB '''
+    for j in range(len(world)):
+        # Mark outside of world as obstacle and visited to work with exploration
+        exp.add_rule([[(2,"Obstacle"),(2,str((-1,j)))]])
+        exp.add_rule([[(2,"Visited"),(2,str((-1,j)))]])
+    for j in range(len(world)):
+        # Mark outside of world as obstacle and visited to work with exploration
+        exp.add_rule([[(2,"Obstacle"),(2,str((len(world),j)))]])
+        exp.add_rule([[(2,"Visited"),(2,str((len(world),j)))]])
+    for j in range(len(world)):
+        # Mark outside of world as obstacle and visited to work with exploration
+        exp.add_rule([[(2,"Obstacle"),(2,str((j,-1)))]])
+        exp.add_rule([[(2,"Visited"),(2,str((j,-1)))]])
+    for j in range(len(world)):
+        # Mark outside of world as obstacle and visited to work with exploration
+        exp.add_rule([[(2,"Obstacle"),(2,str((j,len(world))))]])
+        exp.add_rule([[(2,"Visited"),(2,str((j,len(world))))]])
+    
     ''' KNOWLEDGE BASE'''
     exp.add_rule([["NOT",(2,"Glitter"),(1,"x1")],[(2,"Action"),(2,"Grab")]])
     exp.add_rule([[(2,"Stench"),(1,"x2")],[(2,"Breeze"),(1,"x2")],[(2,"Safe"),(2,"N"),(1,"x2")]])
@@ -791,6 +809,9 @@ def logicExplorer():
                     # Next cell unvisited, let's go there
                     exp.forward()
                     print("*Moving " + str(exp.orientation))
+            else:
+                # Not safe to move forward
+                pass
     
     print("***GAME OVER***")
     print("Final Score: " + str(exp.score))    
