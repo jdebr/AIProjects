@@ -562,9 +562,12 @@ def fol_resolution(KB, alpha):
     Clause form: Each clause is a list [] of terms, each term connected by implicit "OR"
     Term form: Each term is a list [] of tuples (), first value of tuple is integer code and 2nd value is string representation
     '''
-    clauses = KB.copy()
+    cl = KB.copy()
     #negate(alpha)
-    clauses.append(alpha)
+    cl.append(alpha)
+    #print(cl)
+    # Sort to attempt unit resolution
+    clauses = sorted(cl, key=len)
     #print(clauses)
     while True:  
         new = []
