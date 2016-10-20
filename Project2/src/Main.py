@@ -50,8 +50,21 @@ class Explorer:
         
     def update_kb(self):
         ''' Turns current percepts into clauses for KB'''
-        #Update location
-        pass
+        #Stench
+        if self.list_percepts['Stench']:
+            self.add_rule([[(2,"Stench"),(2,str((self.x,self.y)))]])
+        else:
+            self.add_rule([["NOT",(2,"Stench"),(2,str((self.x,self.y)))]])
+        #Breeze
+        if self.list_percepts['Breeze']:
+            self.add_rule([[(2,"Breeze"),(2,str((self.x,self.y)))]])
+        else:
+            self.add_rule([["NOT",(2,"Breeze"),(2,str((self.x,self.y)))]])
+        #Glitter
+        if self.list_percepts['Glitter']:
+            self.add_rule([[(2,"Glitter"),(2,str((self.x,self.y)))]])
+        else:
+            self.add_rule([["NOT",(2,"Glitter"),(2,str((self.x,self.y)))]])
 
     def update_percepts(self) : 
         '''
@@ -134,7 +147,7 @@ class Explorer:
                 self.y = column - 1
         self.score += (-1)
         
-        self.update_percepts(self.world)
+        self.update_percepts()
         
         if self.world[self.x][self.y] == 'O' :
             print("Obstacle, go back to the prevoius cell")
@@ -585,17 +598,32 @@ def logicExplorer():
     exp = Explorer(world)
     
     ''' KNOWLEDGE BASE'''
-    exp.add_rule([["NOT",(2,"Glitter"),(1,"x1")],["NOT",(2,"At"),(1,"x1")],[(2,"Action"),(2,"grab")]])
+    exp.add_rule([["NOT",(2,"Glitter"),(1,"x1")],[(2,"Action"),(2,"grab")]])
+    exp.add_rule([[(2,"Stench"),(1,"x2")],[(2,"Breeze"),(1,"x2")],[(2,"Safe"),(2,"N"),(1,"x2")]])
+    exp.add_rule([[(2,"Stench"),(1,"x3")],[(2,"Breeze"),(1,"x3")],[(2,"Safe"),(2,"S"),(1,"x3")]])
+    exp.add_rule([[(2,"Stench"),(1,"x4")],[(2,"Breeze"),(1,"x4")],[(2,"Safe"),(2,"E"),(1,"x4")]])
+    exp.add_rule([[(2,"Stench"),(1,"x5")],[(2,"Breeze"),(1,"x5")],[(2,"Safe"),(2,"W"),(1,"x5")]])
     
     ''' GAME LOOP'''
-    # Update Percepts
-    exp.update_percepts()
-    # Search KB for best action
-    alpha = [["NOT",(2,"Action"),(2,"Grab")]]
-    if fol_resolution(exp.kb, alpha):
-        # Best Action is Grab
-        exp.grab()
-    else
+    gameover = False
+    while not gameover:
+        # Print Info
+        print("X,Y: " + str(exp.x) + str(exp.y))
+        print("Orientation: " + str(exp.orientation))
+        # Update Percepts
+        exp.update_percepts()
+        exp.update_kb()
+        # Search KB for best action
+        alpha = [["NOT",(2,"Action"),(2,"Grab")]]
+        if fol_resolution(exp.kb, alpha):
+            # Best Action is Grab
+            exp.grab()
+            gameover = True
+        alpha = [["NOT",(2,"Safe"),(2,exp.orientation),(2,str((exp.x,exp.y)))]]
+        if fol_resolution(exp.kb, alpha):
+            # Best Action is Move Forward
+            exp.forward()
+        
     
  
 
@@ -720,6 +748,7 @@ def main():
     #worldGeneratorTest()
     #unificationTest()
     #resolutionTest()
+    logicExplorer()
     pass
     
     
