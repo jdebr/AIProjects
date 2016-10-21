@@ -201,7 +201,7 @@ class Explorer:
         if self.list_percepts['Death'] == 1 : 
             self.unsafe.append([self.x , self.y])
         elif self.list_percepts['Stench'] == 1 or self.list_percepts['Breeze'] == 1:
-            for i in adjCells(self.x,self.y,len(world)) : 
+            for i in adjCells(self.x,self.y,len(self.world)) : 
                 if i not in self.safe : 
                     if i not in self.visited : 
                         self.usafe.append(i)
@@ -212,6 +212,10 @@ class Explorer:
             if [self.x , self.y] in self.unsafe : 
                 self.visited.append([self.x , self.y])
                 self.unsafe.remove([self.x , self.y])
+            for i in adjCells(self.x,self.y,len(self.world)) : 
+                if i in self.unsafe : 
+                    self.unsafe.remove(i)
+                self.safe.append(i)
         
     def shoot(self):
         location_x = self.x 
