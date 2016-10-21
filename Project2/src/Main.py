@@ -240,7 +240,7 @@ class Explorer:
         location_y = self.y
         orientation = self.orientation
         if orientation == 'N' :
-            for i in range(location_x) : 
+            for i in range(location_x+1) : 
                 #When we kill a wumpus we display it as a cross '+' 
                 if self.world[location_x-i][location_y] == 'O':
                     break
@@ -276,7 +276,7 @@ class Explorer:
                     percepts['scream'] = 1  
                     self.slainWumps +=1
         else : 
-            for i in range(location_y) : 
+            for i in range(location_y+1) : 
                 #When we kill a wumpus we display it as a cross '+' 
                 if self.world[location_x][location_y-i] == 'O':
                     break
