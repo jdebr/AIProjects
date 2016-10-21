@@ -49,6 +49,15 @@ class Explorer:
         
         # init the list of percepts to 0 first
         self.list_percepts = {'Stench' : 0, 'Breeze' : 0, 'Glitter' : 0, 'Bump' : 0, 'Scream' : 0, 'Death' : 0}
+		
+		#Lists of visited, safe and unsafe positions
+        self.visited = list()
+        self.safe = list()
+        self.unsafe = list()
+		
+		#init visited position adding the initial position in it
+        self.visited.append([self.x , self.y])
+		
         
     def add_rule(self, rule):
         ''' Add a rule (IN CLAUSE FORM) to the explorer's KB'''
@@ -179,6 +188,7 @@ class Explorer:
         
         if self.world[self.x][self.y] == 'O' :
             print("Obstacle, go back to the previous cell")
+            self.unsafe.append([self.x , self.y])
             self.x = row
             self.y = column 
             self.list_percepts['Bump'] = 1
@@ -186,6 +196,22 @@ class Explorer:
             self.update_percepts()
             percepts['bump'] = 1
             self.score += (-1)
+		
+		#update lists
+        if self.list_percepts['Death'] == 1 : 
+            self.unsafe.append([self.x , self.y])
+        elif self.list_percepts['Stench'] == 1 or self.list_percepts['Breeze'] == 1:
+            for i in adjCells(self.x,self.y,len(world)) : 
+                if i not in self.safe : 
+                    if i not in self.visited : 
+                        self.usafe.append(i)
+        else : 
+            if [self.x , self.y] in self.safe : 
+                self.visited.append([self.x , self.y])
+                self.safe.remove([self.x , self.y])
+            if [self.x , self.y] in self.unsafe : 
+                self.visited.append([self.x , self.y])
+                self.unsafe.remove([self.x , self.y])
         
     def shoot(self):
         location_x = self.x 
