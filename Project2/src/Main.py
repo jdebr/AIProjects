@@ -573,7 +573,7 @@ def fol_resolution(KB, alpha):
     Clause form: Each clause is a list [] of terms, each term connected by implicit "OR"
     Term form: Each term is a list [] of tuples (), first value of tuple is integer code and 2nd value is string representation
     '''
-    #print("Alpha: " + str(alpha))
+    print("Using logic engine with alpha: " + str(alpha))
     cl = KB.copy()
     #negate(alpha)
     cl.append(alpha)
@@ -758,12 +758,12 @@ def logicExplorer():
     while not gameover:
         # Print Info
         print("______________________________")
-        print("X,Y: " + str(exp.x) + str(exp.y))
+        print("Location (Row, Column): (" + str(exp.x) + ", " + str(exp.y) + ")")
         print("Orientation: " + str(exp.orientation))
         print("Score: " + str(exp.score))
         
         # Update Percepts
-        print("Updating percepts...")
+        print("Updating percepts and knowledge base")
         exp.update_percepts()
         exp.update_kb()
         
@@ -850,7 +850,7 @@ def logicExplorer():
                     exp.forward()
             else:
                 # Not safe to move forward
-                print("Not safe!!")
+                print("No safe path!")
                 alpha = [["NOT",(2,"Pit"),(2,str(nextCell))]]
                 if fol_resolution(exp.kb, alpha):
                     # Pit ahead, turn away!
