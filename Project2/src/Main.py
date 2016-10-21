@@ -44,6 +44,14 @@ class Explorer:
                 
         self.arrowCount = arrowCount
         
+        # additional class vars for experiment stat tracking
+        self.success = False
+        self.slainWumps = 0
+        self.pitDeaths = 0
+        self.wumpDeaths = 0
+        self.exploredCells = {(self.x, self.y)}
+        self.arrowsFired = 0
+        
         # Initial Knowledge Base as a blank list
         self.kb = []
         
@@ -165,6 +173,7 @@ class Explorer:
         if self.orientation == 'N' :
             if (row - 1) < len(self.world) and (row - 1) >= 0:
                 self.x = row - 1
+                self.exploredCells.add((self.x, self.y))
             else:
                 percepts['bump'] = 1
                 self.list_percepts['Bump'] = 1
@@ -172,6 +181,7 @@ class Explorer:
         elif self.orientation == 'E' : 
             if (column + 1) < len(self.world) and (column + 1) >= 0:
                 self.y = column + 1
+                self.exploredCells.add((self.x, self.y))
             else:
                 percepts['bump'] = 1
                 self.list_percepts['Bump'] = 1
@@ -179,6 +189,7 @@ class Explorer:
         elif self.orientation == 'S' :
             if (row + 1) < len(self.world) and (row + 1) >= 0:
                 self.x = row + 1
+                self.exploredCells.add((self.x, self.y))
             else:
                 percepts['bump'] = 1
                 self.list_percepts['Bump'] = 1
@@ -186,6 +197,7 @@ class Explorer:
         else :
             if (column - 1) < len(self.world) and (column - 1) >= 0:
                 self.y = column - 1
+                self.exploredCells.add((self.x, self.y))
             else:
                 percepts['bump'] = 1
                 self.list_percepts['Bump'] = 1
@@ -210,17 +222,20 @@ class Explorer:
             self.x = row
             self.y = column
             self.score += (-1000)  
+            self.wumpDeaths += 1
         elif self.world[self.x][self.y] == 'P' :
             print("Killed by Pit! -1000 score and go back to the previous cell")
             self.add_rule([[(2,"Pit"),(2,str((self.x,self.y)))]])
             self.x = row
             self.y = column
             self.score += (-1000)
+            self.pitDeaths += 1
         
     def shoot(self):
         print("* Fire!")
         self.score -= 10
         self.arrowCount -= 1
+        self.arrowsFired += 1
         location_x = self.x 
         location_y = self.y
         orientation = self.orientation
@@ -235,6 +250,7 @@ class Explorer:
                     self.list_percepts['Scream'] = 1
                     self.score += 10
                     percepts['scream'] = 1  
+                    self.slainWumps +=1
         elif orientation == 'S' :
             for i in range(len(self.world)-location_x) : 
                 #When we kill a wumpus we display it as a cross '+' 
@@ -246,6 +262,7 @@ class Explorer:
                     self.list_percepts['Scream'] = 1
                     self.score += 10
                     percepts['scream'] = 1  
+                    self.slainWumps +=1
         elif orientation == 'E' : 
             for i in range(len(self.world)-location_y) : 
                 #When we kill a wumpus we display it as a cross '+' 
@@ -257,6 +274,7 @@ class Explorer:
                     self.list_percepts['Scream'] = 1
                     self.score += 10
                     percepts['scream'] = 1  
+                    self.slainWumps +=1
         else : 
             for i in range(location_y) : 
                 #When we kill a wumpus we display it as a cross '+' 
@@ -268,12 +286,14 @@ class Explorer:
                     self.list_percepts['Scream'] = 1
                     self.score += 10
                     percepts['scream'] = 1  
+                    self.slainWumps +=1
     
     def grab(self):
         if self.world[self.x][self.y] == 'G':
             self.list_percepts['Glitter'] = 1
             self.score += 1000
             print("GOLD FOUND! YOU WIN!")
+            self.success = True
         elif self.world[self.x][self.y] != 'G':
             self.list_percepts['Glitter'] = 0
  
@@ -573,7 +593,7 @@ def fol_resolution(KB, alpha):
     Clause form: Each clause is a list [] of terms, each term connected by implicit "OR"
     Term form: Each term is a list [] of tuples (), first value of tuple is integer code and 2nd value is string representation
     '''
-    print("Using logic engine with alpha: " + str(alpha))
+    #print("Using logic engine with alpha: " + str(alpha))
     cl = KB.copy()
     #negate(alpha)
     cl.append(alpha)
@@ -703,11 +723,14 @@ def buildRule():
 
 
 
-def logicExplorer():
+def logicExplorer(worldSize = 5):
     # Test small world with no pits, wumpus, or obstacles
-    world = worldCreation()
+    world = worldCreation(worldSize, 0.1, 0.1, 0.1 )
     printWorld(world)
     exp = Explorer(world)
+    currentPosition = None
+    lastPosition = None
+    trapCounter = 0
     
     ''' DEFINE EDGES OF WORLD IN KB '''
     for j in range(len(world)):
@@ -813,6 +836,7 @@ def logicExplorer():
         alpha = [["NOT",(2,"Action"),(2,"Grab")]]
         if fol_resolution(exp.kb, alpha):
             # Best Action is Grab
+            print("Trying to grab gold...")
             exp.grab()
             gameover = True
             continue
@@ -868,9 +892,25 @@ def logicExplorer():
                     else:
                         # No pit or wumpus detected
                         exp.forward()
+                        
+        # Check for trapped explorer...if he hasn't changed position in 5 turns he is stuck and game is over
+        if currentPosition:
+            lastPosition = currentPosition
+        currentPosition = (exp.x,exp.y)
+        
+        if currentPosition == lastPosition:
+            trapCounter += 1
+        else:
+            trapCounter = 0
+            
+        if trapCounter > 5:
+            gameover = True
+            print("Explorer Trapped! Game Over!")
     
     print("***GAME OVER***")
-    print("Final Score: " + str(exp.score))    
+    print("Final Score: " + str(exp.score))   
+    # Return explorer to extract statistics
+    return exp 
     
  
 
@@ -1020,14 +1060,60 @@ def reactiveExplorerTest(matrixSize, runNum):
     print("Total number of time killed the wumpus " + str(killedWumpus))
     print("--------------------------------------------")
     print("End time: " + str(get_time()))
+    
+def logicExperiment():
+    stats = {}
+    gameRuns = 3
+    exploredSum = 0.0
+    slainSum = 0.0
+    pitDeathSum = 0.0
+    wumpDeathSum = 0.0
+    firedSum = 0.0
+    goldSum = 0.0
+    scoreSum = 0.0
+    
+    for i in range(gameRuns):
+        e = logicExplorer(5)
+        stats["Game " + str(i)] = {"Cells Explored": len(e.exploredCells),
+                                   "Wumps Slain" : e.slainWumps,
+                                   "Pit Deaths": e.pitDeaths,
+                                   "Wump Deaths": e.wumpDeaths,
+                                   "Arrows Fired": e.arrowsFired,
+                                   "Success": e.success,
+                                   "Score": e.score
+                                    }
+        exploredSum += len(e.exploredCells)
+        slainSum += e.slainWumps
+        pitDeathSum += e.pitDeaths
+        wumpDeathSum += e.wumpDeaths
+        firedSum += e.arrowsFired
+        if e.success:
+            goldSum += 1
+        scoreSum += e.score
+        print("************************************************")
+        
+    print("************************************************")
+    print("************************************************")
+    print("Number of Games: " + str(gameRuns))
+    print("Ave Cells Explored: " + str(exploredSum/gameRuns))
+    print("Ave Wumps Killed: " + str(slainSum/gameRuns))
+    print("Ave Pit Deaths: " + str(pitDeathSum/gameRuns))
+    print("Ave Wump Deaths:" + str(wumpDeathSum/gameRuns))
+    print("Ave Number Arrows Fired: " + str(firedSum/gameRuns))
+    print("Ave Success Rate: " + str(goldSum/gameRuns))
+    print("Ave Score: " + str(scoreSum/gameRuns))
+    print("************************************************")
+    print(stats)
+        
         
 def main():
     #worldGeneratorTest()
     #unificationTest()
     #resolutionTest()
-    logicExplorer()
+    #logicExplorer()
     #reactiveExplorer(5)
     #testRuns()
+    logicExperiment()
     
     
 if __name__ == '__main__':
