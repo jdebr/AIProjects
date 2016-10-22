@@ -73,6 +73,10 @@ class Explorer:
             self.add_rule([[(2,"Wumpus"),(2,str(((self.x-1),self.y)))],[(2,"Wumpus"),(2,str(((self.x+1),self.y)))],[(2,"Wumpus"),(2,str((self.x,(self.y+1))))],[(2,"Wumpus"),(2,str((self.x,(self.y-1))))]])
         else:
             self.add_rule([["NOT",(2,"Stench"),(2,str((self.x,self.y)))]])
+            if [[(2,"Stench"),(2,str((self.x,self.y)))]] in self.kb:
+                self.kb.remove([[(2,"Stench"),(2,str((self.x,self.y)))]])
+            if [[(2,"Wumpus"),(2,str(((self.x-1),self.y)))],[(2,"Wumpus"),(2,str(((self.x+1),self.y)))],[(2,"Wumpus"),(2,str((self.x,(self.y+1))))],[(2,"Wumpus"),(2,str((self.x,(self.y-1))))]] in self.kb:
+                self.kb.remove([[(2,"Wumpus"),(2,str(((self.x-1),self.y)))],[(2,"Wumpus"),(2,str(((self.x+1),self.y)))],[(2,"Wumpus"),(2,str((self.x,(self.y+1))))],[(2,"Wumpus"),(2,str((self.x,(self.y-1))))]])
         #Breeze
         if self.list_percepts['Breeze']:
             self.add_rule([[(2,"Breeze"),(2,str((self.x,self.y)))]])
@@ -251,6 +255,8 @@ class Explorer:
                     self.score += 10
                     percepts['scream'] = 1  
                     self.slainWumps +=1
+                    if [[(2,"Wumpus"),(2,str((location_x-i,location_y)))]] in self.kb:
+                        self.kb.remove([[(2,"Wumpus"),(2,str((location_x-i,location_y)))]])
         elif orientation == 'S' :
             for i in range(len(self.world)-location_x) : 
                 #When we kill a wumpus we display it as a cross '+' 
@@ -263,6 +269,8 @@ class Explorer:
                     self.score += 10
                     percepts['scream'] = 1  
                     self.slainWumps +=1
+                    if [[(2,"Wumpus"),(2,str((location_x+i,location_y)))]] in self.kb:
+                        self.kb.remove([[(2,"Wumpus"),(2,str((location_x+i,location_y)))]])
         elif orientation == 'E' : 
             for i in range(len(self.world)-location_y) : 
                 #When we kill a wumpus we display it as a cross '+' 
@@ -275,6 +283,8 @@ class Explorer:
                     self.score += 10
                     percepts['scream'] = 1  
                     self.slainWumps +=1
+                    if [[(2,"Wumpus"),(2,str((location_x,location_y+i)))]] in self.kb:
+                        self.kb.remove([[(2,"Wumpus"),(2,str((location_x,location_y+i)))]])
         else : 
             for i in range(location_y+1) : 
                 #When we kill a wumpus we display it as a cross '+' 
@@ -287,6 +297,8 @@ class Explorer:
                     self.score += 10
                     percepts['scream'] = 1  
                     self.slainWumps +=1
+                    if [[(2,"Wumpus"),(2,str((location_x,location_y-i)))]] in self.kb:
+                        self.kb.remove([[(2,"Wumpus"),(2,str((location_x,location_y-i)))]])
     
     def grab(self):
         if self.world[self.x][self.y] == 'G':
@@ -585,7 +597,7 @@ def substitute(clause, theta):
         new_clause.append(new_term)
     return new_clause
 
-def fol_resolution(KB, alpha):
+def fol_resolution(KB, alpha, debug = False):
     '''Resolution algorithm performs FOL Resolution on all clauses in KB, the knowledge base,
     which is a list of sentences in clause form, and alpha, which is a new clause.
     Returns true if two clauses can resolve to the empty set and false otherwise.
@@ -593,7 +605,8 @@ def fol_resolution(KB, alpha):
     Clause form: Each clause is a list [] of terms, each term connected by implicit "OR"
     Term form: Each term is a list [] of tuples (), first value of tuple is integer code and 2nd value is string representation
     '''
-    #print("Using logic engine with alpha: " + str(alpha))
+    if debug:
+        print("Using logic engine with alpha: " + str(alpha))
     cl = KB.copy()
     #negate(alpha)
     cl.append(alpha)
@@ -606,7 +619,7 @@ def fol_resolution(KB, alpha):
         for i in range(len(clauses)):
             for j in range(i, len(clauses)):
                 if i != j:
-                    resolvants = fol_resolve(clauses[i],clauses[j])
+                    resolvants = fol_resolve(clauses[i],clauses[j], debug)
                     # If return empty clause then return true
                     if resolvants:
                         if not resolvants[0]:
@@ -621,7 +634,7 @@ def fol_resolution(KB, alpha):
         # Prune clauses
         #prune(clauses)
                                
-def fol_resolve(C1, C2):
+def fol_resolve(C1, C2, debug):
     #print("Resolve " + str(C1) + " and " + str(C2))
     mgu = False
     for term in C1:
@@ -645,9 +658,10 @@ def fol_resolve(C1, C2):
                 c2copy.remove(term2)
                 c1copy.extend(c2copy)
                 sub = substitute(c1copy, mgu)
-                #if not sub:
-                #    print("C1: " + str(C1))
-                #    print("C2: " + str(C2))
+                if debug:
+                    if not sub:
+                        print("C1: " + str(C1))
+                        print("C2: " + str(C2))
                 return [sub]
     # No resolvants possible for two clauses
     return False
@@ -834,7 +848,7 @@ def logicExplorer(worldSize = 5):
         
         # Get the gold!
         alpha = [["NOT",(2,"Action"),(2,"Grab")]]
-        if fol_resolution(exp.kb, alpha):
+        if fol_resolution(exp.kb, alpha, True):
             # Best Action is Grab
             print("Trying to grab gold...")
             exp.grab()
