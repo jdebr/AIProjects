@@ -12,6 +12,7 @@ Group 3
 import random
 import sys
 import datetime
+from timeit import default_timer as timer
 
 #Being used  by Reactive Explorer
 percepts = {'stench' : 0, 'breeze' : 0, 'glitter' : 0, 'bump' : 0, 'scream' : 0, 'death' : 0}
@@ -215,9 +216,9 @@ class Explorer:
             print("Obstacle, go back to the previous cell")
             self.x = row
             self.y = column 
+            self.update_percepts()
             self.list_percepts['Bump'] = 1
             self.update_kb()
-            self.update_percepts()
             percepts['bump'] = 1
             self.score += (-1)
         elif self.world[self.x][self.y] == 'W' :
@@ -257,6 +258,14 @@ class Explorer:
                     self.slainWumps +=1
                     if [[(2,"Wumpus"),(2,str((location_x-i,location_y)))]] in self.kb:
                         self.kb.remove([[(2,"Wumpus"),(2,str((location_x-i,location_y)))]])
+                    if [[(2,"Stench"),(2,str((location_x-i-1,location_y)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x-i-1,location_y)))]])
+                    if [[(2,"Stench"),(2,str((location_x-i+1,location_y)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x-i+1,location_y)))]])
+                    if [[(2,"Stench"),(2,str((location_x-i,location_y-1)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x-i,location_y-1)))]])
+                    if [[(2,"Stench"),(2,str((location_x-i,location_y+1)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x-i,location_y+1)))]])
         elif orientation == 'S' :
             for i in range(len(self.world)-location_x) : 
                 #When we kill a wumpus we display it as a cross '+' 
@@ -271,6 +280,14 @@ class Explorer:
                     self.slainWumps +=1
                     if [[(2,"Wumpus"),(2,str((location_x+i,location_y)))]] in self.kb:
                         self.kb.remove([[(2,"Wumpus"),(2,str((location_x+i,location_y)))]])
+                    if [[(2,"Stench"),(2,str((location_x+i-1,location_y)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x+i-1,location_y)))]])
+                    if [[(2,"Stench"),(2,str((location_x+i+1,location_y)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x+i+1,location_y)))]])
+                    if [[(2,"Stench"),(2,str((location_x+i,location_y-1)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x+i,location_y-1)))]])
+                    if [[(2,"Stench"),(2,str((location_x+i,location_y+1)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x+i,location_y+1)))]])
         elif orientation == 'E' : 
             for i in range(len(self.world)-location_y) : 
                 #When we kill a wumpus we display it as a cross '+' 
@@ -285,6 +302,14 @@ class Explorer:
                     self.slainWumps +=1
                     if [[(2,"Wumpus"),(2,str((location_x,location_y+i)))]] in self.kb:
                         self.kb.remove([[(2,"Wumpus"),(2,str((location_x,location_y+i)))]])
+                    if [[(2,"Stench"),(2,str((location_x+1,location_y+i)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x+1,location_y+i)))]])
+                    if [[(2,"Stench"),(2,str((location_x-1,location_y+i)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x-1,location_y+i)))]])
+                    if [[(2,"Stench"),(2,str((location_x,location_y+i+1)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x,location_y+i+1)))]])
+                    if [[(2,"Stench"),(2,str((location_x,location_y+i-1)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x,location_y+i-1)))]])
         else : 
             for i in range(location_y+1) : 
                 #When we kill a wumpus we display it as a cross '+' 
@@ -299,6 +324,14 @@ class Explorer:
                     self.slainWumps +=1
                     if [[(2,"Wumpus"),(2,str((location_x,location_y-i)))]] in self.kb:
                         self.kb.remove([[(2,"Wumpus"),(2,str((location_x,location_y-i)))]])
+                    if [[(2,"Stench"),(2,str((location_x+1,location_y-i)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x+1,location_y-i)))]])
+                    if [[(2,"Stench"),(2,str((location_x-1,location_y-i)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x-1,location_y-i)))]])
+                    if [[(2,"Stench"),(2,str((location_x,location_y-i+1)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x,location_y-i+1)))]])
+                    if [[(2,"Stench"),(2,str((location_x,location_y-i-1)))]] in self.kb:
+                        self.kb.remove([[(2,"Stench"),(2,str((location_x,location_y-i-1)))]])
     
     def grab(self):
         if self.world[self.x][self.y] == 'G':
@@ -791,6 +824,7 @@ def logicExplorer(worldSize = 5):
     #exp.add_rule([["NOT",(2,"Stench"),(1,"x6")],[(2,"Wumpus"),(2,"N"),(1,"x6")],[(2,"Wumpus"),(2,"S"),(1,"x6")],[(2,"Wumpus"),(2,"E"),(1,"x6")],[(2,"Wumpus"),(2,"W"),(1,"x6")]])
     
     ''' GAME LOOP'''
+    startTime = timer()
     gameover = False
     while not gameover:
         # Print Info
@@ -905,6 +939,9 @@ def logicExplorer(worldSize = 5):
                             exp.turn_right()
                     else:
                         # No pit or wumpus detected
+                        # If we have plenty of arrows, take a test shot
+                        if exp.arrowCount > 2:
+                            exp.shoot()
                         exp.forward()
                         
         # Check for trapped explorer...if he hasn't changed position in 5 turns he is stuck and game is over
@@ -919,7 +956,16 @@ def logicExplorer(worldSize = 5):
             
         if trapCounter > 5:
             gameover = True
-            print("Explorer Trapped! Game Over!")
+            print("***Explorer Trapped!***")
+            
+        # Check for timeout, if exploration taking too long on this map (set at half hour 1800s)
+        now = timer()
+        elapsedTime = now - startTime
+        print("Elapsed Time: " + str(elapsedTime))
+        if elapsedTime > 1800:
+            gameover = True
+            print("***Time out!***")
+        
     
     print("***GAME OVER***")
     print("Final Score: " + str(exp.score))   
@@ -1077,7 +1123,7 @@ def reactiveExplorerTest(matrixSize, runNum):
     
 def logicExperiment():
     stats = {}
-    gameRuns = 3
+    gameRuns = 10
     exploredSum = 0.0
     slainSum = 0.0
     pitDeathSum = 0.0
@@ -1087,7 +1133,7 @@ def logicExperiment():
     scoreSum = 0.0
     
     for i in range(gameRuns):
-        e = logicExplorer(5)
+        e = logicExplorer(10)
         stats["Game " + str(i)] = {"Cells Explored": len(e.exploredCells),
                                    "Wumps Slain" : e.slainWumps,
                                    "Pit Deaths": e.pitDeaths,
