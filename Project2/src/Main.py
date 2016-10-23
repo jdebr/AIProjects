@@ -1133,7 +1133,7 @@ def logicExperiment():
     scoreSum = 0.0
     
     for i in range(gameRuns):
-        e = logicExplorer(10)
+        e = logicExplorer(25)
         stats["Game " + str(i)] = {"Cells Explored": len(e.exploredCells),
                                    "Wumps Slain" : e.slainWumps,
                                    "Pit Deaths": e.pitDeaths,
