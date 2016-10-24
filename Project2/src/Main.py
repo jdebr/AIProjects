@@ -962,9 +962,9 @@ def logicExplorer(worldSize = 5):
         now = timer()
         elapsedTime = now - startTime
         print("Elapsed Time: " + str(elapsedTime))
-        if elapsedTime > 1800:
-            gameover = True
-            print("***Time out!***")
+#         if elapsedTime > 1800:
+#             gameover = True
+#             print("***Time out!***")
         
     
     print("***GAME OVER***")
@@ -1121,9 +1121,9 @@ def reactiveExplorerTest(matrixSize, runNum):
     print("--------------------------------------------")
     print("End time: " + str(get_time()))
     
-def logicExperiment():
+def logicExperiment(worldSize):
     stats = {}
-    gameRuns = 10
+    gameRuns = 2
     exploredSum = 0.0
     slainSum = 0.0
     pitDeathSum = 0.0
@@ -1133,7 +1133,7 @@ def logicExperiment():
     scoreSum = 0.0
     
     for i in range(gameRuns):
-        e = logicExplorer(25)
+        e = logicExplorer(worldSize)
         stats["Game " + str(i)] = {"Cells Explored": len(e.exploredCells),
                                    "Wumps Slain" : e.slainWumps,
                                    "Pit Deaths": e.pitDeaths,
@@ -1164,7 +1164,30 @@ def logicExperiment():
     print("Ave Score: " + str(scoreSum/gameRuns))
     print("************************************************")
     print(stats)
-        
+    stats["AvCells"] = (exploredSum/gameRuns)
+    stats["AvWumpKill"] = (slainSum/gameRuns)
+    stats["AvWumpDeath"] = (wumpDeathSum/gameRuns)
+    stats["AvPitDeath"] = (pitDeathSum/gameRuns)  
+    stats["AvArrowFired"] = (firedSum/gameRuns) 
+    stats["AvSuccess"] = (goldSum/gameRuns) 
+    stats["AvScore"] = (scoreSum/gameRuns)
+    
+    f = open('AIProj2Data', 'a')
+    f.write("************************************************\n")
+    f.write("************************************************\n")
+    f.write("Grid Size: " + str(worldSize)  + "\n")
+    f.write("Number of Games: " + str(gameRuns) + "\n")
+    f.write("Ave Cells Explored: " + str(exploredSum/gameRuns) + "\n")
+    f.write("Ave Wumps Killed: " + str(slainSum/gameRuns) + "\n")
+    f.write("Ave Pit Deaths: " + str(pitDeathSum/gameRuns) + "\n")
+    f.write("Ave Wump Deaths:" + str(wumpDeathSum/gameRuns) + "\n")
+    f.write("Ave Number Arrows Fired: " + str(firedSum/gameRuns) + "\n")
+    f.write("Ave Success Rate: " + str(goldSum/gameRuns) + "\n")
+    f.write("Ave Score: " + str(scoreSum/gameRuns) + "\n")
+    f.write("************************************************\n")
+    f.close()
+    
+    return stats
         
 def main():
     #worldGeneratorTest()
@@ -1173,7 +1196,7 @@ def main():
     #logicExplorer()
     #reactiveExplorer(5)
     #testRuns()
-    logicExperiment()
+    logicExperiment(20)
     
     
 if __name__ == '__main__':
