@@ -9,16 +9,28 @@ Group 3
 @author: Sara Ounissi
 '''
 
-def main():        
-    fileOpen = open("D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 3/breast-cancer-wisconsin.data.txt")
-    for lines in fileOpen:
-        '''
-        #Just Checking if reading individual elements in the line selected.
-        for element in lines:
-            print(element)
-        '''
-        print(lines.rstrip())
-    fileOpen.close()    
+import os
+
+
+def readingFiles():
+    
+    #Change the directory where you are storing the data.
+    fileNames = os.listdir("D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 3")
+    print(fileNames)
+    for name in fileNames:
+        if "data.txt" in name:
+            fileOpen = open("D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 3/" + str(name))
+            for lines in fileOpen:
+                '''
+                #Just Checking if reading individual elements in the line selected.
+                for element in lines:
+                    print(element)
+                '''
+                print(lines.rstrip())
+            fileOpen.close()
+
+def main():
+    readingFiles()
     
     
 if __name__ == '__main__':
