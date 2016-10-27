@@ -9,9 +9,16 @@ Group 3
 @author: Sara Ounissi
 '''
 
-
-def main():
-    print("Hello World")
+def main():        
+    fileOpen = open("D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 3/breast-cancer-wisconsin.data.txt")
+    for lines in fileOpen:
+        '''
+        #Just Checking if reading individual elements in the line selected.
+        for element in lines:
+            print(element)
+        '''
+        print(lines.rstrip())
+    fileOpen.close()    
     
     
 if __name__ == '__main__':
