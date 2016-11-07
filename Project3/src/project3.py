@@ -28,10 +28,32 @@ def readingFiles():
                 '''
                 print(lines.rstrip())
             fileOpen.close()
+            
+def readFile(fileName):
+    ''' Reads in the file specified and parses the content into numerical
+    data as a list of lists
+    '''
+    dataSet = list()
+    
+    with open(fileName, 'r') as f:
+        # split raw text on new lines
+        txtData = f.read().splitlines()
+        # parse out empty lines and split individual values within data instances
+        for line in txtData:
+            if not line:
+                continue
+            datum = line.split(',')
+            dataSet.append(datum)
+            
+    return dataSet
+        
+        
 
 def main():
-    readingFiles()
-    
+    #readingFiles()
+    fileName = "../data/iris.data"
+    irisData = readFile(fileName)
+    print(irisData)
     
 if __name__ == '__main__':
     main()
