@@ -131,10 +131,35 @@ def getSoybean():
     
     return (data, labels)
 
+def getBreastCancer():
+    ''' Processes the Breast Cancer data, returning a tuple of 2 lists: ([data],[labels]),
+    where the data has been turned into lists of numerical discretized data and 
+    class labels are strings.  Data with missing values are omitted from final dataset.
+    '''
+    cancer = readFile("../data/breast-cancer-wisconsin.data")
+    data = list()
+    labels = list()
+    
+    # Breast Cancer has 11 attributes, the first being an ID and the last being the Class
+    for item in cancer:
+        # Check for missing feature, ignore data instance if '?' exists
+        omit = False
+        for feature in item:
+            if feature == '?':
+                omit = True
+                break
+        if not omit:    
+            data.append([int(item[1]), int(item[2]), int(item[3]), int(item[4]), int(item[5]), int(item[6]), int(item[7]), int(item[8]), int(item[9])])
+            labels.append(item[10])
+    
+    return (data, labels)
+
 def main():
-    irisData = getSoybean()
+    irisData = getBreastCancer()
     print(irisData[0])
     print(irisData[1])
+    print(len(irisData[0]))
+    print(len(irisData[1]))
     
 if __name__ == '__main__':
     main()
