@@ -10,6 +10,7 @@ Group 3
 '''
 
 import os
+import random
 
 
 def readingFiles():
@@ -76,6 +77,78 @@ def discretize(data, numBins):
                     break
                 
     return data
+
+def imputeVote(party, feature):
+    ''' Returns a boolean number representing vote data based on the greatest likelihood
+    for that feature given the party (class label).  Uses domain knowledge from the metadata
+    to determine this value.
+    '''
+    if party == 'democrat':
+        if feature == 1:
+            return 1
+        elif feature == 2:
+            return random.choice([0,1])
+        elif feature == 3:
+            return 1
+        elif feature == 4:
+            return 0
+        elif feature == 5:
+            return 0
+        elif feature == 6:
+            return 0
+        elif feature == 7:
+            return 1
+        elif feature == 8:
+            return 1
+        elif feature == 9:
+            return 1
+        elif feature == 10:
+            return 0
+        elif feature == 11:
+            return 1
+        elif feature == 12:
+            return 0
+        elif feature == 13:
+            return 0
+        elif feature == 14:
+            return 0
+        elif feature == 15:
+            return 1
+        elif feature == 16:
+            return 1
+    else:
+        if feature == 1:
+            return 0
+        elif feature == 2:
+            return random.choice([0,1])
+        elif feature == 3:
+            return 0
+        elif feature == 4:
+            return 1
+        elif feature == 5:
+            return 1
+        elif feature == 6:
+            return 1
+        elif feature == 7:
+            return 0
+        elif feature == 8:
+            return 0
+        elif feature == 9:
+            return 0
+        elif feature == 10:
+            return 1
+        elif feature == 11:
+            return 0
+        elif feature == 12:
+            return 1
+        elif feature == 13:
+            return 1
+        elif feature == 14:
+            return 1
+        elif feature == 15:
+            return 0
+        elif feature == 16:
+            return 1
             
 def getIris():
     ''' Processes the Iris data, returning a tuple of 2 lists: ([data],[labels]),
@@ -154,8 +227,35 @@ def getBreastCancer():
     
     return (data, labels)
 
+def getVote():
+    ''' Processes the Vote data, returning a tuple of 2 lists: ([data],[labels]),
+    where the data has been turned into lists of numerical boolean data and 
+    class labels are strings. Missing values are imputed to the most likely boolean
+    value given the class
+    '''
+    vote = readFile("../data/house-votes-84.data")
+    data = list()
+    labels = list()
+    
+    # Vote has 17 attributes,  the first being the Class
+    for item in vote:
+        newData = list()
+        for i in range(1, len(item)):
+            # Encode data as 'y' -> 1, 'n'-> 0
+            if item[i] == 'y':
+                newData.append(1)
+            elif item[i] == 'n':
+                newData.append(0)
+            else:
+                # Impute missing values based on class likelihood
+                newData.append(imputeVote(item[0],i))
+        data.append(newData)
+        labels.append(item[0])
+    
+    return (data, labels)
+
 def main():
-    irisData = getBreastCancer()
+    irisData = getVote()
     print(irisData[0])
     print(irisData[1])
     print(len(irisData[0]))
