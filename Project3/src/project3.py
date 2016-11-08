@@ -112,8 +112,27 @@ def getGlass():
     
     return (data, labels)
 
+def getSoybean():
+    ''' Processes the Soybean data, returning a tuple of 2 lists: ([data],[labels]),
+    where the data has been turned into lists of numerical discretized data and 
+    class labels are strings 
+    '''
+    soybean = readFile("../data/soybean-small.data")
+    data = list()
+    labels = list()
+    
+    # Soybeans has 36 attributes,  the last being the Class
+    for item in soybean:
+        newData = list()
+        for i in range(len(item)-1):
+            newData.append(int(item[i]))
+        data.append(newData)
+        labels.append(item[-1])
+    
+    return (data, labels)
+
 def main():
-    irisData = getGlass()
+    irisData = getSoybean()
     print(irisData[0])
     print(irisData[1])
     
