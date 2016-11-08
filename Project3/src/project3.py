@@ -71,14 +71,12 @@ def discretize(data, numBins):
             feat = feat - featMin 
             # Check each bin to see if feature falls within
             for k in range(1, numBins+1):
-                if feat - (k * binWidth) < 0:
+                if feat - (k * binWidth) <= 0:
                     data[j][i] = k
                     break
                 
-    print(data)
+    return data
             
-        
-
 def getIris():
     ''' Processes the Iris data, returning a tuple of 2 lists: ([data],[labels]),
     where the data has been turned into lists of numerical discretized data and 
@@ -95,11 +93,29 @@ def getIris():
     discretize(data, 10)
     
     return (data, labels)
-        
+
+def getGlass():
+    ''' Processes the Glass data, returning a tuple of 2 lists: ([data],[labels]),
+    where the data has been turned into lists of numerical discretized data and 
+    class labels are strings 
+    '''
+    glass = readFile("../data/glass.data")
+    data = list()
+    labels = list()
+    
+    # Glass has 11 attributes, the first being an ID and the last being the Class
+    for item in glass:
+        data.append([float(item[1]), float(item[2]), float(item[3]), float(item[4]), float(item[5]), float(item[6]), float(item[7]), float(item[8]), float(item[9])])
+        labels.append(item[10])
+    
+    discretize(data, 10)
+    
+    return (data, labels)
 
 def main():
-    irisData = getIris()
-    #print(irisData)
+    irisData = getGlass()
+    print(irisData[0])
+    print(irisData[1])
     
 if __name__ == '__main__':
     main()
