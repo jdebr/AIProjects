@@ -11,6 +11,7 @@ Group 3
 
 import os
 import random
+import math
 
 
 def readingFiles():
@@ -254,12 +255,39 @@ def getVote():
     
     return (data, labels)
 
+def calculateEntropy(dataSet, labels):
+    ''' Returns the calculation of the entropy for a dataSet as the sum
+    of the probability of each class times the log probability of that class
+    '''
+    # Count numbers of each class and total number of classes
+    classCounts = list()
+    classIndex = 0
+    localCount = 0
+    currentLabel = labels[0]
+    for label in labels:
+        # Count instances of each class
+        if label == currentLabel:
+            localCount += 1
+        # Count total number of classes
+        else:
+            classCounts.append(localCount)
+            localCount = 1
+            currentLabel = label
+    # Append final localcount
+    classCounts.append(localCount)
+    
+    # Entropy Calculation
+    entropy = 0.0
+    for i in range(len(classCounts)):
+        pClass = classCounts[i]/len(dataSet)
+        entropy += (pClass * math.log2(pClass))
+    
+    return -entropy
+
 def main():
-    irisData = getVote()
-    print(irisData[0])
-    print(irisData[1])
-    print(len(irisData[0]))
-    print(len(irisData[1]))
+    irisData = getIris()
+    entropy = calculateEntropy(irisData[0], irisData[1])
+    print("Entropy: " + str(entropy))
     
 if __name__ == '__main__':
     main()
