@@ -284,10 +284,46 @@ def calculateEntropy(dataSet, labels):
     
     return -entropy
 
+def calculateGain(feature, dataSet, labels):
+    ''' Calculate the information gain as the difference in entropy from before
+    to after the dataset is split on the attribute feature
+    '''
+    entropy = calculateEntropy(dataSet, labels)
+    newEntropy = 0.0
+    
+    # Count number of splits in the data for feature
+    featValues = set()
+    for data in dataSet:
+        featValues.add(data[feature])
+    #print("Num Splits: " + str(len(featValues)))
+        
+    # For each value feature can take on measure entropy of that subset
+    for value in featValues:
+        subData = list()
+        subLabels = list()
+        # Get subset
+        for i in range(len(dataSet)):
+            if dataSet[i][feature] == value:
+                subData.append(dataSet[i])
+                subLabels.append(labels[i])
+        #print("Subdata: " + str(subData))
+        #print("Sublabels: " + str(subLabels))
+        # Get subEntropy, multiply by probability, and add to newEntropy
+        subEntropy = calculateEntropy(subData, subLabels)
+        p = float(len(subData))/float(len(dataSet))
+        newEntropy += (subEntropy * p)
+        #print("Subentropy: " + str(subEntropy))
+        #print("New Entropy: " + str(newEntropy))
+        
+    # Calculate gain
+    gain = entropy - newEntropy
+    return gain      
+    
+
 def main():
     irisData = getIris()
-    entropy = calculateEntropy(irisData[0], irisData[1])
-    print("Entropy: " + str(entropy))
+    gain = calculateGain(2,irisData[0], irisData[1])
+    print("gain: " + str(gain))
     
 if __name__ == '__main__':
     main()
