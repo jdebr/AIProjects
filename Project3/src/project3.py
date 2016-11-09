@@ -12,6 +12,7 @@ Group 3
 import os
 import random
 import math
+import TreeNode
 
 
 def readingFiles():
@@ -261,11 +262,10 @@ def calculateEntropy(dataSet, labels):
     '''
     # Count numbers of each class and total number of classes
     classCounts = list()
-    classIndex = 0
     localCount = 0
     currentLabel = labels[0]
     for label in labels:
-        # Count instances of each class
+        # Count instances of each class, assumes class labels are grouped
         if label == currentLabel:
             localCount += 1
         # Count total number of classes
@@ -279,19 +279,19 @@ def calculateEntropy(dataSet, labels):
     # Entropy Calculation
     entropy = 0.0
     for i in range(len(classCounts)):
-        pClass = classCounts[i]/len(dataSet)
+        pClass = float(classCounts[i])/len(dataSet)
         entropy += (pClass * math.log2(pClass))
     
     return -entropy
 
 def calculateGain(feature, dataSet, labels):
     ''' Calculate the information gain as the difference in entropy from before
-    to after the dataset is split on the attribute feature
+    to after the dataset is split on feature
     '''
     entropy = calculateEntropy(dataSet, labels)
     newEntropy = 0.0
     
-    # Count number of splits in the data for feature
+    # Collect all possible values for feature
     featValues = set()
     for data in dataSet:
         featValues.add(data[feature])
