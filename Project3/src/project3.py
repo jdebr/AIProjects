@@ -317,7 +317,28 @@ def calculateGain(feature, dataSet, labels):
         
     # Calculate gain
     gain = entropy - newEntropy
-    return gain      
+    return gain
+
+'''
+Naive Bayes 
+'''
+
+def classSeperation(dataValues):
+    classDictionary = {}
+    #print(len(dataValues))
+    tempSet = dataValues[-1]
+    #print(tempSet)
+    #print(dataValues[0][1])
+    for value in range(len(dataValues[0])):
+        #print(dataValues[0][value])
+        if (tempSet[value] not in classDictionary):
+            #print(classDictionary)
+            classDictionary[tempSet[value]] = [] 
+        classDictionary[tempSet[value]].append(dataValues[0][value])
+
+    #print(len(classDictionary))
+    print(classDictionary)
+    #attributeCount(classDictionary)
     
 
 def main():
