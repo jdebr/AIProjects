@@ -322,14 +322,35 @@ def calculateGainRatio(feature, dataSet, labels):
         
     # Calculate gain
     gain = entropy - expectedEntropy
+    print("Gain: " + str(gain))
     print("Expected Entropy: " + str(expectedEntropy))
-    print("gain: " + str(gain))
     print("Intrinsic Value: " + str(-intrinsicValue))
     
     # Calculate gain ratio
     gainRatio = (gain/-intrinsicValue)   
     print("Gain Ratio: " + str(gainRatio))
-    return gainRatio    
+    return gainRatio
+
+'''
+Naive Bayes 
+'''
+
+def classSeperation(dataValues):
+    classDictionary = {}
+    #print(len(dataValues))
+    tempSet = dataValues[-1]
+    #print(tempSet)
+    #print(dataValues[0][1])
+    for value in range(len(dataValues[0])):
+        #print(dataValues[0][value])
+        if (tempSet[value] not in classDictionary):
+            #print(classDictionary)
+            classDictionary[tempSet[value]] = [] 
+        classDictionary[tempSet[value]].append(dataValues[0][value])
+
+    #print(len(classDictionary))
+    print(classDictionary)
+    #attributeCount(classDictionary)
     
 
 def main():
