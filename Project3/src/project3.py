@@ -350,13 +350,54 @@ def classSeperation(dataValues):
 
     #print(len(classDictionary))
     print(classDictionary)
-    #attributeCount(classDictionary)
-    
+    attributeCount(classDictionary)
+    '''
+    #Testing
+    for key in classDictionary:
+        print(key)
+        print(len(classDictionary[key]))
+    '''    
+ 
+'''
+Counting and saving stuff => {0(class):{0(index):{1(count for bin1),2(count for bin2),.....}, 1(index):{..}..}} 
+'''   
+def attributeCount(classDictionary):
+    storeCount = {}
+    count = 0
+    for key , value in classDictionary.items():
+        #Testing how values are being printed
+        #print(value)
+        for num in range(len(value)):          
+            for subValue in range(len(value[num])):
+                if(count > 8):
+                    count = 0
+                #Count Variable Testing
+                #print(subValue)
+                #Testing The individual value
+                #print(value[num][subValue])
+                if(key not in storeCount):
+                    storeCount[key] = {}
+                if(count not in storeCount[key]):
+                    storeCount[key][count] = {}
+                #if (value[num][subValue] not in storeCount[key][subValue]):
+                if (value[num][subValue] not in storeCount[key][count]):
+                    storeCount[key][count][value[num][subValue]] = 1
+                else:
+                    x = storeCount[key][count][value[num][subValue]]
+                    x = x + 1
+                    storeCount[key][count][value[num][subValue]] = x
+                count +=1
+    print(storeCount)    
 
 def main():
     irisData = getIris()
     gain = calculateGainRatio(3,irisData[0], irisData[1])
-    
+    '''
+    #This is the block which i used to call Naive Bayes
+    dataValues = getGlass()
+    print(dataValues)
+    classSeperation(dataValues)
+    '''
     
 if __name__ == '__main__':
     main()
