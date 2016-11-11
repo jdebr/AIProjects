@@ -80,6 +80,7 @@ def discretize(data, numBins):
                 
     return data
 
+# I WILL REMOVE THIS PER DESIGN DOCUMENT FEEDBACK...joe
 def imputeVote(party, feature):
     ''' Returns a boolean number representing vote data based on the greatest likelihood
     for that feature given the party (class label).  Uses domain knowledge from the metadata
@@ -284,12 +285,14 @@ def calculateEntropy(dataSet, labels):
     
     return -entropy
 
-def calculateGain(feature, dataSet, labels):
+def calculateGainRatio(feature, dataSet, labels):
     ''' Calculate the information gain as the difference in entropy from before
-    to after the dataset is split on feature
+    to after the dataset is split on feature, calculate the intrinsic value of that feature,
+    then return the Gain Ratio as G/IV
     '''
     entropy = calculateEntropy(dataSet, labels)
-    newEntropy = 0.0
+    expectedEntropy = 0.0
+    intrinsicValue = 0.0
     
     # Collect all possible values for feature
     featValues = set()
@@ -301,29 +304,38 @@ def calculateGain(feature, dataSet, labels):
     for value in featValues:
         subData = list()
         subLabels = list()
-        # Get subset
+        # Get subset of data for that value
         for i in range(len(dataSet)):
             if dataSet[i][feature] == value:
                 subData.append(dataSet[i])
                 subLabels.append(labels[i])
         #print("Subdata: " + str(subData))
         #print("Sublabels: " + str(subLabels))
+        
         # Get subEntropy, multiply by probability, and add to newEntropy
         subEntropy = calculateEntropy(subData, subLabels)
         p = float(len(subData))/float(len(dataSet))
-        newEntropy += (subEntropy * p)
+        expectedEntropy += (subEntropy * p)
+        intrinsicValue += (p * math.log2(p))
         #print("Subentropy: " + str(subEntropy))
-        #print("New Entropy: " + str(newEntropy))
+        
         
     # Calculate gain
-    gain = entropy - newEntropy
-    return gain      
+    gain = entropy - expectedEntropy
+    print("Expected Entropy: " + str(expectedEntropy))
+    print("gain: " + str(gain))
+    print("Intrinsic Value: " + str(-intrinsicValue))
+    
+    # Calculate gain ratio
+    gainRatio = (gain/-intrinsicValue)   
+    print("Gain Ratio: " + str(gainRatio))
+    return gainRatio    
     
 
 def main():
     irisData = getIris()
-    gain = calculateGain(2,irisData[0], irisData[1])
-    print("gain: " + str(gain))
+    gain = calculateGainRatio(3,irisData[0], irisData[1])
+    
     
 if __name__ == '__main__':
     main()
