@@ -363,14 +363,15 @@ Counting and saving stuff => {0(class):{0(index):{1(count for bin1),2(count for 
 '''   
 def attributeCount(classDictionary):
     storeCount = {}
-    count = 0
+    count = 1
     for key , value in classDictionary.items():
         #Testing how values are being printed
         #print(value)
         for num in range(len(value)):          
             for subValue in range(len(value[num])):
-                if(count > 8):
-                    count = 0
+                
+                if(count > len(value[num])):
+                    count = 1
                 #Count Variable Testing
                 #print(subValue)
                 #Testing The individual value
