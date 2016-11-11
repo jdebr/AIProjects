@@ -388,7 +388,51 @@ def attributeCount(classDictionary):
                     x = x + 1
                     storeCount[key][count][value[num][subValue]] = x
                 count +=1
-    print(storeCount)    
+    print(storeCount)
+    priorProbabilityCalculation(storeCount)   
+       
+def priorProbabilityCalculation(storeCount):
+    totalClassValue = {}
+    classProbabilityValue = {}
+    '''
+    These loops are used to get the sum of all the values of class
+    '''
+    for key, value in storeCount.items():
+        print("Key is " + str(key))
+        
+        for secondaryKey, secondaryValue in value.items():
+            #print(secondaryValue)
+            count = 0
+            for finalKey in secondaryValue.items():
+                #print(finalKey)
+                #print(finalKey[0])
+                count += finalKey[1]
+            if(key not in totalClassValue):
+                totalClassValue[key] = count
+
+    print("Class Probability " + str(totalClassValue))
+    
+    '''
+    to calculate total of training data
+    '''
+    
+    total = sum(totalClassValue.values())
+    
+    '''
+    Calulation of priori probability
+    currently it is doing with whole class but it will be done on class training data divided by
+    total training data
+    '''
+    for key, value in totalClassValue.items():
+        if(key not in classProbabilityValue):
+                x = value / total
+                classProbabilityValue[key] = x
+                
+    print("Prior Probability is " + str(classProbabilityValue))
+    
+    '''
+    Calculation of conditional probability
+    '''   
 
 def main():
     irisData = getIris()
