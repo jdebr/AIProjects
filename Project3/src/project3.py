@@ -524,9 +524,30 @@ def priorProbabilityCalculation(storeCount):
                 
     print("Prior Probability is " + str(classProbabilityValue))
     
-    '''
+    '''     
     Calculation of conditional probability
-    '''   
+    In this block using prior and conditional probability we will calculate Posterior Probability
+    Calculate particular bin value count of each class divided by total bin counts
+    '''
+    print("--------------------------")
+    conditionalProbabilityValue = {}
+    for key, value in storeCount.items():
+        #print(key)
+        for secondaryKey, secondaryValue in value.items():
+            print(secondaryKey)
+            for lastKey in secondaryValue.items():
+                #print(sum(lastKey.values()))
+                print(lastKey)
+                for subKey, subValue in totalClassValue.items():
+                    if(key not in conditionalProbabilityValue):
+                        conditionalProbabilityValue[key] = {}
+                    if(secondaryKey not in conditionalProbabilityValue[key]):
+                        conditionalProbabilityValue[key][secondaryKey] = {}
+                    if (subKey == key): 
+                        conditionalProbabilityValue[key][secondaryKey][lastKey[0]] = lastKey[1]/subValue
+                        
+    
+    print("conditional probability => " + str(conditionalProbabilityValue))
 
 def experiment_ID3():
     iris = getIris()
