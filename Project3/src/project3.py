@@ -322,14 +322,108 @@ def calculateGainRatio(feature, dataSet, labels):
         
     # Calculate gain
     gain = entropy - expectedEntropy
-    print("Gain: " + str(gain))
-    print("Expected Entropy: " + str(expectedEntropy))
-    print("Intrinsic Value: " + str(-intrinsicValue))
+    #print("Gain: " + str(gain))
+    #print("Expected Entropy: " + str(expectedEntropy))
+    #print("Intrinsic Value: " + str(-intrinsicValue))
     
-    # Calculate gain ratio
-    gainRatio = (gain/-intrinsicValue)   
-    print("Gain Ratio: " + str(gainRatio))
-    return gainRatio
+    # Calculate gain ratio, watch out for divide by zero!
+    if int(intrinsicValue) == 0:
+        return gain
+    else:
+        return (gain/-intrinsicValue)
+
+def run_ID3(trainData, trainLabels, testData, testLabels):
+    ''' Run the ID3 algorithm, building a decision tree using the trainData and trainLabels
+    and then testing the tree using the testData and testLabels
+    '''
+    # Build initial set of feature indices for creating decision tree
+    featureIndices = list()
+    for i in range(len(trainData[0])):
+        featureIndices.append(i)
+        
+    # Build decision tree
+    ID3 = build_ID3(trainData, trainLabels, featureIndices)
+    
+    # Test decision tree using testData, return classification accuracy
+    total = float(len(testData))
+    numCorrect = 0
+    for i in range(len(testData)):
+        prediction = ID3.test(testData[i])
+        if testLabels[i] == prediction:
+            numCorrect += 1
+        #print("ID3 Prediction: " + prediction)
+        #print("Actual Class: " + testLabels[i])
+            
+    accuracy = numCorrect/total
+    print("Number correctly classified: " + str(numCorrect))
+    print("ID3 Accuracy: " + str(accuracy))
+
+def build_ID3(trainData, trainLabels, features):
+    ''' Build a node of the decision tree for ID3 by choosing the attribute from features that
+    results in the highest gain ratio when splitting the trainData and creating child nodes for 
+    all possible values of that attribute.  If features is empty, return the majority label of the 
+    trainLabels.  If all trainLabels are the same, return that label.
+    '''
+    root = TreeNode.TreeNode()
+    
+    # If all trainLabels are the same return the node with that label
+    nodeLabel = trainLabels[0]
+    allSame = True
+    for label in trainLabels:
+        if label != nodeLabel:
+            allSame = False
+            break
+    if allSame:
+        root.setLabel(nodeLabel)
+        return root
+    
+    # If no features remain for testing then return node with label of the majority class label
+    if not features:
+        majorityLabel = trainLabels[0]
+        currentLabel = trainLabels[0]
+        majorityCount = 1
+        currentCount = 0
+        for label in trainLabels:
+            if label == currentLabel:
+                currentCount += 1
+            else:
+                if currentCount > majorityCount:
+                    majorityLabel = currentLabel
+                    majorityCount = currentCount
+                currentLabel = label 
+                currentCount = 1
+        root.setLabel(majorityLabel)
+        return root
+    
+    # Otherwise find feature with highest gain ratio and split dataset by creating children nodes
+    bestFeature = features[0]
+    bestGR = calculateGainRatio(bestFeature, trainData, trainLabels)
+    for feature in features:
+        currentGR = calculateGainRatio(feature, trainData, trainLabels)
+        if currentGR > bestGR:
+            bestFeature = feature
+            bestGR = currentGR
+    root.setFeature(bestFeature)
+    # Find possible values of best feature for splitting dataset
+    featValues = set()
+    for data in trainData:
+        featValues.add(data[bestFeature])
+    for value in featValues:
+        # Get subset of dataset and labels with that feature value and create a child node using that subset
+        subData = list()
+        subLabels = list()
+        subFeatures = features.copy()
+        for i in range(len(trainData)):
+            if trainData[i][bestFeature] == value:
+                subData.append(trainData[i])
+                subLabels.append(trainLabels[i])
+        subFeatures.remove(bestFeature)
+        child = build_ID3(subData, subLabels, subFeatures)
+        root.addChild(child, value)
+    return root
+        
+
+
 
 '''
 Naive Bayes 
@@ -434,9 +528,20 @@ def priorProbabilityCalculation(storeCount):
     Calculation of conditional probability
     '''   
 
+def experiment_ID3():
+    iris = getIris()
+    dataSet = iris[0]
+    labels = iris[1]
+    # Contrived experiment, divide test set evenly amongst examples
+    trainData = dataSet[::2]
+    trainLabels = labels[::2]
+    testData = dataSet[1::2]
+    testLabels = labels[1::2]
+    run_ID3(trainData, trainLabels, testData, testLabels)
+    
+    
 def main():
-    irisData = getIris()
-    gain = calculateGainRatio(3,irisData[0], irisData[1])
+    experiment_ID3()
     '''
     #This is the block which i used to call Naive Bayes
     dataValues = getGlass()
