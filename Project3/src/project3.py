@@ -261,26 +261,21 @@ def calculateEntropy(dataSet, labels):
     ''' Returns the calculation of the entropy for a dataSet as the sum
     of the probability of each class times the log probability of that class
     '''
-    # Count numbers of each class and total number of classes
-    classCounts = list()
-    localCount = 0
-    currentLabel = labels[0]
+    # Count numbers of each class and total number of classes    
+    classCounts = {}
     for label in labels:
-        # Count instances of each class, assumes class labels are grouped
-        if label == currentLabel:
-            localCount += 1
+        # Count instances of each class
+        if label in classCounts:
+            classCounts[label] += 1
         # Count total number of classes
         else:
-            classCounts.append(localCount)
-            localCount = 1
-            currentLabel = label
-    # Append final localcount
-    classCounts.append(localCount)
+            classCounts[label] = 1
+    #print(classCounts)
     
     # Entropy Calculation
     entropy = 0.0
-    for i in range(len(classCounts)):
-        pClass = float(classCounts[i])/len(dataSet)
+    for count in classCounts.values():
+        pClass = float(count)/len(dataSet)
         entropy += (pClass * math.log2(pClass))
     
     return -entropy
@@ -420,9 +415,29 @@ def build_ID3(trainData, trainLabels, features):
         subFeatures.remove(bestFeature)
         child = build_ID3(subData, subLabels, subFeatures)
         root.addChild(child, value)
+    # Set a pruning label as the majority label for classes at this point in the tree
+    
     return root
-        
 
+def prune(tree, validationData, validationLabels):
+    ''' Use a validation set to test the accuracy of the tree before and after reduced error pruning,
+    which is done by iterating through internal tree nodes and setting their labels to be the majority
+    label of their children.  If a pruned tree performs better than an unpruned tree, keep the pruned
+    tree.
+    '''
+    # Get unpruned acccuracy
+    total = float(len(validationData))
+    numCorrect = 0
+    for i in range(len(validationData)):
+        prediction = tree.test(validationData[i])
+        if validationLabels[i] == prediction:
+            numCorrect += 1
+            
+    unpruned_accuracy = numCorrect/total
+    
+    # Begin pruning
+    
+    
 
 
 '''
@@ -577,7 +592,7 @@ def priorProbabilityCalculation(storeCount):
     print("Posterior Probability is " + str(tempPosterior))
 
 def experiment_ID3():
-    iris = getIris()
+    iris = getBreastCancer()
     dataSet = iris[0]
     labels = iris[1]
     # Contrived experiment, divide test set evenly amongst examples
@@ -589,6 +604,8 @@ def experiment_ID3():
     
     
 def main():
+    #vote = getBreastCancer()
+    #calculateEntropy(vote[0], vote[1])
     experiment_ID3()
     '''
     #This is the block which i used to call Naive Bayes

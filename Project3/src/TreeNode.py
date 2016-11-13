@@ -8,7 +8,6 @@ Group 3
 @author: Shriyansh Kothari
 @author: Sara Ounissi
 '''
-from dill.pointers import children
 class TreeNode(object):
     '''
     A custom node for a Tree Data structure required for Project 3.
@@ -21,6 +20,7 @@ class TreeNode(object):
         self.featureValues = list()
         self.feature = None
         self.label = None
+        self.prune_label = None
         
     def test(self, example):
         ''' Takes an example data instance and uses the decision tree node to return a class label
@@ -44,5 +44,8 @@ class TreeNode(object):
     def setFeature(self, newFeature):
         ''' Sets index on which test will operate '''
         self.feature = newFeature
+        
+    def setPruneLabel(self,newLabel):
+        self.prune_label = newLabel
         
         
