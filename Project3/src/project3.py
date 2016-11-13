@@ -548,6 +548,33 @@ def priorProbabilityCalculation(storeCount):
                         
     
     print("conditional probability => " + str(conditionalProbabilityValue))
+    
+    '''
+    Now to calculate posterior probability
+    '''
+    tempPosterior = {}
+    posteriorProbability = totalClassValue
+    print("Posterior Probability is " + str(posteriorProbability))
+    for conditionalKey, conditionalValue in conditionalProbabilityValue.items():
+        #print(conditionalValue)
+        #print("Change Key")
+        for subKey, subValue in conditionalValue.items():
+            print(subValue)
+            for finalValue in subValue.items():
+                #print(finalValue[0])
+                #print(finalValue[1])
+                if(conditionalKey not in tempPosterior):
+                    tempPosterior[conditionalKey] = {}
+                if(subKey not in tempPosterior[conditionalKey]):
+                    tempPosterior[conditionalKey][subKey] = {}
+                if(finalValue[0] not in tempPosterior[conditionalKey][subKey]):
+                    tempPosterior[conditionalKey][subKey][finalValue[0]] = []
+                    for posteriorKey, posteriorValue in posteriorProbability.items():
+                        if(posteriorKey in tempPosterior):
+                            tempPosterior[conditionalKey][subKey][finalValue[0]] = finalValue[1]*posteriorValue
+                        
+                    
+    print("Posterior Probability is " + str(tempPosterior))
 
 def experiment_ID3():
     iris = getIris()
