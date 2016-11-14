@@ -497,8 +497,6 @@ def classSeperation(trainData, trainLabels, testData, testLabels):
         prediction = testingNaiveBayes(testData[i])
         if testLabels[i] == prediction:
             numCorrect += 1
-        #print("ID3 Prediction: " + prediction)
-        #print("Actual Class: " + testLabels[i])
             
     accuracy = numCorrect/totalTest
     print("Number correctly classified: " + str(numCorrect))
@@ -586,35 +584,27 @@ def priorProbabilityCalculation(storeCount):
 
 def testingNaiveBayes(testData): 
     testIndex = testData
-    tempPosterior = 1
+    tempPosterior = 0 
     posteriorProbability = classProbabilityValue
     predictionDictionary = {}
-    counterTest = 0
+    #Before Class Values
     for conditionalKey, conditionalValue in conditionalProbabilityValue.items():
-        tempPosterior = 1       
+        tempPosterior = 0      
         for subKey, subValue in conditionalValue.items():
             for finalValue in subValue.items():
                 if(testIndex[subKey-1] == finalValue[0]):
-                    tempPosterior = (tempPosterior * finalValue[1])
+                    tempPosterior = tempPosterior + math.log(finalValue[1])
                     break
-                else:
-                    tempPosterior = tempPosterior
         if(conditionalKey not in predictionDictionary):
             predictionDictionary[conditionalKey] = tempPosterior
-    #Before Class Values            
+    #After Class Values            
     for posteriorKey, posteriorValue in posteriorProbability.items():
         for predictionKey, predictionValue in predictionDictionary.items():
             if (posteriorKey == predictionKey):
-                predictionValue = predictionValue * posteriorValue
+                predictionValue = predictionValue + math.log(posteriorValue)
                 predictionDictionary[posteriorKey] = predictionValue
-    #After Class Values
-    tempHighValue = 0
-    for highKey, highValue in predictionDictionary.items():
-        #tempHighValue = highValue
-        if(highValue > tempHighValue):
-            tempHighValue = highValue
-            keyToReturn = highKey
-    return keyToReturn
+    
+    return (max(predictionDictionary, key=lambda i:predictionDictionary[i]))
                    
                     
 def experiment_NaiveBayes():
