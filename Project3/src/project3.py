@@ -13,6 +13,7 @@ import os
 import random
 import math
 import TreeNode
+from nltk.chunk.util import accuracy
 
 
 def readingFiles():
@@ -327,7 +328,7 @@ def calculateGainRatio(feature, dataSet, labels):
     else:
         return (gain/-intrinsicValue)
 
-def run_ID3(trainData, trainLabels, testData, testLabels):
+def run_ID3(trainData, trainLabels, testData, testLabels, validationData, validationLabels):
     ''' Run the ID3 algorithm, building a decision tree using the trainData and trainLabels
     and then testing the tree using the testData and testLabels
     '''
@@ -338,6 +339,9 @@ def run_ID3(trainData, trainLabels, testData, testLabels):
         
     # Build decision tree
     ID3 = build_ID3(trainData, trainLabels, featureIndices)
+    
+    # Prune 
+    prune(ID3, ID3, validationData, validationLabels)
     
     # Test decision tree using testData, return classification accuracy
     total = float(len(testData))
@@ -416,29 +420,53 @@ def build_ID3(trainData, trainLabels, features):
         child = build_ID3(subData, subLabels, subFeatures)
         root.addChild(child, value)
     # Set a pruning label as the majority label for classes at this point in the tree
-    
+    classCounts = {}
+    for label in trainLabels:
+        # Count instances of each class
+        if label in classCounts:
+            classCounts[label] += 1
+        # Count total number of classes
+        else:
+            classCounts[label] = 1
+    root.setPruneLabel(max(classCounts))
     return root
-
-def prune(tree, validationData, validationLabels):
+        
+def prune(tree, node, data, labels):
     ''' Use a validation set to test the accuracy of the tree before and after reduced error pruning,
     which is done by iterating through internal tree nodes and setting their labels to be the majority
     label of their children.  If a pruned tree performs better than an unpruned tree, keep the pruned
     tree.
     '''
-    # Get unpruned acccuracy
-    total = float(len(validationData))
+    # Base case
+    if node.label:
+        return
+    # Start with trying to prune child nodes
+    for child in node.children:
+        prune(tree, child, data, labels)
+    # Get unpruned accuracy
+    total = float(len(data))
     numCorrect = 0
-    for i in range(len(validationData)):
-        prediction = tree.test(validationData[i])
-        if validationLabels[i] == prediction:
+    for i in range(len(data)):
+        prediction = tree.test(data[i])
+        if labels[i] == prediction:
             numCorrect += 1
-            
-    unpruned_accuracy = numCorrect/total
-    
-    # Begin pruning
-    
-    
-
+    accuracy = numCorrect/total
+    # Prune self by setting label to majority class from training data and test
+    node.setLabel(node.prune_label)
+    numCorrect = 0
+    for i in range(len(data)):
+        prediction = tree.test(data[i])
+        if labels[i] == prediction:
+            numCorrect += 1      
+    new_accuracy = numCorrect/total
+    print("Pruned accuracy: " + str(new_accuracy))
+    # Set label back to none if this results in decreased accuracy
+    if new_accuracy < accuracy:
+        node.label = None
+    # Otherwise keep the pruned tree and set the best accuracy
+    else:
+        print("Node pruned!")
+    return
 
 '''
 Naive Bayes 
@@ -592,20 +620,24 @@ def priorProbabilityCalculation(storeCount):
     print("Posterior Probability is " + str(tempPosterior))
 
 def experiment_ID3():
-    iris = getBreastCancer()
-    dataSet = iris[0]
-    labels = iris[1]
+    #data = getBreastCancer()
+    #data = getIris()
+    #data = getGlass()
+    #data = getSoybean()
+    data = getVote()
+    dataSet = data[0]
+    labels = data[1]
     # Contrived experiment, divide test set evenly amongst examples
-    trainData = dataSet[::2]
-    trainLabels = labels[::2]
-    testData = dataSet[1::2]
-    testLabels = labels[1::2]
-    run_ID3(trainData, trainLabels, testData, testLabels)
+    trainData = dataSet[::3]
+    trainLabels = labels[::3]
+    testData = dataSet[1::3]
+    testLabels = labels[1::3]
+    validationData = dataSet[2::3]
+    validationLabels = labels[2::3]
+    run_ID3(trainData, trainLabels, testData, testLabels, validationData, validationLabels)
     
     
 def main():
-    #vote = getBreastCancer()
-    #calculateEntropy(vote[0], vote[1])
     experiment_ID3()
     '''
     #This is the block which i used to call Naive Bayes
