@@ -491,7 +491,7 @@ def classSeperation(trainData, trainLabels, testData, testLabels):
     
     # Test Naive Bayes using testData
     totalTest = float(len(testData))
-    print(totalTest)
+    print("Print total test length " + str(totalTest))
     numCorrect = 0
     for i in range(len(testData)):
         prediction = testingNaiveBayes(testData[i])
@@ -503,94 +503,78 @@ def classSeperation(trainData, trainLabels, testData, testLabels):
     accuracy = numCorrect/totalTest
     print("Number correctly classified: " + str(numCorrect))
     print("Naive Bayes Accuracy: " + str(accuracy))
-
+    
 '''
 Counting and saving stuff => {0(class):{0(index):{1(count for bin1),2(count for bin2),.....}, 1(index):{..}..}} 
 '''   
 def attributeCount(classDictionary):
     storeCount = {}
     count = 1
+    #print(classDictionary.items())
     for key , value in classDictionary.items():
-        #Testing how values are being printed
         #print(value)
         for num in range(len(value)):          
             for subValue in range(len(value[num])):
-                
+                #print(subValue)             
                 if(count > len(value[num])):
                     count = 1
-                #Count Variable Testing
-                #print(subValue)
-                #Testing The individual value
-                #print(value[num][subValue])
                 if(key not in storeCount):
                     storeCount[key] = {}
                 if(count not in storeCount[key]):
                     storeCount[key][count] = {}
-                #if (value[num][subValue] not in storeCount[key][subValue]):
+                for i in range(1,11):
+                    '''
+                    storing every bin value with value 1 and Then after the end of this loop calculating there value
+                    Laplacian Method
+                    '''
+                    if (i not in storeCount[key][count]):
+                        storeCount[key][count][i] = 1
                 if (value[num][subValue] not in storeCount[key][count]):
                     storeCount[key][count][value[num][subValue]] = 1
                 else:
                     x = storeCount[key][count][value[num][subValue]]
                     x = x + 1
                     storeCount[key][count][value[num][subValue]] = x
-                count +=1
-    print(storeCount)
+                count +=1         
+    print("Bin count" + str(storeCount))
     priorProbabilityCalculation(storeCount)   
        
 def priorProbabilityCalculation(storeCount):
-
     '''
     These loops are used to get the sum of all the values of class
     '''
     for key, value in storeCount.items():
-        #print("Key is " + str(key))
-        
         for secondaryKey, secondaryValue in value.items():
-            #print(secondaryValue)
             count = 0
             for finalKey in secondaryValue.items():
-                #print(finalKey)
-                #print(finalKey[0])
                 count += finalKey[1]
             if(key not in totalClassValue):
                 totalClassValue[key] = count
 
     print("Class Probability " + str(totalClassValue))
-    
     '''
-    to calculate total of training data
+    To calculate total of training data
     '''
-    
-    total = sum(totalClassValue.values())
-    print(total)
-    
+    total = sum(totalClassValue.values())    
     '''
-    Calulation of priori probability
+    Calculation of priori probability
     currently it is doing with whole class but it will be done on class training data divided by
     total training data
     '''
     for key, value in totalClassValue.items():
         if(key not in classProbabilityValue):
-            #print(value)
             x = value / total
             classProbabilityValue[key] = x
                 
-    print("Prior Probability is " + str(classProbabilityValue))
-    
+    print("Prior Probability is " + str(classProbabilityValue))   
     '''     
     Calculation of conditional probability
     In this block using prior and conditional probability we will calculate Posterior Probability
     Calculate particular bin value count of each class divided by total bin counts
     '''
-    #print("--------------------------")
-    
     for key, value in storeCount.items():
-        #print(key)
         for secondaryKey, secondaryValue in value.items():
-            #print(secondaryKey)
             for lastKey in secondaryValue.items():
-                #print(sum(lastKey.values()))
-                #print(lastKey)
                 for subKey, subValue in totalClassValue.items():
                     if(key not in conditionalProbabilityValue):
                         conditionalProbabilityValue[key] = {}
@@ -598,7 +582,7 @@ def priorProbabilityCalculation(storeCount):
                         conditionalProbabilityValue[key][secondaryKey] = {}
                     if (subKey == key): 
                         conditionalProbabilityValue[key][secondaryKey][lastKey[0]] = lastKey[1]/subValue
-    print("conditional probability => " + str(conditionalProbabilityValue))
+    print("Conditional probability => " + str(conditionalProbabilityValue))
 
 def testingNaiveBayes(testData): 
     testIndex = testData
@@ -606,49 +590,42 @@ def testingNaiveBayes(testData):
     posteriorProbability = classProbabilityValue
     predictionDictionary = {}
     counterTest = 0
-
     for conditionalKey, conditionalValue in conditionalProbabilityValue.items():
         tempPosterior = 1       
-        #print(conditionalKey)
         for subKey, subValue in conditionalValue.items():
             for finalValue in subValue.items():
                 if(testIndex[subKey-1] == finalValue[0]):
-                    tempPosterior = tempPosterior * finalValue[1]
+                    tempPosterior = (tempPosterior * finalValue[1])
                     break
                 else:
-                    tempPosterior = tempPosterior 
+                    tempPosterior = tempPosterior
         if(conditionalKey not in predictionDictionary):
             predictionDictionary[conditionalKey] = tempPosterior
     #Before Class Values            
-    print(predictionDictionary) 
     for posteriorKey, posteriorValue in posteriorProbability.items():
         for predictionKey, predictionValue in predictionDictionary.items():
             if (posteriorKey == predictionKey):
                 predictionValue = predictionValue * posteriorValue
                 predictionDictionary[posteriorKey] = predictionValue
     #After Class Values
-    print(predictionDictionary)
     tempHighValue = 0
     for highKey, highValue in predictionDictionary.items():
         #tempHighValue = highValue
         if(highValue > tempHighValue):
             tempHighValue = highValue
             keyToReturn = highKey
-    print(tempHighValue)
-    print(keyToReturn)
     return keyToReturn
                    
                     
 def experiment_NaiveBayes():
-    iris = getIris()
-    dataSet = iris[0]
-    labels = iris[1]
-    # Contrived experiment, divide test set evenly amongst examples
+    glass = getGlass()
+    dataSet = glass[0]
+    labels = glass[1]
     trainData = dataSet[::2]
     trainLabels = labels[::2]
     testData = dataSet[1::2]
     testLabels = labels[1::2]
-    classSeperation(trainData, trainLabels, testData, testLabels)       
+    classSeperation(trainData, trainLabels, testData, testLabels)
 
 def experiment_ID3():
     #data = getBreastCancer()
