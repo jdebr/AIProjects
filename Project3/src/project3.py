@@ -13,7 +13,11 @@ import os
 import random
 import math
 import TreeNode
+from nltk.chunk.util import accuracy
 
+conditionalProbabilityValue = {}
+totalClassValue = {}
+classProbabilityValue = {}
 
 def readingFiles():
     
@@ -80,6 +84,7 @@ def discretize(data, numBins):
                 
     return data
 
+# I WILL REMOVE THIS PER DESIGN DOCUMENT FEEDBACK...joe
 def imputeVote(party, feature):
     ''' Returns a boolean number representing vote data based on the greatest likelihood
     for that feature given the party (class label).  Uses domain knowledge from the metadata
@@ -260,36 +265,33 @@ def calculateEntropy(dataSet, labels):
     ''' Returns the calculation of the entropy for a dataSet as the sum
     of the probability of each class times the log probability of that class
     '''
-    # Count numbers of each class and total number of classes
-    classCounts = list()
-    localCount = 0
-    currentLabel = labels[0]
+    # Count numbers of each class and total number of classes    
+    classCounts = {}
     for label in labels:
-        # Count instances of each class, assumes class labels are grouped
-        if label == currentLabel:
-            localCount += 1
+        # Count instances of each class
+        if label in classCounts:
+            classCounts[label] += 1
         # Count total number of classes
         else:
-            classCounts.append(localCount)
-            localCount = 1
-            currentLabel = label
-    # Append final localcount
-    classCounts.append(localCount)
+            classCounts[label] = 1
+    #print(classCounts)
     
     # Entropy Calculation
     entropy = 0.0
-    for i in range(len(classCounts)):
-        pClass = float(classCounts[i])/len(dataSet)
+    for count in classCounts.values():
+        pClass = float(count)/len(dataSet)
         entropy += (pClass * math.log2(pClass))
     
     return -entropy
 
-def calculateGain(feature, dataSet, labels):
+def calculateGainRatio(feature, dataSet, labels):
     ''' Calculate the information gain as the difference in entropy from before
-    to after the dataset is split on feature
+    to after the dataset is split on feature, calculate the intrinsic value of that feature,
+    then return the Gain Ratio as G/IV
     '''
     entropy = calculateEntropy(dataSet, labels)
-    newEntropy = 0.0
+    expectedEntropy = 0.0
+    intrinsicValue = 0.0
     
     # Collect all possible values for feature
     featValues = set()
@@ -301,50 +303,378 @@ def calculateGain(feature, dataSet, labels):
     for value in featValues:
         subData = list()
         subLabels = list()
-        # Get subset
+        # Get subset of data for that value
         for i in range(len(dataSet)):
             if dataSet[i][feature] == value:
                 subData.append(dataSet[i])
                 subLabels.append(labels[i])
         #print("Subdata: " + str(subData))
         #print("Sublabels: " + str(subLabels))
+        
         # Get subEntropy, multiply by probability, and add to newEntropy
         subEntropy = calculateEntropy(subData, subLabels)
         p = float(len(subData))/float(len(dataSet))
-        newEntropy += (subEntropy * p)
+        expectedEntropy += (subEntropy * p)
+        intrinsicValue += (p * math.log2(p))
         #print("Subentropy: " + str(subEntropy))
-        #print("New Entropy: " + str(newEntropy))
+        
         
     # Calculate gain
-    gain = entropy - newEntropy
-    return gain
+    gain = entropy - expectedEntropy
+    #print("Gain: " + str(gain))
+    #print("Expected Entropy: " + str(expectedEntropy))
+    #print("Intrinsic Value: " + str(-intrinsicValue))
+    
+    # Calculate gain ratio, watch out for divide by zero!
+    if int(intrinsicValue) == 0:
+        return gain
+    else:
+        return (gain/-intrinsicValue)
+
+def run_ID3(trainData, trainLabels, testData, testLabels, validationData, validationLabels):
+    ''' Run the ID3 algorithm, building a decision tree using the trainData and trainLabels
+    and then testing the tree using the testData and testLabels
+    '''
+    # Build initial set of feature indices for creating decision tree
+    featureIndices = list()
+    for i in range(len(trainData[0])):
+        featureIndices.append(i)
+        
+    # Build decision tree
+    ID3 = build_ID3(trainData, trainLabels, featureIndices)
+    
+    # Prune 
+    prune(ID3, ID3, validationData, validationLabels)
+    
+    # Test decision tree using testData, return classification accuracy
+    total = float(len(testData))
+    numCorrect = 0
+    for i in range(len(testData)):
+        prediction = ID3.test(testData[i])
+        if testLabels[i] == prediction:
+            numCorrect += 1
+        #print("ID3 Prediction: " + prediction)
+        #print("Actual Class: " + testLabels[i])
+            
+    accuracy = numCorrect/total
+    print("Number correctly classified: " + str(numCorrect))
+    print("ID3 Accuracy: " + str(accuracy))
+
+def build_ID3(trainData, trainLabels, features):
+    ''' Build a node of the decision tree for ID3 by choosing the attribute from features that
+    results in the highest gain ratio when splitting the trainData and creating child nodes for 
+    all possible values of that attribute.  If features is empty, return the majority label of the 
+    trainLabels.  If all trainLabels are the same, return that label.
+    '''
+    root = TreeNode.TreeNode()
+    
+    # If all trainLabels are the same return the node with that label
+    nodeLabel = trainLabels[0]
+    allSame = True
+    for label in trainLabels:
+        if label != nodeLabel:
+            allSame = False
+            break
+    if allSame:
+        root.setLabel(nodeLabel)
+        return root
+    
+    # If no features remain for testing then return node with label of the majority class label
+    if not features:
+        majorityLabel = trainLabels[0]
+        currentLabel = trainLabels[0]
+        majorityCount = 1
+        currentCount = 0
+        for label in trainLabels:
+            if label == currentLabel:
+                currentCount += 1
+            else:
+                if currentCount > majorityCount:
+                    majorityLabel = currentLabel
+                    majorityCount = currentCount
+                currentLabel = label 
+                currentCount = 1
+        root.setLabel(majorityLabel)
+        return root
+    
+    # Otherwise find feature with highest gain ratio and split dataset by creating children nodes
+    bestFeature = features[0]
+    bestGR = calculateGainRatio(bestFeature, trainData, trainLabels)
+    for feature in features:
+        currentGR = calculateGainRatio(feature, trainData, trainLabels)
+        if currentGR > bestGR:
+            bestFeature = feature
+            bestGR = currentGR
+    root.setFeature(bestFeature)
+    # Find possible values of best feature for splitting dataset
+    featValues = set()
+    for data in trainData:
+        featValues.add(data[bestFeature])
+    for value in featValues:
+        # Get subset of dataset and labels with that feature value and create a child node using that subset
+        subData = list()
+        subLabels = list()
+        subFeatures = features.copy()
+        for i in range(len(trainData)):
+            if trainData[i][bestFeature] == value:
+                subData.append(trainData[i])
+                subLabels.append(trainLabels[i])
+        subFeatures.remove(bestFeature)
+        child = build_ID3(subData, subLabels, subFeatures)
+        root.addChild(child, value)
+    # Set a pruning label as the majority label for classes at this point in the tree
+    classCounts = {}
+    for label in trainLabels:
+        # Count instances of each class
+        if label in classCounts:
+            classCounts[label] += 1
+        # Count total number of classes
+        else:
+            classCounts[label] = 1
+    root.setPruneLabel(max(classCounts))
+    return root
+        
+def prune(tree, node, data, labels):
+    ''' Use a validation set to test the accuracy of the tree before and after reduced error pruning,
+    which is done by iterating through internal tree nodes and setting their labels to be the majority
+    label of their children.  If a pruned tree performs better than an unpruned tree, keep the pruned
+    tree.
+    '''
+    # Base case
+    if node.label:
+        return
+    # Start with trying to prune child nodes
+    for child in node.children:
+        prune(tree, child, data, labels)
+    # Get unpruned accuracy
+    total = float(len(data))
+    numCorrect = 0
+    for i in range(len(data)):
+        prediction = tree.test(data[i])
+        if labels[i] == prediction:
+            numCorrect += 1
+    accuracy = numCorrect/total
+    # Prune self by setting label to majority class from training data and test
+    node.setLabel(node.prune_label)
+    numCorrect = 0
+    for i in range(len(data)):
+        prediction = tree.test(data[i])
+        if labels[i] == prediction:
+            numCorrect += 1      
+    new_accuracy = numCorrect/total
+    print("Pruned accuracy: " + str(new_accuracy))
+    # Set label back to none if this results in decreased accuracy
+    if new_accuracy < accuracy:
+        node.label = None
+    # Otherwise keep the pruned tree and set the best accuracy
+    else:
+        print("Node pruned!")
+    return
 
 '''
 Naive Bayes 
 '''
 
-def classSeperation(dataValues):
+def classSeperation(trainData, trainLabels, testData, testLabels):
+    '''
+    In this block we join the training Labels and Data into one class dictionary
+    '''
     classDictionary = {}
-    #print(len(dataValues))
-    tempSet = dataValues[-1]
-    #print(tempSet)
-    #print(dataValues[0][1])
-    for value in range(len(dataValues[0])):
-        #print(dataValues[0][value])
-        if (tempSet[value] not in classDictionary):
-            #print(classDictionary)
-            classDictionary[tempSet[value]] = [] 
-        classDictionary[tempSet[value]].append(dataValues[0][value])
+    for value in range(len(trainData)):
+        if (trainLabels[value] not in classDictionary):
+            classDictionary[trainLabels[value]] = [] 
+        classDictionary[trainLabels[value]].append(trainData[value])
 
-    #print(len(classDictionary))
+    print("Class Dictionary after joining training labels and data")
     print(classDictionary)
-    #attributeCount(classDictionary)
+    attributeCount(classDictionary)
     
+    # Test Naive Bayes using testData
+    totalTest = float(len(testData))
+    print(totalTest)
+    numCorrect = 0
+    for i in range(len(testData)):
+        prediction = testingNaiveBayes(testData[i])
+        if testLabels[i] == prediction:
+            numCorrect += 1
+        #print("ID3 Prediction: " + prediction)
+        #print("Actual Class: " + testLabels[i])
+            
+    accuracy = numCorrect/totalTest
+    print("Number correctly classified: " + str(numCorrect))
+    print("Naive Bayes Accuracy: " + str(accuracy))
 
+'''
+Counting and saving stuff => {0(class):{0(index):{1(count for bin1),2(count for bin2),.....}, 1(index):{..}..}} 
+'''   
+def attributeCount(classDictionary):
+    storeCount = {}
+    count = 1
+    for key , value in classDictionary.items():
+        #Testing how values are being printed
+        #print(value)
+        for num in range(len(value)):          
+            for subValue in range(len(value[num])):
+                
+                if(count > len(value[num])):
+                    count = 1
+                #Count Variable Testing
+                #print(subValue)
+                #Testing The individual value
+                #print(value[num][subValue])
+                if(key not in storeCount):
+                    storeCount[key] = {}
+                if(count not in storeCount[key]):
+                    storeCount[key][count] = {}
+                #if (value[num][subValue] not in storeCount[key][subValue]):
+                if (value[num][subValue] not in storeCount[key][count]):
+                    storeCount[key][count][value[num][subValue]] = 1
+                else:
+                    x = storeCount[key][count][value[num][subValue]]
+                    x = x + 1
+                    storeCount[key][count][value[num][subValue]] = x
+                count +=1
+    print(storeCount)
+    priorProbabilityCalculation(storeCount)   
+       
+def priorProbabilityCalculation(storeCount):
+
+    '''
+    These loops are used to get the sum of all the values of class
+    '''
+    for key, value in storeCount.items():
+        #print("Key is " + str(key))
+        
+        for secondaryKey, secondaryValue in value.items():
+            #print(secondaryValue)
+            count = 0
+            for finalKey in secondaryValue.items():
+                #print(finalKey)
+                #print(finalKey[0])
+                count += finalKey[1]
+            if(key not in totalClassValue):
+                totalClassValue[key] = count
+
+    print("Class Probability " + str(totalClassValue))
+    
+    '''
+    to calculate total of training data
+    '''
+    
+    total = sum(totalClassValue.values())
+    print(total)
+    
+    '''
+    Calulation of priori probability
+    currently it is doing with whole class but it will be done on class training data divided by
+    total training data
+    '''
+    for key, value in totalClassValue.items():
+        if(key not in classProbabilityValue):
+            #print(value)
+            x = value / total
+            classProbabilityValue[key] = x
+                
+    print("Prior Probability is " + str(classProbabilityValue))
+    
+    '''     
+    Calculation of conditional probability
+    In this block using prior and conditional probability we will calculate Posterior Probability
+    Calculate particular bin value count of each class divided by total bin counts
+    '''
+    #print("--------------------------")
+    
+    for key, value in storeCount.items():
+        #print(key)
+        for secondaryKey, secondaryValue in value.items():
+            #print(secondaryKey)
+            for lastKey in secondaryValue.items():
+                #print(sum(lastKey.values()))
+                #print(lastKey)
+                for subKey, subValue in totalClassValue.items():
+                    if(key not in conditionalProbabilityValue):
+                        conditionalProbabilityValue[key] = {}
+                    if(secondaryKey not in conditionalProbabilityValue[key]):
+                        conditionalProbabilityValue[key][secondaryKey] = {}
+                    if (subKey == key): 
+                        conditionalProbabilityValue[key][secondaryKey][lastKey[0]] = lastKey[1]/subValue
+    print("conditional probability => " + str(conditionalProbabilityValue))
+
+def testingNaiveBayes(testData): 
+    testIndex = testData
+    tempPosterior = 1
+    posteriorProbability = classProbabilityValue
+    predictionDictionary = {}
+    counterTest = 0
+
+    for conditionalKey, conditionalValue in conditionalProbabilityValue.items():
+        tempPosterior = 1       
+        #print(conditionalKey)
+        for subKey, subValue in conditionalValue.items():
+            for finalValue in subValue.items():
+                if(testIndex[subKey-1] == finalValue[0]):
+                    tempPosterior = tempPosterior * finalValue[1]
+                    break
+                else:
+                    tempPosterior = tempPosterior 
+        if(conditionalKey not in predictionDictionary):
+            predictionDictionary[conditionalKey] = tempPosterior
+    #Before Class Values            
+    print(predictionDictionary) 
+    for posteriorKey, posteriorValue in posteriorProbability.items():
+        for predictionKey, predictionValue in predictionDictionary.items():
+            if (posteriorKey == predictionKey):
+                predictionValue = predictionValue * posteriorValue
+                predictionDictionary[posteriorKey] = predictionValue
+    #After Class Values
+    print(predictionDictionary)
+    tempHighValue = 0
+    for highKey, highValue in predictionDictionary.items():
+        #tempHighValue = highValue
+        if(highValue > tempHighValue):
+            tempHighValue = highValue
+            keyToReturn = highKey
+    print(tempHighValue)
+    print(keyToReturn)
+    return keyToReturn
+                   
+                    
+def experiment_NaiveBayes():
+    iris = getIris()
+    dataSet = iris[0]
+    labels = iris[1]
+    # Contrived experiment, divide test set evenly amongst examples
+    trainData = dataSet[::2]
+    trainLabels = labels[::2]
+    testData = dataSet[1::2]
+    testLabels = labels[1::2]
+    classSeperation(trainData, trainLabels, testData, testLabels)       
+
+def experiment_ID3():
+    #data = getBreastCancer()
+    #data = getIris()
+    #data = getGlass()
+    #data = getSoybean()
+    data = getVote()
+    dataSet = data[0]
+    labels = data[1]
+    # Contrived experiment, divide test set evenly amongst examples
+    trainData = dataSet[::3]
+    trainLabels = labels[::3]
+    testData = dataSet[1::3]
+    testLabels = labels[1::3]
+    validationData = dataSet[2::3]
+    validationLabels = labels[2::3]
+    run_ID3(trainData, trainLabels, testData, testLabels, validationData, validationLabels)    
+    
 def main():
-    irisData = getIris()
-    gain = calculateGain(2,irisData[0], irisData[1])
-    print("gain: " + str(gain))
+    experiment_ID3()
+    '''
+    #This is the block which i used to call Naive Bayes
+    dataValues = getGlass()
+    print(dataValues)
+    classSeperation(dataValues)
+    '''
     
 if __name__ == '__main__':
     main()
