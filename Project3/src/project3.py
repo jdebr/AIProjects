@@ -496,10 +496,7 @@ def classSeperation(trainData, trainLabels, testData, testLabels):
     for i in range(len(testData)):
         prediction = testingNaiveBayes(testData[i])
         if testLabels[i] == prediction:
-            numCorrect += 1
-        #print("ID3 Prediction: " + prediction)
-        #print("Actual Class: " + testLabels[i])
-            
+            numCorrect += 1            
     accuracy = numCorrect/totalTest
     print("Number correctly classified: " + str(numCorrect))
     print("Naive Bayes Accuracy: " + str(accuracy))
