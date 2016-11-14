@@ -594,7 +594,7 @@ def priorProbabilityCalculation(storeCount):
     
     '''
     Now to calculate posterior probability
-    '''
+    
     tempPosterior = {}
     posteriorProbability = totalClassValue
     print("Posterior Probability is " + str(posteriorProbability))
@@ -615,6 +615,41 @@ def priorProbabilityCalculation(storeCount):
                     for posteriorKey, posteriorValue in posteriorProbability.items():
                         if(posteriorKey in tempPosterior):
                             tempPosterior[conditionalKey][subKey][finalValue[0]] = finalValue[1]*posteriorValue
+                        
+                    
+    print("Posterior Probability is " + str(tempPosterior))
+    '''
+    testIndex = [3, 7, 1, 1]
+    tempPosterior = 1
+    posteriorProbability = totalClassValue
+    predictionDictionary = {}
+    counterTest = 0
+
+    for conditionalKey, conditionalValue in conditionalProbabilityValue.items():
+        tempPosterior = 1       
+        print(conditionalKey)
+        for subKey, subValue in conditionalValue.items():
+            for finalValue in subValue.items():
+                if(testIndex[subKey-1] == finalValue[0]):
+                    #print("**********************")
+                    #print(testIndex[subKey-1])
+                    #print(finalValue[0])
+                    #print("**********************")
+                    tempPosterior = tempPosterior * finalValue[1]
+                    break
+                else:
+                    tempPosterior = tempPosterior * 1
+        if(conditionalKey not in predictionDictionary):
+            predictionDictionary[conditionalKey] = tempPosterior
+    #Before Class Values            
+    print(predictionDictionary) 
+    for posteriorKey, posteriorValue in posteriorProbability.items():
+        for predictionKey, predictionValue in predictionDictionary.items():
+            if (posteriorKey == predictionKey):
+                predictionValue = predictionValue * posteriorValue
+                predictionDictionary[posteriorKey] = predictionValue
+    #After Class Values
+    print(predictionDictionary) 
                         
                     
     print("Posterior Probability is " + str(tempPosterior))
