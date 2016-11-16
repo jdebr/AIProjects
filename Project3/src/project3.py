@@ -13,6 +13,7 @@ import os
 import random
 import math
 import TreeNode
+import operator
 from nltk.chunk.util import accuracy
 
 conditionalProbabilityValue = {}
@@ -633,9 +634,69 @@ def experiment_ID3():
     validationData = dataSet[2::3]
     validationLabels = labels[2::3]
     run_ID3(trainData, trainLabels, testData, testLabels, validationData, validationLabels)    
+
+################################
+#KNN algorithm
+################################
+
+def divideData(data, labels) : 
+    trainData = data[::3]
+    trainLabels = labels[::3]
+    testData = data[1::3]
+    testLabels = labels[1::3]
+    print("trainData")
+    print(trainLabels)
+    print("testData")
+    print(testLabels)
+    return (trainData, trainLabels, testData, testLabels)
+
+def vdm(x,y) :
+    pass
+	
+def calculateListKneighbors(trainData, trainLabels, currentRaw, k):
+    listDist = list()
+    for i in range(0, len(trainData)):
+        dist = vdm(currentRaw, trainData[i])
+        listDist.append(dist,trainLabels[i])
+    sortedList = listDist.sort()
+    kNeighbors = list()
+    for i in range(0, k):
+        kNeighbors.append(sortedList[i][1])
+    return kNeighbors
+
+def selectClass(kNeighbors):
+    dictionaryClass = {}
+    for i in range(0, len(kNeighbors)):
+        if kNeighbors[i] in dictionaryClass :
+            dictionaryClass[kNeighbors[i]] +=1
+        else :
+            dictionaryClass[kNeighbors[i]] = 1
+    return max(dictionaryClass.iteritems(), key=operator.itemgetter(1))[0]
+
+def knn(data, labels, k):
+    dataDivided = divideData(data, labels)
+    newLabels = list()
+    trueVal = 0
+	
+    #Define labels for the testData
+    for i in range(0, len(testData)):
+        kNeighbors = calculateListKneighbors(dataDivided[0],dataDivided[1], i, k)
+        newClass = selectClass(kNeighbors)
+        newLabels.append(newClass)
+        if newClass == testLabels[i] :
+            trueVal = trueVal + 1
+    #Define Accuracy
+    accuracy = (trueVal / len(testData)) * 100
+    print(accuracy)
+		
+
+	
     
 def main():
-    experiment_ID3()
+    #tests for KNN
+    DATA = getIris()
+    newData = divideData(DATA[0],DATA[1])
+    #experiment_ID3()
     '''
     #This is the block which i used to call Naive Bayes
     dataValues = getGlass()
