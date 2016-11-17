@@ -14,38 +14,23 @@ class TanNode(object):
     Contains data structures and methods for tracking child nodes and 
     tree traversal during the classification task for TAN.
     '''
-    def __init__(self):
-        ''' Constructor'''
+    def __init__(self, feature):
+        ''' Constructor builds an empty node representing feature index'''
         self.children = list()
-        self.featureValues = list()
-        self.feature = None
-        self.label = None
-        self.prune_label = None
+        self.childNames = list()
+        self.weights = {}
+        self.name = feature
         
-    def test(self, example):
-        ''' Takes an example data instance and uses the decision tree node to return a class label
-        or the child node that testing on the current node's feature indicates'''
-        if self.label:
-            return self.label
-        else:
-            for i in range(len(self.featureValues)):
-                if example[self.feature] == self.featureValues[i]:
-                    return self.children[i].test(example)
-                
-    def addChild(self, childNode, childValue):
-        ''' Adds a new child node to this tree with a corresponding value'''
-        self.children.append(childNode)
-        self.featureValues.append(childValue)
-    
-    def setLabel(self, newLabel):
-        ''' Sets class label which test will return'''
-        self.label = newLabel
+    def addUndirectedEdge(self, neighborNode):
+        ''' Makes an undirected edge between this node and neighbor by adding each
+        to the other's child list, add names to namelist'''
+        self.children.append(neighborNode)
+        self.childNames.append(neighborNode.name)
+        neighborNode.children.append(self)
+        neighborNode.childNames.append(self.name)
         
-    def setFeature(self, newFeature):
-        ''' Sets index on which test will operate '''
-        self.feature = newFeature
-        
-    def setPruneLabel(self,newLabel):
-        self.prune_label = newLabel
+    def setWeight(self, neighborIndex, weight):
+        ''' Sets the weight for the edge between this node and the neighbor'''
+        self.weights[neighborIndex] = weight
         
         

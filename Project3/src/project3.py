@@ -326,11 +326,37 @@ def calculate_CMI(feat1, feat2, dataSet, labels):
                     # Add to CMI
                     CMI += (Pxyc * math.log2(Pxy/(Px*Py)))
     
-    print("CMI: " + str(CMI))
+    #print("CMI: " + str(CMI))
+    return CMI
+    
+def build_TAN(dataSet, labels):
+    ''' Build a complete undirected graph where each node represents an 
+    attribute in the dataset and each edge is weighted by the Conditional
+    Mutual Information value between each pair of features
+    '''
+    # Network is a list of nodes that represent the features 
+    network = list()
+    # Build a node for each feature in the dataset, ID'd by index
+    for i in range(len(dataSet[0])):
+        node = TanNode.TanNode(i)
+        network.append(node)
+    # Connect all nodes and set the weights for each edge as the CMI between those features
+    for i in range(len(dataSet[0])-1):
+        for j in range(i+1, len(dataSet[0])):
+            network[i].addUndirectedEdge(network[j])
+            weight = calculate_CMI(i, j, dataSet, labels)
+            network[i].setWeight(j, weight)
+            network[j].setWeight(i, weight)
+            
+    for node in network:
+        print("Node {0}:".format(node.name))
+        print("  connections: " + str(node.childNames))
+        print("  weights: " + str(node.weights))
+        
     
 def experiment_TAN():
-    data = getSoybean()
-    calculate_CMI(0, 1, data[0], data[1])
+    data = getIris()
+    build_TAN(data[0], data[1])
     
 '''
 ID3
