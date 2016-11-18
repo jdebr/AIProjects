@@ -847,6 +847,37 @@ def knn(data, labels, k):
     
 #5x2 Validation
 def crossValidation(dataSet,labels):
+    print(len(labels))
+    tempDictionary = {}
+    for value in range(len(dataSet)):
+        if (labels[value] not in tempDictionary):
+            tempDictionary[labels[value]] = [] 
+        tempDictionary[labels[value]].append(dataSet[value])
+    print(tempDictionary)
+    tempTestData = []
+    testLabels = []
+    tempTrainData = []
+    trainLabels = []
+    for key, value in tempDictionary.items():
+        random.shuffle(value)
+        half = int(math.ceil(len(value)/2))
+        tempTestData.append(value[:half])
+        tempTrainData.append(value[half:])
+        for num in range(0,half):
+            testLabels.append(key)
+            trainLabels.append(key)
+    
+    
+    testData = []
+    trainData = []
+    for i in range(len(tempTrainData)):
+        for k in tempTrainData[i]:
+            trainData.append(k)
+    for i in range(len(tempTestData)):
+        for k in tempTrainData[i]:
+            testData.append(k)
+    return(trainData, trainLabels, testData, testLabels)
+    '''
     tempDataSet = []
     randomValue = []
     for i in range(len(dataSet)):
@@ -866,7 +897,13 @@ def crossValidation(dataSet,labels):
             else:
                 testLabels.append(tempDataSet[num][0])
                 testData.append(tempDataSet[num][1])
+    print(testData)
+    print(testLabels)
+    print("--------------")
+    print(trainData)
+    print(trainLabels)
     return(trainData, trainLabels, testData, testLabels)
+    '''    
 
 
 def main():
