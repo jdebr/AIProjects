@@ -230,7 +230,7 @@ def calculate_CMI(feat1, feat2, dataSet, labels):
     #print("CMI: " + str(CMI))
     return CMI
     
-def build_TAN(dataSet, labels):
+def build_TAN(dataSet, labels, testData, testLabels):
     ''' Build a complete undirected graph where each node represents an 
     attribute in the dataset and each edge is weighted by the Conditional
     Mutual Information value between each pair of features
@@ -278,10 +278,10 @@ def build_TAN(dataSet, labels):
             forest[tree1] = forest[tree1].union(forest[tree2])
             del(forest[tree2])
             
-    print(spanTree)
+    #print(spanTree)
     # Pick root
     root = random.choice(network)
-    print("Root: " + root.name)
+    #print("Root: " + root.name)
     # Set directed edges away from root
     edges = spanTree.copy()
     remainingNodes = []
@@ -308,18 +308,62 @@ def build_TAN(dataSet, labels):
                 currentNode.addDirectedEdge(network[int(edge[0])])
                 remainingNodes.append(int(edge[0]))
                 spanTree.remove(edge)
-        
     
-        
+    # Use tree to make predictions
+    numCorrect = 0
+    for i in range(len(testData)):
+        testD = testData[i]
+        testL = testLabels[i]
+        # Initialize classes
+        predictions = {}
+        classCounts = {}
+        for label in labels:
+            if label not in predictions:
+                predictions[label] = 0
+                classCounts[label] = 1
+            else:
+                classCounts[label] += 1
+                
+        # Calculation Probabilities
+        for c in predictions.keys():
+            print(c)
+            # Prob of class
+            pC = (float(classCounts[c])/float(len(dataSet)))
+            # Prob of root given class
+            print("Root: " + root.name)
+            r = int(root.name)
+            localCount = 0 # SMOOTHING?
+            for index, data in enumerate(dataSet):
+                if labels[index] == c and data[r] == testD[r]:
+                    localCount += 1
+            pR = (float(localCount)/float(classCounts[c]))
+            prob = pC * pR
+            predictions[c] = prob
+        prediction = max(predictions, key = lambda i:predictions[i])
+        print("Prediction: " + (prediction))
+        print("Actual: " + testL)
+        if testL == prediction:
+            numCorrect += 1
+            
+    print("Accuracy: " + str(float(numCorrect)/len(testData)))
+            
+            
     
-    for node in network:
-        print("Node {0}:".format(node.name))
-        print("  connections: " + str(node.childNames))
+    
+    #for node in network:
+    #    print("Node {0}:".format(node.name))
+    #    print("  connections: " + str(node.childNames))
         
     
 def experiment_TAN():
-    data = getSoybean()
-    build_TAN(data[0], data[1])
+    data = getVote()
+    dataSet = data[0]
+    labels = data[1]
+    trainData = dataSet[::2]
+    trainLabels = labels[::2]
+    testData = dataSet[1::2]
+    testLabels = labels[1::2]
+    build_TAN(trainData, trainLabels, testData, testLabels)
     
 '''
 ID3
