@@ -793,9 +793,15 @@ def creatListClass(labels):
 def vdm(x,y,listClass,occInClass,occTot) :
     vdm = 0
     for i in range(0, len(listClass)):
-        print(occInClass[listClass[i][x]])
+        print(listClass[i])
+        print(occInClass[listClass[i]][x])
         print(occTot[x])
-        vdm += fabs((occInClass[listClass[i][x]]/occTot[x])-(occInClass[listClass[i][y]]/occTot[y]))
+        if y in occInClass[listClass[i]] : 
+            print(occInClass[listClass[i]][y])
+            print(occTot[y])
+            vdm += abs((occInClass[listClass[i]][x]/occTot[x])-(occInClass[listClass[i]][y]/occTot[y]))
+        else :
+            vdm += abs((occInClass[listClass[i]][x]/occTot[x]))
     return vdm 
 
 #distance function where we sum the VDM of each features 
@@ -843,7 +849,9 @@ def knn(data, labels, k):
     #Define labels for the testData
     for i in range(0, len(dataDivided[2])):
         #Creat the list of kNeighbors of each raw of the DataTest
-        kNeighbors = calculateListKneighbors(dataDivided[0],dataDivided[1], i, k)
+        print("DataTest["+str(i)+"] :")
+        print(dataDivided[2][i])
+        kNeighbors = calculateListKneighbors(dataDivided[0],dataDivided[1], dataDivided[2][i], k)
         print("kNeighbors for raw number "+str(i))
         print(kNeighbors)
         #Select the new class of the raw
@@ -923,7 +931,7 @@ def main():
     #tests for KNN
     DATA = getIris()
     #newData = divideData(DATA[0],DATA[1])
-    knn(DATA[0],DATA[1], 11)
+    #knn(DATA[0],DATA[1], 11)
 
     #experiment_ID3()
     #experiment_TAN()	
