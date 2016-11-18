@@ -729,11 +729,9 @@ def experiment_NaiveBayes():
     glass = getGlass()
     dataSet = glass[0]
     labels = glass[1]
-    trainData = dataSet[::2]
-    trainLabels = labels[::2]
-    testData = dataSet[1::2]
-    testLabels = labels[1::2]
-    classSeperation(trainData, trainLabels, testData, testLabels)
+    for testRuns in range(0,5):
+        getResults = crossValidation(dataSet,labels)
+        classSeperation(getResults[0], getResults[1], getResults[2], getResults[3])
 
 
 ################################
@@ -790,40 +788,32 @@ def knn(data, labels, k):
     accuracy = (trueVal / len(testData)) * 100
     print(accuracy)
 #5x2 Validation
-def crossValidation(k,n):
-    #for dataSetSize in range (0,n):
-    
-    data = getIris()
+def crossValidation(dataSet,labels):
     tempDataSet = []
-    dataSet = data[0]
-    labels = data[1]
     for i in range(len(dataSet)):
-        #tempDataSet.append(dataSet[i])
         tempDataSet.append((labels[i],dataSet[i]))
     random.shuffle(tempDataSet)
-    for testRuns in range(0,k):
-        testData = []
-        testLabels = []
-        trainData = []
-        trainLabels = []
-        for i in range(len(tempDataSet)):                
-            num = random.randint(0,len(tempDataSet)-1)
-            #print(num)
-            if( i < 49):
-                trainLabels.append(tempDataSet[num][0])
-                trainData.append(tempDataSet[num][1])
-            elif( i > 49 and i < 150):
-                testLabels.append(tempDataSet[num][0])
-                testData.append(tempDataSet[num][1])
-        #Call method to run Algorithm
-        classSeperation(trainData, trainLabels, testData, testLabels)        
+    testData = []
+    testLabels = []
+    trainData = []
+    trainLabels = []
+    for i in range(len(tempDataSet)):                
+        num = random.randint(0,len(tempDataSet)-1)
+        if( i < 49):
+            trainLabels.append(tempDataSet[num][0])
+            trainData.append(tempDataSet[num][1])
+        elif( i > 49 and i < 150):
+            testLabels.append(tempDataSet[num][0])
+            testData.append(tempDataSet[num][1])
+    return(trainData, trainLabels, testData, testLabels)  
+
+
 def main():
     #tests for KNN
     #DATA = getIris()
     #newData = divideData(DATA[0],DATA[1])
     #experiment_ID3()
-    experiment_TAN()
-    crossValidation(5, 2)	
+    experiment_TAN()	
     '''
     #This is the block which i used to call Naive Bayes
     dataValues = getGlass()
