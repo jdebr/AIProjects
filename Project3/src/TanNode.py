@@ -23,9 +23,16 @@ class TanNode(object):
         
     def addDirectedEdge(self, childNode):
         ''' Makes a directed edge from this node to the childnode by adding it
-        to the child list and adding the name to the namelist'''
+        to the child list and adding the name to the namelist, sets childNode
+        parent reference'''
         self.children.append(childNode)
         self.childNames.append(childNode.name)
+        childNode.setParent(int(self.name))
+        
+    def setParent(self, parentIndex):
+        ''' Sets a class variable showing the feature index of the parent of this node,
+        if it has one'''
+        self.parent = parentIndex
         
     def addUndirectedEdge(self, neighborNode):
         ''' Makes an undirected edge between this node and neighbor by adding each

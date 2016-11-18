@@ -230,7 +230,7 @@ def calculate_CMI(feat1, feat2, dataSet, labels):
     #print("CMI: " + str(CMI))
     return CMI
     
-def build_TAN(dataSet, labels, testData, testLabels):
+def run_TAN(dataSet, labels, testData, testLabels):
     ''' Build a complete undirected graph where each node represents an 
     attribute in the dataset and each edge is weighted by the Conditional
     Mutual Information value between each pair of features
@@ -314,7 +314,7 @@ def build_TAN(dataSet, labels, testData, testLabels):
     for i in range(len(testData)):
         testD = testData[i]
         testL = testLabels[i]
-        # Initialize classes
+        # Initialize classes and class counts
         predictions = {}
         classCounts = {}
         for label in labels:
@@ -337,8 +337,36 @@ def build_TAN(dataSet, labels, testData, testLabels):
                 if labels[index] == c and data[r] == testD[r]:
                     localCount += 1
             pR = (float(localCount)/float(classCounts[c]))
-            prob = pC * pR
-            predictions[c] = prob
+            finalProb = pC * pR
+            # Prob of other features
+            givenIndex = r
+            remainingFeatures = list()
+            # Start with children of root
+            for child in root.children:
+                remainingFeatures.append(int(child.name))
+            # Calculate probability of remaining features
+            while remainingFeatures:
+                localCount = 0.1
+                localTotal = 1
+                currentFeature = remainingFeatures.pop(0)
+                # If current node has children, add them to list
+                for child in network[currentFeature].children:
+                    remainingFeatures.append(int(child.name))
+                # If current node has different parent, change given Value and Index
+                if network[currentFeature].parent != givenIndex:
+                    givenIndex = network[currentFeature].parent
+                for index, data in enumerate(dataSet):
+                    if labels[index] == c and data[givenIndex] == testD[givenIndex]:
+                        localTotal += 1
+                        if data[currentFeature] == testD[currentFeature]:
+                            localCount += 1
+                localProb = (float(localCount)/float(localTotal))
+                # If 
+                #print("Local Prob: " + str(localProb))
+                finalProb *= localProb
+            # Store probability of each class
+            predictions[c] = finalProb
+        # Choose prediction as highest probability class
         prediction = max(predictions, key = lambda i:predictions[i])
         print("Prediction: " + (prediction))
         print("Actual: " + testL)
@@ -346,7 +374,7 @@ def build_TAN(dataSet, labels, testData, testLabels):
             numCorrect += 1
             
     print("Accuracy: " + str(float(numCorrect)/len(testData)))
-            
+           
             
     
     
@@ -356,14 +384,14 @@ def build_TAN(dataSet, labels, testData, testLabels):
         
     
 def experiment_TAN():
-    data = getVote()
+    data = getGlass()
     dataSet = data[0]
     labels = data[1]
     trainData = dataSet[::2]
     trainLabels = labels[::2]
     testData = dataSet[1::2]
     testLabels = labels[1::2]
-    build_TAN(trainData, trainLabels, testData, testLabels)
+    run_TAN(trainData, trainLabels, testData, testLabels)
     
 '''
 ID3
@@ -852,7 +880,6 @@ def knn(data, labels, k):
     #New list of labels predicted
     newLabels = list()
     trueVal = 0
-	
     #Define labels for the testData
     for i in range(0, len(dataDivided[2])):
         #Creat the list of kNeighbors of each raw of the DataTest
