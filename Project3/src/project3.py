@@ -12,9 +12,9 @@ Group 3
 import os
 import random
 import math
-import TreeNode
+import ID3Node
+import TanNode
 import operator
-from nltk.chunk.util import accuracy
 
 conditionalProbabilityValue = {}
 totalClassValue = {}
@@ -262,6 +262,105 @@ def getVote():
     
     return (data, labels)
 
+'''
+TAN
+'''
+def calculate_CMI(feat1, feat2, dataSet, labels):
+    ''' Calculates the Conditional Mutual Information between two random
+    variables: feat1 and feat2, which are given as integer indexes of the 
+    individual data points, represented as lists in the dataSet list
+    '''
+    # Get class distribution from labels
+    classCounts = {}
+    for label in labels:
+        if label in classCounts:
+            classCounts[label] += 1
+        else:
+            classCounts[label] = 1
+            
+    # Get feat1 distribution
+    feat1Counts = {}
+    for data in dataSet:
+        if data[feat1] in feat1Counts:
+            feat1Counts[data[feat1]] += 1
+        else:
+            feat1Counts[data[feat1]] = 1
+            
+    # Get feat1 distribution
+    feat2Counts = {}
+    for data in dataSet:
+        if data[feat2] in feat2Counts:
+            feat2Counts[data[feat2]] += 1
+        else:
+            feat2Counts[data[feat2]] = 1
+    
+    # CMI calculation
+    CMI = 0.0
+    # Sum over all classes
+    for c in classCounts.keys():
+        # Sum over values of feat1
+        for x in feat1Counts.keys():
+            # Sum over values of feat2
+            for y in feat2Counts.keys():
+                # Get counts for conditional probabilities of values
+                localCount = 0.0
+                xCount = 0.0
+                yCount = 0.0
+                for i in range(len(dataSet)):
+                    if labels[i] == c and dataSet[i][feat1] == x and dataSet[i][feat2] == y:
+                        localCount += 1
+                    if labels[i] == c and dataSet[i][feat1] == x:
+                        xCount += 1
+                    if labels[i] == c and dataSet[i][feat2] == y:
+                        yCount += 1
+                # Prob of (x,y,c)
+                Pxyc = localCount/len(dataSet)
+                #print("Prob of C={0}, X={1}, Y={2}: {3}".format(c, x, y, Pcxy))
+                # Only proceed for nonzero probs
+                if Pxyc > 0:
+                    # Prob of (x,y | c)
+                    Pxy = localCount/classCounts[c]
+                    # Probs of (x|c) and (y|c)
+                    Px = xCount/classCounts[c]
+                    Py = yCount/classCounts[c]
+                    # Add to CMI
+                    CMI += (Pxyc * math.log2(Pxy/(Px*Py)))
+    
+    #print("CMI: " + str(CMI))
+    return CMI
+    
+def build_TAN(dataSet, labels):
+    ''' Build a complete undirected graph where each node represents an 
+    attribute in the dataset and each edge is weighted by the Conditional
+    Mutual Information value between each pair of features
+    '''
+    # Network is a list of nodes that represent the features 
+    network = list()
+    # Build a node for each feature in the dataset, ID'd by index
+    for i in range(len(dataSet[0])):
+        node = TanNode.TanNode(i)
+        network.append(node)
+    # Connect all nodes and set the weights for each edge as the CMI between those features
+    for i in range(len(dataSet[0])-1):
+        for j in range(i+1, len(dataSet[0])):
+            network[i].addUndirectedEdge(network[j])
+            weight = calculate_CMI(i, j, dataSet, labels)
+            network[i].setWeight(j, weight)
+            network[j].setWeight(i, weight)
+            
+    for node in network:
+        print("Node {0}:".format(node.name))
+        print("  connections: " + str(node.childNames))
+        print("  weights: " + str(node.weights))
+        
+    
+def experiment_TAN():
+    data = getIris()
+    build_TAN(data[0], data[1])
+    
+'''
+ID3
+'''
 def calculateEntropy(dataSet, labels):
     ''' Returns the calculation of the entropy for a dataSet as the sum
     of the probability of each class times the log probability of that class
@@ -367,7 +466,7 @@ def build_ID3(trainData, trainLabels, features):
     all possible values of that attribute.  If features is empty, return the majority label of the 
     trainLabels.  If all trainLabels are the same, return that label.
     '''
-    root = TreeNode.TreeNode()
+    root = ID3Node.ID3Node()
     
     # If all trainLabels are the same return the node with that label
     nodeLabel = trainLabels[0]
@@ -472,10 +571,28 @@ def prune(tree, node, data, labels):
         print("Node pruned!")
     return
 
+def experiment_ID3():
+    ''' Method for testing ID3 operation '''
+    #data = getBreastCancer()
+    #data = getIris()
+    #data = getGlass()
+    #data = getSoybean()
+    data = getVote()
+    dataSet = data[0]
+    labels = data[1]
+    # Contrived experiment, divide test set evenly amongst examples
+    trainData = dataSet[::3]
+    trainLabels = labels[::3]
+    testData = dataSet[1::3]
+    testLabels = labels[1::3]
+    validationData = dataSet[2::3]
+    validationLabels = labels[2::3]
+    run_ID3(trainData, trainLabels, testData, testLabels, validationData, validationLabels)    
+
+
 '''
 Naive Bayes 
 '''
-
 def classSeperation(trainData, trainLabels, testData, testLabels):
     '''
     In this block we join the training Labels and Data into one class dictionary
@@ -606,34 +723,16 @@ def testingNaiveBayes(testData):
                 predictionDictionary[posteriorKey] = predictionValue
     
     return (max(predictionDictionary, key=lambda i:predictionDictionary[i]))
-                   
+
                     
 def experiment_NaiveBayes():
     glass = getGlass()
     dataSet = glass[0]
     labels = glass[1]
-    trainData = dataSet[::2]
-    trainLabels = labels[::2]
-    testData = dataSet[1::2]
-    testLabels = labels[1::2]
-    classSeperation(trainData, trainLabels, testData, testLabels)
+    for testRuns in range(0,5):
+        getResults = crossValidation(dataSet,labels)
+        classSeperation(getResults[0], getResults[1], getResults[2], getResults[3])
 
-def experiment_ID3():
-    #data = getBreastCancer()
-    #data = getIris()
-    #data = getGlass()
-    #data = getSoybean()
-    data = getVote()
-    dataSet = data[0]
-    labels = data[1]
-    # Contrived experiment, divide test set evenly amongst examples
-    trainData = dataSet[::3]
-    trainLabels = labels[::3]
-    testData = dataSet[1::3]
-    testLabels = labels[1::3]
-    validationData = dataSet[2::3]
-    validationLabels = labels[2::3]
-    run_ID3(trainData, trainLabels, testData, testLabels, validationData, validationLabels)    
 
 ################################
 #KNN algorithm
@@ -699,7 +798,6 @@ def distFunctionVDM(x,y,listClass, occInClass, occTot):
     for k in range(0, len(x)):
         sumVDM += vdm(x[k],y[k],listClass, occInClass, occTot)
     return sumVDM
-	
 
 def calculateListKneighbors(trainData, trainLabels, currentRaw, k):
     occInClass = creaListOccInClass(trainData, trainLabels)
@@ -739,16 +837,35 @@ def knn(data, labels, k):
     #Define Accuracy
     accuracy = (trueVal / len(dataDivided[2])) * 100
     print(accuracy)
-		
+#5x2 Validation
+def crossValidation(dataSet,labels):
+    tempDataSet = []
+    for i in range(len(dataSet)):
+        tempDataSet.append((labels[i],dataSet[i]))
+    random.shuffle(tempDataSet)
+    testData = []
+    testLabels = []
+    trainData = []
+    trainLabels = []
+    for i in range(len(tempDataSet)):                
+        num = random.randint(0,len(tempDataSet)-1)
+        if( i < 49):
+            trainLabels.append(tempDataSet[num][0])
+            trainData.append(tempDataSet[num][1])
+        elif( i > 49 and i < 150):
+            testLabels.append(tempDataSet[num][0])
+            testData.append(tempDataSet[num][1])
+    return(trainData, trainLabels, testData, testLabels)  
 
-	
-    
+
 def main():
     #tests for KNN
     DATA = getIris()
     #newData = divideData(DATA[0],DATA[1])
     #knn(DATA[0],DATA[1], 11)
+
     #experiment_ID3()
+    experiment_TAN()	
     '''
     #This is the block which i used to call Naive Bayes
     dataValues = getGlass()

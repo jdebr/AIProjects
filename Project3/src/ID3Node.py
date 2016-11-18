@@ -8,9 +8,9 @@ Group 3
 @author: Shriyansh Kothari
 @author: Sara Ounissi
 '''
-class TreeNode(object):
+class ID3Node(object):
     '''
-    A custom node for a Tree Data structure required for Project 3.
+    A custom node for a Tree data structure required for Project 3.
     Contains data structures and methods for tracking child nodes and 
     tree traversal during the classification task for ID-3.
     '''
