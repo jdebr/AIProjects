@@ -18,26 +18,7 @@ import operator
 
 conditionalProbabilityValue = {}
 totalClassValue = {}
-classProbabilityValue = {}
-
-def readingFiles():
-    
-    #Change the directory where you are storing the data.
-    fileNames = os.listdir("D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 3")
-    print(fileNames)
-    for name in fileNames:
-        if "data.txt" in name:
-            fileOpen = open("D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 3/" + str(name))
-            for lines in fileOpen:
-                '''
-                #Just Checking if reading individual elements in the line selected.
-                for element in lines:
-                    print(element)
-                '''
-                print(lines.rstrip())
-            fileOpen.close()
-            
-            
+classProbabilityValue = {}            
             
 def readFile(fileName):
     ''' Reads in the file specified and parses the content into a list of lists,
@@ -53,8 +34,7 @@ def readFile(fileName):
             if not line:
                 continue
             datum = line.split(',')
-            dataSet.append(datum)
-            
+            dataSet.append(datum)        
     return dataSet
 
 def discretize(data, numBins):
@@ -81,82 +61,8 @@ def discretize(data, numBins):
             for k in range(1, numBins+1):
                 if feat - (k * binWidth) <= 0:
                     data[j][i] = k
-                    break
-                
+                    break           
     return data
-
-# I WILL REMOVE THIS PER DESIGN DOCUMENT FEEDBACK...joe
-def imputeVote(party, feature):
-    ''' Returns a boolean number representing vote data based on the greatest likelihood
-    for that feature given the party (class label).  Uses domain knowledge from the metadata
-    to determine this value.
-    '''
-    if party == 'democrat':
-        if feature == 1:
-            return 1
-        elif feature == 2:
-            return random.choice([0,1])
-        elif feature == 3:
-            return 1
-        elif feature == 4:
-            return 0
-        elif feature == 5:
-            return 0
-        elif feature == 6:
-            return 0
-        elif feature == 7:
-            return 1
-        elif feature == 8:
-            return 1
-        elif feature == 9:
-            return 1
-        elif feature == 10:
-            return 0
-        elif feature == 11:
-            return 1
-        elif feature == 12:
-            return 0
-        elif feature == 13:
-            return 0
-        elif feature == 14:
-            return 0
-        elif feature == 15:
-            return 1
-        elif feature == 16:
-            return 1
-    else:
-        if feature == 1:
-            return 0
-        elif feature == 2:
-            return random.choice([0,1])
-        elif feature == 3:
-            return 0
-        elif feature == 4:
-            return 1
-        elif feature == 5:
-            return 1
-        elif feature == 6:
-            return 1
-        elif feature == 7:
-            return 0
-        elif feature == 8:
-            return 0
-        elif feature == 9:
-            return 0
-        elif feature == 10:
-            return 1
-        elif feature == 11:
-            return 0
-        elif feature == 12:
-            return 1
-        elif feature == 13:
-            return 1
-        elif feature == 14:
-            return 1
-        elif feature == 15:
-            return 0
-        elif feature == 16:
-            return 1
             
 def getIris():
     ''' Processes the Iris data, returning a tuple of 2 lists: ([data],[labels]),
@@ -166,7 +72,7 @@ def getIris():
     iris = readFile("../data/iris.data")
     data = list()
     labels = list()
-    
+    # Iris has 5 attributes, the last being the class
     for item in iris:
         data.append([float(item[0]), float(item[1]), float(item[2]), float(item[3])])
         labels.append(item[4])
@@ -183,7 +89,6 @@ def getGlass():
     glass = readFile("../data/glass.data")
     data = list()
     labels = list()
-    
     # Glass has 11 attributes, the first being an ID and the last being the Class
     for item in glass:
         data.append([float(item[1]), float(item[2]), float(item[3]), float(item[4]), float(item[5]), float(item[6]), float(item[7]), float(item[8]), float(item[9])])
@@ -201,7 +106,6 @@ def getSoybean():
     soybean = readFile("../data/soybean-small.data")
     data = list()
     labels = list()
-    
     # Soybeans has 36 attributes,  the last being the Class
     for item in soybean:
         newData = list()
@@ -220,7 +124,6 @@ def getBreastCancer():
     cancer = readFile("../data/breast-cancer-wisconsin.data")
     data = list()
     labels = list()
-    
     # Breast Cancer has 11 attributes, the first being an ID and the last being the Class
     for item in cancer:
         # Check for missing feature, ignore data instance if '?' exists
@@ -244,19 +147,17 @@ def getVote():
     vote = readFile("../data/house-votes-84.data")
     data = list()
     labels = list()
-    
     # Vote has 17 attributes,  the first being the Class
     for item in vote:
         newData = list()
         for i in range(1, len(item)):
-            # Encode data as 'y' -> 1, 'n'-> 0
+            # Encode data as 'y' -> 1, 'n'-> -1, '?'-> 0
             if item[i] == 'y':
                 newData.append(1)
             elif item[i] == 'n':
-                newData.append(0)
+                newData.append(-1)
             else:
-                # Impute missing values based on class likelihood
-                newData.append(imputeVote(item[0],i))
+                newData.append(0)
         data.append(newData)
         labels.append(item[0])
     
@@ -787,6 +688,7 @@ def knn(data, labels, k):
     #Define Accuracy
     accuracy = (trueVal / len(testData)) * 100
     print(accuracy)
+    
 #5x2 Validation
 def crossValidation(dataSet,labels):
     tempDataSet = []
@@ -813,13 +715,7 @@ def main():
     #DATA = getIris()
     #newData = divideData(DATA[0],DATA[1])
     #experiment_ID3()
-    experiment_TAN()	
-    '''
-    #This is the block which i used to call Naive Bayes
-    dataValues = getGlass()
-    print(dataValues)
-    classSeperation(dataValues)
-    '''
+    experiment_TAN()
     
 if __name__ == '__main__':
     main()
