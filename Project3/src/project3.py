@@ -870,14 +870,16 @@ def vdm(x,y,listClass,occInClass,occTot) :
     vdm = 0
     for i in range(0, len(listClass)):
         print(listClass[i])
-        print(occInClass[listClass[i]][x])
-        print(occTot[x])
-        if y in occInClass[listClass[i]] : 
-            print(occInClass[listClass[i]][y])
-            print(occTot[y])
-            vdm += abs((occInClass[listClass[i]][x]/occTot[x])-(occInClass[listClass[i]][y]/occTot[y]))
-        else :
-            vdm += abs((occInClass[listClass[i]][x]/occTot[x]))
+        print(occInClass[listClass[i]][i][x])
+        print(occTot[i][x])
+        if y in occInClass[listClass[i]][i] and y in occTot[i] and x in occInClass[listClass[i]][i] and x in occTot[i]  : 
+            print(occInClass[listClass[i]][i][y])
+            print(occTot[i][y])
+            vdm += abs((occInClass[listClass[i]][i][x]/occTot[i][x])-(occInClass[listClass[i]][i][y]/occTot[i][y]))
+        if (y not in occInClass[listClass[i]][i] or y not in occTot[i]) and (x in occInClass[listClass[i]][i] and x in occTot[i]):
+            vdm += abs((occInClass[listClass[i]][i][x]/occTot[i][x]))
+		if (x not in occInClass[listClass[i]][i] and x not in occTot[i]) and (y in occInClass[listClass[i]][i] and y in occTot[i]) :
+		    vdm += abs(-(occInClass[listClass[i]][i][y]/occTot[i][y]))
     return vdm 
 
 #distance function where we sum the VDM of each features 
