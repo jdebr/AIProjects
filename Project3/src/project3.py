@@ -847,15 +847,48 @@ def creaListOccInClass(trainData, trainLabels):
     return storeCount
 
 #Function that creat a dictionary with each value/feature and it's occurence in the set of data 
-def creatOccTot(data):
-    occTot = {}
-    for i in range(0, len(data)):
-        for j in range(0, len(data[0])):
-            if data[i][j] in occTot :
-                occTot[data[i][j]] +=1
-            else :
-                occTot[data[i][j]] = 1
-    return occTot
+#Function that creat a dictionary with each value/feature and it's occurence in the set of data 
+def creatOccTot(trainData, trainLabels):
+    classDictionary = {}
+    for value in range(len(trainData)):
+        if (trainLabels[value] not in classDictionary):
+            classDictionary[trainLabels[value]] = [] 
+        classDictionary[trainLabels[value]].append(trainData[value])
+
+    print("Class Dictionary after joining training labels and data")
+    print(classDictionary)
+    #attributeCount(classDictionary)
+    storeCount = {}
+    count = 1
+    #print(classDictionary.items())
+    for key , value in classDictionary.items():
+        
+        #print(value)
+        for num in range(len(value)):          
+            for subValue in range(len(value[num])):
+                #print(subValue)             
+                if(count > len(value[num])):
+                    count = 1
+                if(count not in storeCount):
+                    storeCount[count] = {}
+                #if(count not in storeCount[key]):
+                #    storeCount[key][count] = {}
+                for i in range(1,11):
+                    '''
+                    storing every bin value with value 1 and Then after the end of this loop calculating there value
+                    Laplace Method
+                    '''
+                    if (i not in storeCount[count]):
+                        storeCount[count][i] = 1
+                if (value[num][subValue] not in storeCount[count]):
+                    storeCount[key][count][value[num][subValue]] = 1
+                else:
+                    x = storeCount[count][value[num][subValue]]
+                    x = x + 1
+                    storeCount[count][value[num][subValue]] = x
+                count +=1         
+    print(str(storeCount))
+    return storeCount
 
 #Function that return a list containing one occurence of the different classes
 def creatListClass(labels):
@@ -892,7 +925,8 @@ def distFunctionVDM(x,y,listClass, occInClass, occTot):
 #Return the list of the kNeighbors, it's a list cotaining only the labels of the kNeighbors
 def calculateListKneighbors(trainData, trainLabels, currentRaw, k):
     occInClass = creaListOccInClass(trainData, trainLabels)
-    occTot = creatOccTot(trainData)
+    print(occInClass)
+    occTot = creatOccTot(trainData, trainLabels)
     listClass = creatListClass(trainLabels)
     listDist = list()
     for i in range(0, len(trainData)):
