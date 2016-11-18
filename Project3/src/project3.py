@@ -745,6 +745,7 @@ def experiment_NaiveBayes():
 #KNN algorithm
 ################################
 
+#DEviding the data between a training set and a test set 
 def divideData(data, labels) : 
     trainData = data[::3]
     trainLabels = labels[::3]
@@ -756,6 +757,8 @@ def divideData(data, labels) :
     #print(testLabels)
     return (trainData, trainLabels, testData, testLabels)
 
+#Function that return a dictionary of dictionary
+#For each class as a key we have a dictionary of the value/feature and their occurence in the class
 def creaListOccInClass(data, labels):
     occInClass = {}
     for i in range(0, len(labels)):
@@ -774,7 +777,7 @@ def creaListOccInClass(data, labels):
                     occInClass[labels[i]][data[i][j]] = 1
     return occInClass
 
-                    
+#Function that creat a dictionary with each value/feature and it's occurence in the set of data 
 def creatOccTot(data):
     occTot = {}
     for i in range(0, len(data)):
@@ -785,27 +788,37 @@ def creatOccTot(data):
                 occTot[data[i][j]] = 1
     return occTot
 
+#Function that return a list containing one occurence of the different classes
 def creatListClass(labels):
     listClass = list()
     for i in range(0, len(labels)):
         if labels[i] not in listClass : 
             listClass.append(labels[i])
     return listClass
-	
+
+#vdm computation 
 def vdm(x,y,listClass,occInClass,occTot) :
     vdm = 0
     for i in range(0, len(listClass)):
-        print(occInClass[listClass[i][x]])
+        print(listClass[i])
+        print(occInClass[listClass[i]][x])
         print(occTot[x])
-        vdm += fabs((occInClass[listClass[i][x]]/occTot[x])-(occInClass[listClass[i][y]]/occTot[y]))
+        if y in occInClass[listClass[i]] : 
+            print(occInClass[listClass[i]][y])
+            print(occTot[y])
+            vdm += abs((occInClass[listClass[i]][x]/occTot[x])-(occInClass[listClass[i]][y]/occTot[y]))
+        else :
+            vdm += abs((occInClass[listClass[i]][x]/occTot[x]))
     return vdm 
-	
+
+#distance function where we sum the VDM of each features 
 def distFunctionVDM(x,y,listClass, occInClass, occTot):
     sumVDM = 0
     for k in range(0, len(x)):
         sumVDM += vdm(x[k],y[k],listClass, occInClass, occTot)
     return sumVDM
 
+#Return the list of the kNeighbors, it's a list cotaining only the labels of the kNeighbors
 def calculateListKneighbors(trainData, trainLabels, currentRaw, k):
     occInClass = creaListOccInClass(trainData, trainLabels)
     occTot = creatOccTot(trainData)
@@ -820,6 +833,8 @@ def calculateListKneighbors(trainData, trainLabels, currentRaw, k):
         kNeighbors.append(sortedList[i][1])
     return kNeighbors
 
+#Function that select the predicted class, it looks at all the classes of the 
+#kNeighbors and return the one that have the highest occurence 
 def selectClass(kNeighbors):
     dictionaryClass = {}
     for i in range(0, len(kNeighbors)):
@@ -829,22 +844,34 @@ def selectClass(kNeighbors):
             dictionaryClass[kNeighbors[i]] = 1
     return max(dictionaryClass.iteritems(), key=operator.itemgetter(1))[0]
 
+#KNN algorithm
 def knn(data, labels, k):
+    print("KNN Algorithm ................................")
+    print("With k = "+str(k))
     dataDivided = divideData(data, labels)
+    #New list of labels predicted
     newLabels = list()
     trueVal = 0
 	
     #Define labels for the testData
     for i in range(0, len(dataDivided[2])):
-        kNeighbors = calculateListKneighbors(dataDivided[0],dataDivided[1], i, k)
+        #Creat the list of kNeighbors of each raw of the DataTest
+        print("DataTest["+str(i)+"] :")
+        print(dataDivided[2][i])
+        kNeighbors = calculateListKneighbors(dataDivided[0],dataDivided[1], dataDivided[2][i], k)
+        print("kNeighbors for raw number "+str(i))
+        print(kNeighbors)
+        #Select the new class of the raw
         newClass = selectClass(kNeighbors)
+        print("Class prediction for the current raw")
+        print(newClass)
         newLabels.append(newClass)
         if newClass == dataDivided[3][i] :
             trueVal = trueVal + 1
     #Define Accuracy
     accuracy = (trueVal / len(dataDivided[2])) * 100
-    print(accuracy)
-    
+    print("Accuracy "+str(accuracy))
+
 #5x2 Validation
 def crossValidation(dataSet,labels):
     print(len(labels))
@@ -908,7 +935,7 @@ def crossValidation(dataSet,labels):
 
 def main():
     #tests for KNN
-    DATA = getIris()
+    #DATA = getIris()
     #newData = divideData(DATA[0],DATA[1])
     #knn(DATA[0],DATA[1], 11)
 
