@@ -677,19 +677,69 @@ def divideData(data, labels) :
     trainLabels = labels[::3]
     testData = data[1::3]
     testLabels = labels[1::3]
-    print("trainData")
-    print(trainLabels)
-    print("testData")
-    print(testLabels)
+    #print("trainData")
+    #print(trainLabels)
+    #print("testData")
+    #print(testLabels)
     return (trainData, trainLabels, testData, testLabels)
 
-def vdm(x,y) :
-    pass
+def creaListOccInClass(data, labels):
+    occInClass = {}
+    for i in range(0, len(labels)):
+        if labels[i] in occInClass :
+            for j in range(0,len(data[0])):
+                if data[i][j] in occInClass[labels[i]]:
+                    occInClass[labels[i]][data[i][j]] += 1
+                else :
+                    occInClass[labels[i]][data[i][j]] = 1 
+        else :
+            occInClass[labels[i]] = {}
+            for j in range(0,len(data[0])):
+                if data[i][j] in occInClass[labels[i]]:
+                    occInClass[labels[i]][data[i][j]] += 1
+                else :
+                    occInClass[labels[i]][data[i][j]] = 1
+    return occInClass
+
+                    
+def creatOccTot(data):
+    occTot = {}
+    for i in range(0, len(data)):
+        for j in range(0, len(data[0])):
+            if data[i][j] in occTot :
+                occTot[data[i][j]] +=1
+            else :
+                occTot[data[i][j]] = 1
+    return occTot
+
+def creatListClass(labels):
+    listClass = list()
+    for i in range(0, len(labels)):
+        if labels[i] not in listClass : 
+            listClass.append(labels[i])
+    return listClass
+	
+def vdm(x,y,listClass,occInClass,occTot) :
+    vdm = 0
+    for i in range(0, len(listClass)):
+        print(occInClass[listClass[i][x]])
+        print(occTot[x])
+        vdm += fabs((occInClass[listClass[i][x]]/occTot[x])-(occInClass[listClass[i][y]]/occTot[y]))
+    return vdm 
+	
+def distFunctionVDM(x,y,listClass, occInClass, occTot):
+    sumVDM = 0
+    for k in range(0, len(x)):
+        sumVDM += vdm(x[k],y[k],listClass, occInClass, occTot)
+    return sumVDM
 
 def calculateListKneighbors(trainData, trainLabels, currentRaw, k):
+    occInClass = creaListOccInClass(trainData, trainLabels)
+    occTot = creatOccTot(trainData)
+    listClass = creatListClass(trainLabels)
     listDist = list()
     for i in range(0, len(trainData)):
-        dist = vdm(currentRaw, trainData[i])
+        dist = distFunctionVDM(trainData[i],currentRaw,listClass, occInClass, occTot)
         listDist.append(dist,trainLabels[i])
     sortedList = listDist.sort()
     kNeighbors = list()
@@ -712,19 +762,20 @@ def knn(data, labels, k):
     trueVal = 0
 	
     #Define labels for the testData
-    for i in range(0, len(testData)):
+    for i in range(0, len(dataDivided[2])):
         kNeighbors = calculateListKneighbors(dataDivided[0],dataDivided[1], i, k)
         newClass = selectClass(kNeighbors)
         newLabels.append(newClass)
-        if newClass == testLabels[i] :
+        if newClass == dataDivided[3][i] :
             trueVal = trueVal + 1
     #Define Accuracy
-    accuracy = (trueVal / len(testData)) * 100
+    accuracy = (trueVal / len(dataDivided[2])) * 100
     print(accuracy)
     
 #5x2 Validation
 def crossValidation(dataSet,labels):
     tempDataSet = []
+    randomValue = []
     for i in range(len(dataSet)):
         tempDataSet.append((labels[i],dataSet[i]))
     random.shuffle(tempDataSet)
@@ -732,28 +783,25 @@ def crossValidation(dataSet,labels):
     testLabels = []
     trainData = []
     trainLabels = []
-    for i in range(len(tempDataSet)):                
+    while len(randomValue) < len(tempDataSet):    
         num = random.randint(0,len(tempDataSet)-1)
-        if( i < 49):
-            trainLabels.append(tempDataSet[num][0])
-            trainData.append(tempDataSet[num][1])
-        elif( i > 49 and i < 150):
-            testLabels.append(tempDataSet[num][0])
-            testData.append(tempDataSet[num][1])
-    print("Train Data: " + str(trainData))
-    print("Train Labels: " + str(trainLabels))
-    print("Test Data: " + str(testData))
-    print("Test Labels: " + str(testLabels))
-    print("Dataset size: " + str(len(dataSet)))
-    print("Train Size: " + str(len(trainData)))
-    print("Test Size: " + str(len(testData)))
-    return(trainData, trainLabels, testData, testLabels)  
+        if(num not in randomValue):
+            randomValue.append(num)
+            if( num < (int(len(tempDataSet)-1)/2)):
+                trainLabels.append(tempDataSet[num][0])
+                trainData.append(tempDataSet[num][1])
+            else:
+                testLabels.append(tempDataSet[num][0])
+                testData.append(tempDataSet[num][1])
+    return(trainData, trainLabels, testData, testLabels)
 
 
 def main():
     #tests for KNN
-    #data = getSoybean()
+    DATA = getIris()
     #newData = divideData(DATA[0],DATA[1])
+    #knn(DATA[0],DATA[1], 11)
+
     #experiment_ID3()
     experiment_TAN()
     #crossValidation(data[0], data[1])
