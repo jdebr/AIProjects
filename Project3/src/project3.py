@@ -707,15 +707,23 @@ def crossValidation(dataSet,labels):
         elif( i > 49 and i < 150):
             testLabels.append(tempDataSet[num][0])
             testData.append(tempDataSet[num][1])
+    print("Train Data: " + str(trainData))
+    print("Train Labels: " + str(trainLabels))
+    print("Test Data: " + str(testData))
+    print("Test Labels: " + str(testLabels))
+    print("Dataset size: " + str(len(dataSet)))
+    print("Train Size: " + str(len(trainData)))
+    print("Test Size: " + str(len(testData)))
     return(trainData, trainLabels, testData, testLabels)  
 
 
 def main():
     #tests for KNN
-    #DATA = getIris()
+    data = getSoybean()
     #newData = divideData(DATA[0],DATA[1])
     #experiment_ID3()
-    experiment_TAN()
+    #experiment_TAN()
+    crossValidation(data[0], data[1])
     
 if __name__ == '__main__':
     main()
