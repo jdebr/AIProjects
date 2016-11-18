@@ -866,11 +866,10 @@ def crossValidation(dataSet,labels):
     trainData = []
     for i in range(len(tempTrainData)):
         for k in tempTrainData[i]:
-            print(len(tempTrainData[i]))
-            testData.append(k)
+            trainData.append(k)
     for i in range(len(tempTestData)):
         for k in tempTrainData[i]:
-            trainData.append(k)
+            testData.append(k)
     return(trainData, trainLabels, testData, testLabels)
     '''
     tempDataSet = []
