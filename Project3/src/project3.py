@@ -237,10 +237,16 @@ def build_TAN(dataSet, labels):
     '''
     # Network is a list of nodes that represent the features 
     network = list()
+    # Edges is a list of edge IDs and weights for maximum spanning tree
+    edges = list()
+    # Forest is a list of sets of trees for the max spanning alg
+    forest = list()
     # Build a node for each feature in the dataset, ID'd by index
     for i in range(len(dataSet[0])):
         node = TanNode.TanNode(i)
         network.append(node)
+        # Prep forest
+        forest.append(set(str(i)))
     # Connect all nodes and set the weights for each edge as the CMI between those features
     for i in range(len(dataSet[0])-1):
         for j in range(i+1, len(dataSet[0])):
@@ -248,7 +254,34 @@ def build_TAN(dataSet, labels):
             weight = calculate_CMI(i, j, dataSet, labels)
             network[i].setWeight(j, weight)
             network[j].setWeight(i, weight)
+            edges.append((str(i), str(j), weight))
+    # Build maximum weight spanning tree
+    edges = sorted(edges, key = lambda x: x[2], reverse = True)
+    spanTree = list()
+    while edges and len(spanTree) < len(network)-1:
+        maxEdge = edges.pop(0)
+        isCycle = False
+        tree1 = None
+        tree2 = None
+        # Look for cycles
+        for index, tree in enumerate(forest):
+            if maxEdge[0] in tree and maxEdge[1] in tree:
+                isCycle = True
+                break
+            elif maxEdge[0] in tree:
+                tree1 = index
+            elif maxEdge[1] in tree:
+                tree2 = index
+        # If no cycles, add edge to max spanning tree
+        if not isCycle:
+            spanTree.append(maxEdge)
+            forest[tree1] = forest[tree1].union(forest[tree2])
+            del(forest[tree2])
             
+    print(forest)
+    print(spanTree)
+        
+    
     for node in network:
         print("Node {0}:".format(node.name))
         print("  connections: " + str(node.childNames))
@@ -719,11 +752,11 @@ def crossValidation(dataSet,labels):
 
 def main():
     #tests for KNN
-    data = getSoybean()
+    #data = getSoybean()
     #newData = divideData(DATA[0],DATA[1])
     #experiment_ID3()
-    #experiment_TAN()
-    crossValidation(data[0], data[1])
+    experiment_TAN()
+    #crossValidation(data[0], data[1])
     
 if __name__ == '__main__':
     main()
