@@ -812,8 +812,8 @@ def creaListOccInClass(trainData, trainLabels):
             classDictionary[trainLabels[value]] = [] 
         classDictionary[trainLabels[value]].append(trainData[value])
 
-    print("Class Dictionary after joining training labels and data")
-    print(classDictionary)
+    #print("Class Dictionary after joining training labels and data")
+    #print(classDictionary)
     #attributeCount(classDictionary)
     storeCount = {}
     count = 1
@@ -843,7 +843,7 @@ def creaListOccInClass(trainData, trainLabels):
                     x = x + 1
                     storeCount[key][count][value[num][subValue]] = x
                 count +=1         
-    print("Bin count" + str(storeCount))
+    #print("Bin count" + str(storeCount))
     return storeCount
 
 #Function that creat a dictionary with each value/feature and it's occurence in the set of data 
@@ -855,8 +855,8 @@ def creatOccTot(trainData, trainLabels):
             classDictionary[trainLabels[value]] = [] 
         classDictionary[trainLabels[value]].append(trainData[value])
 
-    print("Class Dictionary after joining training labels and data")
-    print(classDictionary)
+    #print("Class Dictionary after joining training labels and data")
+    #print(classDictionary)
     #attributeCount(classDictionary)
     storeCount = {}
     count = 1
@@ -881,13 +881,13 @@ def creatOccTot(trainData, trainLabels):
                     if (i not in storeCount[count]):
                         storeCount[count][i] = 1
                 if (value[num][subValue] not in storeCount[count]):
-                    storeCount[key][count][value[num][subValue]] = 1
+                    storeCount[count][value[num][subValue]] = 1
                 else:
                     x = storeCount[count][value[num][subValue]]
                     x = x + 1
                     storeCount[count][value[num][subValue]] = x
                 count +=1         
-    print(str(storeCount))
+    #print(str(storeCount))
     return storeCount
 
 #Function that return a list containing one occurence of the different classes
@@ -901,18 +901,18 @@ def creatListClass(labels):
 #vdm computation 
 def vdm(x,y,listClass,occInClass,occTot) :
     vdm = 0
-    for i in range(0, len(listClass)):
-        print(listClass[i])
-        print(occInClass[listClass[i]][i][x])
-        print(occTot[i][x])
-        if y in occInClass[listClass[i]][i] and y in occTot[i] and x in occInClass[listClass[i]][i] and x in occTot[i]  : 
-            print(occInClass[listClass[i]][i][y])
-            print(occTot[i][y])
-            vdm += abs((occInClass[listClass[i]][i][x]/occTot[i][x])-(occInClass[listClass[i]][i][y]/occTot[i][y]))
-        if (y not in occInClass[listClass[i]][i] or y not in occTot[i]) and (x in occInClass[listClass[i]][i] and x in occTot[i]):
-            vdm += abs((occInClass[listClass[i]][i][x]/occTot[i][x]))
-		if (x not in occInClass[listClass[i]][i] and x not in occTot[i]) and (y in occInClass[listClass[i]][i] and y in occTot[i]) :
-		    vdm += abs(-(occInClass[listClass[i]][i][y]/occTot[i][y]))
+    for i in range(1, len(listClass)+1):
+        #print(listClass[i-1])
+        #print(occInClass[listClass[i-1]][i][x])
+        #print(occTot[i][x])
+        if y in occInClass[listClass[i-1]][i] and y in occTot[i] and x in occInClass[listClass[i-1]][i] and x in occTot[i]  : 
+            #print(occInClass[listClass[i-1]][i][y])
+            #print(occTot[i][y])
+            vdm += abs((occInClass[listClass[i-1]][i][x]/occTot[i][x])-(occInClass[listClass[i-1]][i][y]/occTot[i][y]))
+        if (y not in occInClass[listClass[i-1]][i] or y not in occTot[i]) and (x in occInClass[listClass[i-1]][i] and x in occTot[i]):
+            vdm += abs((occInClass[listClass[i-1]][i][x]/occTot[i][x]))
+        if (x not in occInClass[listClass[i-1]][i] and x not in occTot[i]) and (y in occInClass[listClass[i-1]][i] and y in occTot[i]) :
+            vdm += abs(-(occInClass[listClass[i-1]][i][y]/occTot[i][y]))
     return vdm 
 
 #distance function where we sum the VDM of each features 
@@ -925,14 +925,13 @@ def distFunctionVDM(x,y,listClass, occInClass, occTot):
 #Return the list of the kNeighbors, it's a list cotaining only the labels of the kNeighbors
 def calculateListKneighbors(trainData, trainLabels, currentRaw, k):
     occInClass = creaListOccInClass(trainData, trainLabels)
-    print(occInClass)
     occTot = creatOccTot(trainData, trainLabels)
     listClass = creatListClass(trainLabels)
     listDist = list()
     for i in range(0, len(trainData)):
         dist = distFunctionVDM(trainData[i],currentRaw,listClass, occInClass, occTot)
-        listDist.append(dist,trainLabels[i])
-    sortedList = listDist.sort()
+        listDist.append((dist,trainLabels[i]))
+    sortedList = sorted(listDist, key=lambda x:x[0])
     kNeighbors = list()
     for i in range(0, k):
         kNeighbors.append(sortedList[i][1])
@@ -947,7 +946,7 @@ def selectClass(kNeighbors):
             dictionaryClass[kNeighbors[i]] +=1
         else :
             dictionaryClass[kNeighbors[i]] = 1
-    return max(dictionaryClass.iteritems(), key=operator.itemgetter(1))[0]
+    return max(dictionaryClass, key = lambda x:dictionaryClass[x])
 
 #KNN algorithm
 def knn(data, labels, k):
@@ -1039,12 +1038,12 @@ def crossValidation(dataSet,labels):
 
 def main():
     #tests for KNN
-    #DATA = getIris()
+    DATA = getIris()
     #newData = divideData(DATA[0],DATA[1])
-    #knn(DATA[0],DATA[1], 11)
+    knn(DATA[0],DATA[1], 11)
 
     #experiment_ID3()
-    experiment_TAN()
+    #experiment_TAN()
     #crossValidation(data[0], data[1])
     
 if __name__ == '__main__':
