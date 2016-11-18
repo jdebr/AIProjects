@@ -837,9 +837,12 @@ def knn(data, labels, k):
     #Define Accuracy
     accuracy = (trueVal / len(dataDivided[2])) * 100
     print(accuracy)
+
+
 #5x2 Validation
 def crossValidation(dataSet,labels):
     tempDataSet = []
+    randomValue = []
     for i in range(len(dataSet)):
         tempDataSet.append((labels[i],dataSet[i]))
     random.shuffle(tempDataSet)
@@ -847,15 +850,17 @@ def crossValidation(dataSet,labels):
     testLabels = []
     trainData = []
     trainLabels = []
-    for i in range(len(tempDataSet)):                
+    while len(randomValue) < len(tempDataSet):    
         num = random.randint(0,len(tempDataSet)-1)
-        if( i < 49):
-            trainLabels.append(tempDataSet[num][0])
-            trainData.append(tempDataSet[num][1])
-        elif( i > 49 and i < 150):
-            testLabels.append(tempDataSet[num][0])
-            testData.append(tempDataSet[num][1])
-    return(trainData, trainLabels, testData, testLabels)  
+        if(num not in randomValue):
+            randomValue.append(num)
+            if( num < (int(len(tempDataSet)-1)/2)):
+                trainLabels.append(tempDataSet[num][0])
+                trainData.append(tempDataSet[num][1])
+            else:
+                testLabels.append(tempDataSet[num][0])
+                testData.append(tempDataSet[num][1])
+    return(trainData, trainLabels, testData, testLabels)   
 
 
 def main():
