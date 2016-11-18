@@ -243,17 +243,17 @@ def build_TAN(dataSet, labels):
     forest = list()
     # Build a node for each feature in the dataset, ID'd by index
     for i in range(len(dataSet[0])):
-        node = TanNode.TanNode(i)
+        node = TanNode.TanNode(str(i))
         network.append(node)
         # Prep forest
-        forest.append(set(str(i)))
+        forest.append({str(i)})
     # Connect all nodes and set the weights for each edge as the CMI between those features
     for i in range(len(dataSet[0])-1):
         for j in range(i+1, len(dataSet[0])):
-            network[i].addUndirectedEdge(network[j])
+            #network[i].addUndirectedEdge(network[j])
             weight = calculate_CMI(i, j, dataSet, labels)
-            network[i].setWeight(j, weight)
-            network[j].setWeight(i, weight)
+            #network[i].setWeight(j, weight)
+            #network[j].setWeight(i, weight)
             edges.append((str(i), str(j), weight))
     # Build maximum weight spanning tree
     edges = sorted(edges, key = lambda x: x[2], reverse = True)
@@ -278,18 +278,47 @@ def build_TAN(dataSet, labels):
             forest[tree1] = forest[tree1].union(forest[tree2])
             del(forest[tree2])
             
-    print(forest)
     print(spanTree)
+    # Pick root
+    root = random.choice(network)
+    print("Root: " + root.name)
+    # Set directed edges away from root
+    edges = spanTree.copy()
+    remainingNodes = []
+    for edge in edges:
+        if edge[0] == root.name:
+            root.addDirectedEdge(network[int(edge[1])])
+            remainingNodes.append(int(edge[1]))
+            spanTree.remove(edge)
+        elif edge[1] == root.name:
+            root.addDirectedEdge(network[int(edge[0])])
+            remainingNodes.append(int(edge[0]))
+            spanTree.remove(edge)
+    # Set rest of directed edges
+    while remainingNodes:
+        i = remainingNodes.pop(0)
+        currentNode = network[i]
+        edges = spanTree.copy()
+        for edge in edges:
+            if edge[0] == currentNode.name:
+                currentNode.addDirectedEdge(network[int(edge[1])])
+                remainingNodes.append(int(edge[1]))
+                spanTree.remove(edge)
+            elif edge[1] == currentNode.name:
+                currentNode.addDirectedEdge(network[int(edge[0])])
+                remainingNodes.append(int(edge[0]))
+                spanTree.remove(edge)
+        
+    
         
     
     for node in network:
         print("Node {0}:".format(node.name))
         print("  connections: " + str(node.childNames))
-        print("  weights: " + str(node.weights))
         
     
 def experiment_TAN():
-    data = getIris()
+    data = getSoybean()
     build_TAN(data[0], data[1])
     
 '''
