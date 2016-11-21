@@ -15,6 +15,7 @@ import math
 import ID3Node
 import TanNode
 import operator
+from statistics import mean 
 
 conditionalProbabilityValue = {}
 totalClassValue = {}
@@ -216,7 +217,7 @@ def calculate_CMI(feat1, feat2, dataSet, labels):
                         yCount += 1
                 # Prob of (x,y,c)
                 Pxyc = localCount/len(dataSet)
-                #print("Prob of C={0}, X={1}, Y={2}: {3}".format(c, x, y, Pcxy))
+                ##print("Prob of C={0}, X={1}, Y={2}: {3}".format(c, x, y, Pcxy))
                 # Only proceed for nonzero probs
                 if Pxyc > 0:
                     # Prob of (x,y | c)
@@ -227,7 +228,7 @@ def calculate_CMI(feat1, feat2, dataSet, labels):
                     # Add to CMI
                     CMI += (Pxyc * math.log2(Pxy/(Px*Py)))
     
-    #print("CMI: " + str(CMI))
+    ##print("CMI: " + str(CMI))
     return CMI
     
 def run_TAN(dataSet, labels, testData, testLabels):
@@ -242,8 +243,8 @@ def run_TAN(dataSet, labels, testData, testLabels):
     # Forest is a list of sets of trees for the max spanning alg
     forest = list()
     # Build a node for each feature in the dataset, ID'd by index
-    print("####################")
-    print("Building Complete Undirected Graph From Features")
+    #print("####################")
+    #print("Building Complete Undirected Graph From Features")
     for i in range(len(dataSet[0])):
         node = TanNode.TanNode(str(i))
         network.append(node)
@@ -254,13 +255,13 @@ def run_TAN(dataSet, labels, testData, testLabels):
         for j in range(i+1, len(dataSet[0])):
             #network[i].addUndirectedEdge(network[j])
             weight = calculate_CMI(i, j, dataSet, labels)
-            print("CMI between feature {0} and feature {1}: {2}".format(i,j,weight))
+            #print("CMI between feature {0} and feature {1}: {2}".format(i,j,weight))
             #network[i].setWeight(j, weight)
             #network[j].setWeight(i, weight)
             edges.append((str(i), str(j), weight))
     # Build maximum weight spanning tree
-    print("####################")
-    print("Building Max Weight Spanning Tree")
+    #print("####################")
+    #print("Building Max Weight Spanning Tree")
     edges = sorted(edges, key = lambda x: x[2], reverse = True)
     spanTree = list()
     while edges and len(spanTree) < len(network)-1:
@@ -283,11 +284,11 @@ def run_TAN(dataSet, labels, testData, testLabels):
             forest[tree1] = forest[tree1].union(forest[tree2])
             del(forest[tree2])
             
-    print("Max Spanning Tree: " + str(spanTree))
-    print("####################")
+    #print("Max Spanning Tree: " + str(spanTree))
+    #print("####################")
     # Pick root
     root = random.choice(network)
-    #print("Root: " + root.name)
+    ##print("Root: " + root.name)
     # Set directed edges away from root
     edges = spanTree.copy()
     remainingNodes = []
@@ -335,7 +336,7 @@ def run_TAN(dataSet, labels, testData, testLabels):
             # Prob of class
             pC = (float(classCounts[c])/float(len(dataSet)))
             # Prob of root given class
-            #print("Root: " + root.name)
+            ##print("Root: " + root.name)
             r = int(root.name)
             localCount = 0 # SMOOTHING?
             for index, data in enumerate(dataSet):
@@ -367,30 +368,30 @@ def run_TAN(dataSet, labels, testData, testLabels):
                             localCount += 1
                 localProb = (float(localCount)/float(localTotal))
                 # If 
-                #print("Local Prob: " + str(localProb))
+                ##print("Local Prob: " + str(localProb))
                 finalProb *= localProb
             # Store probability of each class
             predictions[c] = finalProb
         # Choose prediction as highest probability class
-        print("Calculated Posterior Probabilities: " + str(predictions))
+        #print("Calculated Posterior Probabilities: " + str(predictions))
         prediction = max(predictions, key = lambda i:predictions[i])
-        print("Prediction: " + (prediction))
-        print("Actual: " + testL)
+        #print("Prediction: " + (prediction))
+        #print("Actual: " + testL)
         if testL == prediction:
             numCorrect += 1
-    print("####################")        
-    print("Accuracy: " + str(float(numCorrect)/len(testData)))
+    #print("####################")        
+    #print("Accuracy: " + str(float(numCorrect)/len(testData)))
            
             
     
     
     #for node in network:
-    #    print("Node {0}:".format(node.name))
-    #    print("  connections: " + str(node.childNames))
+    #    #print("Node {0}:".format(node.name))
+    #    #print("  connections: " + str(node.childNames))
         
     
 def experiment_TAN():
-    print("Running TAN on Vote Data")
+    #print("Running TAN on Vote Data")
     data = getVote()
     dataSet = data[0]
     labels = data[1]
@@ -413,7 +414,7 @@ def calculateEntropy(dataSet, labels):
         # Count total number of classes
         else:
             classCounts[label] = 1
-    #print(classCounts)
+    ##print(classCounts)
     
     # Entropy Calculation
     entropy = 0.0
@@ -436,7 +437,7 @@ def calculateGainRatio(feature, dataSet, labels):
     featValues = set()
     for data in dataSet:
         featValues.add(data[feature])
-    #print("Num Splits: " + str(len(featValues)))
+    ##print("Num Splits: " + str(len(featValues)))
         
     # For each value feature can take on measure entropy of that subset
     for value in featValues:
@@ -447,22 +448,22 @@ def calculateGainRatio(feature, dataSet, labels):
             if dataSet[i][feature] == value:
                 subData.append(dataSet[i])
                 subLabels.append(labels[i])
-        #print("Subdata: " + str(subData))
-        #print("Sublabels: " + str(subLabels))
+        ##print("Subdata: " + str(subData))
+        ##print("Sublabels: " + str(subLabels))
         
         # Get subEntropy, multiply by probability, and add to newEntropy
         subEntropy = calculateEntropy(subData, subLabels)
         p = float(len(subData))/float(len(dataSet))
         expectedEntropy += (subEntropy * p)
         intrinsicValue += (p * math.log2(p))
-        #print("Subentropy: " + str(subEntropy))
+        ##print("Subentropy: " + str(subEntropy))
         
         
     # Calculate gain
     gain = entropy - expectedEntropy
-    #print("Gain: " + str(gain))
-    #print("Expected Entropy: " + str(expectedEntropy))
-    #print("Intrinsic Value: " + str(-intrinsicValue))
+    ##print("Gain: " + str(gain))
+    ##print("Expected Entropy: " + str(expectedEntropy))
+    ##print("Intrinsic Value: " + str(-intrinsicValue))
     
     # Calculate gain ratio, watch out for divide by zero!
     if int(intrinsicValue) == 0:
@@ -483,25 +484,25 @@ def run_ID3(trainData, trainLabels, testData, testLabels, validationData, valida
     ID3 = build_ID3(trainData, trainLabels, featureIndices)
     
     # Prune 
-    print("##################################")
-    print("Attempting to prune with reduced error pruning technique")
+    #print("##################################")
+    #print("Attempting to prune with reduced error pruning technique")
     prune(ID3, ID3, validationData, validationLabels)
     
     # Test decision tree using testData, return classification accuracy
-    print("##################################")
-    print("Running classification with test dataset")
+    #print("##################################")
+    #print("Running classification with test dataset")
     total = float(len(testData))
     numCorrect = 0
     for i in range(len(testData)):
         prediction = ID3.test(testData[i])
         if testLabels[i] == prediction:
             numCorrect += 1
-        print("ID3 Prediction: " + str(prediction))
-        print("Actual Class: " + testLabels[i])
+        #print("ID3 Prediction: " + str(prediction))
+        #print("Actual Class: " + testLabels[i])
             
     accuracy = numCorrect/total
-    print("Number correctly classified: " + str(numCorrect))
-    print("ID3 Accuracy: " + str(accuracy))
+    #print("Number correctly classified: " + str(numCorrect))
+    #print("ID3 Accuracy: " + str(accuracy))
 
 def build_ID3(trainData, trainLabels, features):
     ''' Build a node of the decision tree for ID3 by choosing the attribute from features that
@@ -509,8 +510,8 @@ def build_ID3(trainData, trainLabels, features):
     all possible values of that attribute.  If features is empty, return the majority label of the 
     trainLabels.  If all trainLabels are the same, return that label.
     '''
-    print("################")
-    print("Building Decision Tree")
+    #print("################")
+    #print("Building Decision Tree")
     root = ID3Node.ID3Node()
     
     # If all trainLabels are the same return the node with that label
@@ -521,7 +522,7 @@ def build_ID3(trainData, trainLabels, features):
             allSame = False
             break
     if allSame:
-        print("Leaf Node with class label " + (str(nodeLabel)))
+        #print("Leaf Node with class label " + (str(nodeLabel)))
         root.setLabel(nodeLabel)
         return root
     
@@ -541,7 +542,7 @@ def build_ID3(trainData, trainLabels, features):
                 currentLabel = label 
                 currentCount = 1
         root.setLabel(majorityLabel)
-        print("Leaf Node with class label " + (str(majorityLabel)))
+        #print("Leaf Node with class label " + (str(majorityLabel)))
         return root
     
     # Otherwise find feature with highest gain ratio and split dataset by creating children nodes
@@ -549,12 +550,12 @@ def build_ID3(trainData, trainLabels, features):
     bestGR = calculateGainRatio(bestFeature, trainData, trainLabels)
     for feature in features:
         currentGR = calculateGainRatio(feature, trainData, trainLabels)
-        print("Calculating Gain Ratio for feature " + str(feature) + ": " + str(currentGR))
+        #print("Calculating Gain Ratio for feature " + str(feature) + ": " + str(currentGR))
         if currentGR > bestGR:
             bestFeature = feature
             bestGR = currentGR
     root.setFeature(bestFeature)
-    print("Best Feature is feature # " + str(bestFeature))
+    #print("Best Feature is feature # " + str(bestFeature))
     # Find possible values of best feature for splitting dataset
     featValues = set()
     for data in trainData:
@@ -611,13 +612,13 @@ def prune(tree, node, data, labels):
         if labels[i] == prediction:
             numCorrect += 1      
     new_accuracy = numCorrect/total
-    print("Pruned accuracy: " + str(new_accuracy))
+    #print("Pruned accuracy: " + str(new_accuracy))
     # Set label back to none if this results in decreased accuracy
     if new_accuracy < accuracy:
         node.label = None
     # Otherwise keep the pruned tree and set the best accuracy
-    else:
-        print("Accuracy is as good or better! Node pruned!")
+    #else:
+        #print("Accuracy is as good or better! Node pruned!")
     return
 
 def experiment_ID3():
@@ -636,7 +637,7 @@ def experiment_ID3():
     testLabels = labels[1::3]
     validationData = dataSet[2::3]
     validationLabels = labels[2::3]
-    print("Running ID3 on Breast Cancer Data")
+    #print("Running ID3 on Breast Cancer Data")
     run_ID3(trainData, trainLabels, testData, testLabels, validationData, validationLabels)    
 
 
@@ -653,14 +654,14 @@ def classSeperation(trainData, trainLabels, testData, testLabels):
             classDictionary[trainLabels[value]] = [] 
         classDictionary[trainLabels[value]].append(trainData[value])
 
-    print("Class Dictionary after joining training labels and data: ")
-    print(classDictionary)
-    print("--------------")
+    #print("Class Dictionary after joining training labels and data: ")
+    #print(classDictionary)
+    #print("--------------")
     attributeCount(classDictionary)
     
     # Test Naive Bayes using testData
     totalTest = float(len(testData))
-    print("Size of test set " + str(totalTest))
+    #print("Size of test set " + str(totalTest))
     numCorrect = 0
     for i in range(len(testData)):
         prediction = testingNaiveBayes(testData[i])
@@ -668,8 +669,8 @@ def classSeperation(trainData, trainLabels, testData, testLabels):
             numCorrect += 1
             
     accuracy = numCorrect/totalTest
-    print("Number correctly classified: " + str(numCorrect))
-    print("Naive Bayes Accuracy: " + str(accuracy))
+    #print("Number correctly classified: " + str(numCorrect))
+    #print("Naive Bayes Accuracy: " + str(accuracy))
     
 '''
 Counting and saving stuff => {0(class):{0(index):{1(count for bin1),2(count for bin2),.....}, 1(index):{..}..}} 
@@ -677,12 +678,12 @@ Counting and saving stuff => {0(class):{0(index):{1(count for bin1),2(count for 
 def attributeCount(classDictionary):
     storeCount = {}
     count = 1
-    #print(classDictionary.items())
+    ##print(classDictionary.items())
     for key , value in classDictionary.items():
-        #print(value)
+        ##print(value)
         for num in range(len(value)):          
             for subValue in range(len(value[num])):
-                #print(subValue)             
+                ##print(subValue)             
                 if(count > len(value[num])):
                     count = 1
                 if(key not in storeCount):
@@ -703,7 +704,7 @@ def attributeCount(classDictionary):
                     x = x + 1
                     storeCount[key][count][value[num][subValue]] = x
                 count +=1         
-    print("Total number of feature values ({Class: {Feature Index: {Value: Count}}})" + str(storeCount))
+    #print("Total number of feature values ({Class: {Feature Index: {Value: Count}}})" + str(storeCount))
     priorProbabilityCalculation(storeCount)   
        
 def priorProbabilityCalculation(storeCount):
@@ -718,7 +719,7 @@ def priorProbabilityCalculation(storeCount):
             if(key not in totalClassValue):
                 totalClassValue[key] = count
 
-    print("Class Counts " + str(totalClassValue))
+    #print("Class Counts " + str(totalClassValue))
     '''
     To calculate total of training data
     '''
@@ -733,7 +734,7 @@ def priorProbabilityCalculation(storeCount):
             x = value / total
             classProbabilityValue[key] = x
                 
-    print("Prior Probability is " + str(classProbabilityValue))   
+    #print("Prior Probability is " + str(classProbabilityValue))   
     '''     
     Calculation of conditional probability
     In this block using prior and conditional probability we will calculate Posterior Probability
@@ -749,7 +750,7 @@ def priorProbabilityCalculation(storeCount):
                         conditionalProbabilityValue[key][secondaryKey] = {}
                     if (subKey == key): 
                         conditionalProbabilityValue[key][secondaryKey][lastKey[0]] = lastKey[1]/subValue
-    print("Conditional probability => " + str(conditionalProbabilityValue))
+    #print("Conditional probability => " + str(conditionalProbabilityValue))
 
 def testingNaiveBayes(testData): 
     testIndex = testData
@@ -777,7 +778,7 @@ def testingNaiveBayes(testData):
 
                     
 def experiment_NaiveBayes():
-    print("Running Naive Bayes on Iris Data")
+    #print("Running Naive Bayes on Iris Data")
     glass = getIris()
     dataSet = glass[0]
     labels = glass[1]
@@ -796,10 +797,10 @@ def divideData(data, labels) :
     trainLabels = labels[::3]
     testData = data[1::3]
     testLabels = labels[1::3]
-    #print("trainData")
-    #print(trainLabels)
-    #print("testData")
-    #print(testLabels)
+    ##print("trainData")
+    ##print(trainLabels)
+    ##print("testData")
+    ##print(testLabels)
     return (trainData, trainLabels, testData, testLabels)
 
 #Function that return a dictionary of dictionary
@@ -829,17 +830,17 @@ def creaListOccInClass(trainData, trainLabels):
             classDictionary[trainLabels[value]] = [] 
         classDictionary[trainLabels[value]].append(trainData[value])
 
-    #print("Class Dictionary after joining training labels and data")
-    #print(classDictionary)
+    ##print("Class Dictionary after joining training labels and data")
+    ##print(classDictionary)
     #attributeCount(classDictionary)
     storeCount = {}
     count = 1
-    #print(classDictionary.items())
+    ##print(classDictionary.items())
     for key , value in classDictionary.items():
-        #print(value)
+        ##print(value)
         for num in range(len(value)):          
             for subValue in range(len(value[num])):
-                #print(subValue)             
+                ##print(subValue)             
                 if(count > len(value[num])):
                     count = 1
                 if(key not in storeCount):
@@ -860,7 +861,7 @@ def creaListOccInClass(trainData, trainLabels):
                     x = x + 1
                     storeCount[key][count][value[num][subValue]] = x
                 count +=1         
-    #print("Bin count" + str(storeCount))
+    ##print("Bin count" + str(storeCount))
     return storeCount
 
 #Function that creat a dictionary with each value/feature and it's occurence in the set of data 
@@ -871,18 +872,18 @@ def creatOccTot(trainData, trainLabels):
             classDictionary[trainLabels[value]] = [] 
         classDictionary[trainLabels[value]].append(trainData[value])
 
-    #print("Class Dictionary after joining training labels and data")
-    #print(classDictionary)
+    ##print("Class Dictionary after joining training labels and data")
+    ##print(classDictionary)
     #attributeCount(classDictionary)
     storeCount = {}
     count = 1
-    #print(classDictionary.items())
+    ##print(classDictionary.items())
     for key , value in classDictionary.items():
         
-        #print(value)
+        ##print(value)
         for num in range(len(value)):          
             for subValue in range(len(value[num])):
-                #print(subValue)             
+                ##print(subValue)             
                 if(count > len(value[num])):
                     count = 1
                 if(count not in storeCount):
@@ -903,7 +904,7 @@ def creatOccTot(trainData, trainLabels):
                     x = x + 1
                     storeCount[count][value[num][subValue]] = x
                 count +=1         
-    #print(str(storeCount))
+    ##print(str(storeCount))
     return storeCount
 
 #Function that return a list containing one occurence of the different classes
@@ -919,12 +920,12 @@ def vdm(x,y,listClass,occInClass,occTot) :
     vdm = 0
 
     for i in range(1, len(listClass)+1):
-        #print(listClass[i-1])
-        #print(occInClass[listClass[i-1]][i][x])
-        #print(occTot[i][x])
+        ##print(listClass[i-1])
+        ##print(occInClass[listClass[i-1]][i][x])
+        ##print(occTot[i][x])
         if y in occInClass[listClass[i-1]][i] and y in occTot[i] and x in occInClass[listClass[i-1]][i] and x in occTot[i]  : 
-            #print(occInClass[listClass[i-1]][i][y])
-            #print(occTot[i][y])
+            ##print(occInClass[listClass[i-1]][i][y])
+            ##print(occTot[i][y])
             vdm += abs((occInClass[listClass[i-1]][i][x]/occTot[i][x])-(occInClass[listClass[i-1]][i][y]/occTot[i][y]))
         if (y not in occInClass[listClass[i-1]][i] or y not in occTot[i]) and (x in occInClass[listClass[i-1]][i] and x in occTot[i]):
             vdm += abs((occInClass[listClass[i-1]][i][x]/occTot[i][x]))
@@ -966,45 +967,48 @@ def selectClass(kNeighbors):
     return max(dictionaryClass, key = lambda x:dictionaryClass[x])
 
 #KNN algorithm
-def knn(data, labels, k):
-    print("KNN Algorithm ................................")
-    print("With k = "+str(k))
-    dataDivided = divideData(data, labels)
+def knn(dataDivided, k):
+    #print("KNN Algorithm ................................")
+    #print("With k = "+str(k))
+    #dataDivided = divideData(data, labels)
     #New list of labels predicted
     newLabels = list()
     trueVal = 0
     #Define labels for the testData
     for i in range(0, len(dataDivided[2])):
         #Creat the list of kNeighbors of each raw of the DataTest
-        print("DataTest["+str(i)+"] :")
-        print(dataDivided[2][i])
+        #print("DataTest["+str(i)+"] :")
+        #print(dataDivided[2][i])
         kNeighbors = calculateListKneighbors(dataDivided[0],dataDivided[1], dataDivided[2][i], k)
-        print("kNeighbors for raw number "+str(i))
-        print(kNeighbors)
+        #print("kNeighbors for raw number "+str(i))
+        #print(kNeighbors)
         #Select the new class of the raw
         newClass = selectClass(kNeighbors)
-        print("Class prediction for the current raw")
-        print(newClass)
+        #print("Class prediction for the current raw")
+        #print(newClass)
         newLabels.append(newClass)
         if newClass == dataDivided[3][i] :
             trueVal = trueVal + 1
     #Define Accuracy
     accuracy = (trueVal / len(dataDivided[2])) * 100
-    print("Accuracy "+str(accuracy))
+    #print("Accuracy "+str(accuracy))
+    return accuracy 
 
 #5x2 Validation
-def crossValidation(dataSet,labels):
-    #print(len(labels))
+def crossValidation(dataSet,labels, validationSize = 0.1):
+    ##print(len(labels))
     tempDictionary = {}
     for value in range(len(dataSet)):
         if (labels[value] not in tempDictionary):
             tempDictionary[labels[value]] = [] 
         tempDictionary[labels[value]].append(dataSet[value])
-    #print(tempDictionary)
+    ##print(tempDictionary)
     tempTestData = []
     testLabels = []
     tempTrainData = []
     trainLabels = []
+    validationData = []
+    validationLabels = []
     for key, value in tempDictionary.items():
         random.shuffle(value)
         half = int(math.ceil(len(value)/2))
@@ -1013,7 +1017,6 @@ def crossValidation(dataSet,labels):
         for num in range(0,half):
             testLabels.append(key)
             trainLabels.append(key)
-    
     
     testData = []
     trainData = []
@@ -1024,47 +1027,59 @@ def crossValidation(dataSet,labels):
         for k in tempTestData[i]:
             testData.append(k)
             
-    print("--------------")
-    print("Train Data: " + str(trainData))
-    print("Train Labels: " + str(trainLabels))
-    print("Test Data: " + str(testData))
-    print("Test Labels: " + str(testLabels))
-    print("--------------")
+#     #print("Equal?")
+#     eq = tempTrainData[0][0] == trainData[0]
+#     #print(eq)
+            
+#     #print("--------------")
+#     #print("Train Data: " + str(trainData))
+#     #print("Train Labels: " + str(trainLabels))
+#     #print("Test Data: " + str(testData))
+#     #print("Test Labels: " + str(testLabels))
+#     #print("--------------")
     
-    return(trainData, trainLabels, testData, testLabels)
-    '''
-    tempDataSet = []
-    randomValue = []
-    for i in range(len(dataSet)):
-        tempDataSet.append((labels[i],dataSet[i]))
-    random.shuffle(tempDataSet)
-    testData = []
-    testLabels = []
-    trainData = []
-    trainLabels = []
-    while len(randomValue) < len(tempDataSet):    
-        num = random.randint(0,len(tempDataSet)-1)
-        if(num not in randomValue):
-            randomValue.append(num)
-            if( num < (int(len(tempDataSet)-1)/2)):
-                trainLabels.append(tempDataSet[num][0])
-                trainData.append(tempDataSet[num][1])
-            else:
-                testLabels.append(tempDataSet[num][0])
-                testData.append(tempDataSet[num][1])
-    print(testData)
-    print(testLabels)
-    print("--------------")
-    print(trainData)
-    print(trainLabels)
-    return(trainData, trainLabels, testData, testLabels)
-    '''    
+    return(trainData, trainLabels, testData, testLabels, validationData, validationLabels)
 
+def finalExperiment(data, k):
+    results = {"knn":[],
+               "nb":[],
+               "tan":[],
+               "id3":[] }
+    # 5 passes of 2-fold cross validation for each dataset for each algorithm
+    for i in range(5):
+        dataSplits = crossValidation(data[0], data[1])
+        trainData = dataSplits[0]
+        trainLabels = dataSplits[1]
+        testData = dataSplits[2]
+        testLabels = dataSplits[3]
+        validationData = dataSplits[4]
+        validationLabels = dataSplits[5]
+        
+        # KNN
+        acc1 = knn((trainData,trainLabels,testData,testLabels), k)
+        acc2 = knn((testData,testLabels,trainData,trainLabels), k)
+        results["knn"].append(acc1)
+        results["knn"].append(acc2)
+        
+        # NB
+        
+        # TAN
+        
+        # ID3
+    print(mean(results["knn"]))
+    
 
 def main():
-    data = getSoybean()
-    # SAMPLE RUN PRINTOUTS
-    knn(data[0],data[1], 3)
+    data = getGlass()
+    #data = getBreastCancer()
+    #data = getSoybean()
+    #data = getVote()
+    #data = getIris()
+    for k in [1,9]:
+        finalExperiment(data,k)
+    #data = getSoybean()
+    # SAMPLE RUN #printOUTS
+    #knn(data[0],data[1], 3)
     #experiment_NaiveBayes()
     #experiment_ID3()
     #experiment_TAN()
