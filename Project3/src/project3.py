@@ -380,7 +380,8 @@ def run_TAN(dataSet, labels, testData, testLabels):
         if testL == prediction:
             numCorrect += 1
     #print("####################")        
-    #print("Accuracy: " + str(float(numCorrect)/len(testData)))
+    accuracy = float(numCorrect)/len(testData)
+    return accuracy
            
             
     
@@ -500,7 +501,8 @@ def run_ID3(trainData, trainLabels, testData, testLabels, validationData, valida
         #print("ID3 Prediction: " + str(prediction))
         #print("Actual Class: " + testLabels[i])
             
-    accuracy = numCorrect/total
+    accuracy = float(numCorrect)/total
+    return accuracy
     #print("Number correctly classified: " + str(numCorrect))
     #print("ID3 Accuracy: " + str(accuracy))
 
@@ -671,6 +673,7 @@ def classSeperation(trainData, trainLabels, testData, testLabels):
     accuracy = numCorrect/totalTest
     #print("Number correctly classified: " + str(numCorrect))
     #print("Naive Bayes Accuracy: " + str(accuracy))
+    return accuracy
     
 '''
 Counting and saving stuff => {0(class):{0(index):{1(count for bin1),2(count for bin2),.....}, 1(index):{..}..}} 
@@ -990,7 +993,7 @@ def knn(dataDivided, k):
         if newClass == dataDivided[3][i] :
             trueVal = trueVal + 1
     #Define Accuracy
-    accuracy = (trueVal / len(dataDivided[2])) * 100
+    accuracy = (trueVal / len(dataDivided[2]))
     #print("Accuracy "+str(accuracy))
     return accuracy 
 
@@ -1002,30 +1005,47 @@ def crossValidation(dataSet,labels, validationSize = 0.1):
         if (labels[value] not in tempDictionary):
             tempDictionary[labels[value]] = [] 
         tempDictionary[labels[value]].append(dataSet[value])
-    ##print(tempDictionary)
+    #for c, v in tempDictionary.items():
+    #    print(str(c) + str(v))
     tempTestData = []
     testLabels = []
     tempTrainData = []
     trainLabels = []
-    validationData = []
+    tempValData = []
     validationLabels = []
     for key, value in tempDictionary.items():
         random.shuffle(value)
-        half = int(math.ceil(len(value)/2))
-        tempTestData.append(value[:half])
-        tempTrainData.append(value[half:])
-        for num in range(0,half):
+        tsplit = int((len(value)*.45))
+        vsplit = len(value[tsplit*2:])
+        tempTestData.append(value[:tsplit])
+        tempTrainData.append(value[tsplit:tsplit*2])
+        tempValData.append(value[tsplit*2:])
+        for num in range(tsplit):
             testLabels.append(key)
             trainLabels.append(key)
+        for num in range(vsplit):
+            validationLabels.append(key)
     
     testData = []
     trainData = []
+    validationData = []
     for i in range(len(tempTrainData)):
         for k in tempTrainData[i]:
             trainData.append(k)
     for i in range(len(tempTestData)):
         for k in tempTestData[i]:
             testData.append(k)
+    for i in range(len(tempValData)):
+        for k in tempValData[i]:
+            validationData.append(k)
+            
+#     print("Total Length:{0}, Test:{1}, Train:{2}, Val:{3}".format(len(dataSet),len(testData),len(trainData),len(validationData)))
+#     print("Total Length:{0}, Test:{1}, Train:{2}, Val:{3}".format(len(labels),len(testLabels),len(trainLabels),len(validationLabels)))
+#     print(validationData)
+#     print(validationLabels)
+#     
+#     print(testData)
+#     print(trainData)
             
 #     #print("Equal?")
 #     eq = tempTrainData[0][0] == trainData[0]
@@ -1062,21 +1082,63 @@ def finalExperiment(data, k):
         results["knn"].append(acc2)
         
         # NB
+        acc1 = classSeperation(trainData, trainLabels, testData, testLabels)
+        acc2 = classSeperation(testData,testLabels,trainData,trainLabels)
+        results["nb"].append(acc1)
+        results["nb"].append(acc2)
         
         # TAN
+        acc1 = run_TAN(trainData, trainLabels, testData, testLabels)
+        acc2 = run_TAN(testData,testLabels,trainData,trainLabels)
+        results["tan"].append(acc1)
+        results["tan"].append(acc2)
         
         # ID3
-    print(mean(results["knn"]))
-    
-
+        acc1 = run_ID3(trainData, trainLabels, testData, testLabels, validationData, validationLabels)
+        acc2 = run_ID3(testData,testLabels,trainData,trainLabels, validationData, validationLabels)
+        results["id3"].append(acc1)
+        results["id3"].append(acc2)
+        
+    #for alg, data in results.items():
+    #    print(alg)
+    #    print(data)
+      
+    print("Average Classification Accuracies")  
+    print("KNN: " + str(mean(results["knn"])))
+    print("NB:  " + str(mean(results["nb"])))
+    print("TAN: " + str(mean(results["tan"])))
+    print("ID3: " + str(mean(results["id3"])))
+    print()
+    print("Paired 5x2 CV T-scores:")
+    names = ["knn","nb","tan","id3"]
+    for i in range(3):
+        for j in range(i+1, 4):
+            A = names[i]
+            B = names[j]
+            print(A + " and " + B)
+            p11 = (1 - results[A][0]) - (1 - results[B][0])
+            #print("P11: " + str(p11))
+            # Now calc variance
+            sTotal = 0.0
+            for k in [0,2,4,6,8]:
+                p1 = (1 - results[A][k]) - (1 - results[B][k])
+                p2 = (1 - results[A][k+1]) - (1 - results[B][k+1])
+                pMean = (p1 + p2)/2
+                s2 = ((p1 - pMean)**2) + ((p2 - pMean)**2)
+                sTotal += s2
+            # Now the t statistic
+            den = math.sqrt(sTotal/5)
+            t = p11/den 
+            print("T-stat: " + str(t))
+            print("*****")
+            
 def main():
-    data = getGlass()
+    #data = getVote()
     #data = getBreastCancer()
     #data = getSoybean()
-    #data = getVote()
-    #data = getIris()
-    for k in [1,9]:
-        finalExperiment(data,k)
+    #data = getGlass()
+    data = getIris()
+    finalExperiment(data, 3)
     #data = getSoybean()
     # SAMPLE RUN #printOUTS
     #knn(data[0],data[1], 3)
