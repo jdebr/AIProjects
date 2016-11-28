@@ -8,9 +8,11 @@ Group 3
 @author: Shriyansh Kothari
 @author: Sara Ounissi
 '''
+from Track import Track
+from Racecar import Racecar
 
 def main():
-    print("Hello World")
+    track = Track('R')
 
 if __name__ == "__main__":
     main()
