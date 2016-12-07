@@ -8,16 +8,19 @@ Group 3
 @author: Shriyansh Kothari
 @author: Sara Ounissi
 '''
+import Racecar
 
 class Track():
     ''' Define a class for simulating a racetrack, which is specified by an external
     ASCII text file.  Contains methods for evaluating current position of a RaceCar object
     on the track.
     '''
-    def __init__(self, trackShape):
+    def __init__(self, trackShape, carX, carY):
         ''' Initialize track using text found in one of three files, specified by the trackshape
-        which can either be 'R', 'O', or 'L'
+        which can either be 'R', 'O', or 'L'.  Initializes a Racecar object at position defined by
+        carX and carY
         '''
+        # Self.track is a list of lists of character representing the track
         self.track = list()
         
         trackFile = ''
@@ -34,7 +37,7 @@ class Track():
         with open(trackFile, 'r') as f:
             # First line specifies track dimensions
             line = f.readline()
-            print("Size: " + str(line))
+            #print("Size: " + str(line))
             # Remaining lines specify track
             line = f.readline()
             # Iterate rest of file, which is the track 
@@ -44,6 +47,17 @@ class Track():
                 self.track.append(trackLine)
                 line = f.readline()
                 
-        for line in self.track:
-            for char in line:
-                print(char, end="")
+        # Initialize other class objects
+        self.car = Racecar.Racecar(carX, carY)
+                
+    def show(self):
+        ''' Method for printing ASCII representation of the state of the track '''
+        for i, line in enumerate(self.track):
+            for j, char in enumerate(line):
+                if j == self.car.x and i == (len(self.track) - 1 - self.car.y):
+                    # Print the car's location
+                    print('R', end="")
+                else:
+                    print(char, end="")
+        
+        

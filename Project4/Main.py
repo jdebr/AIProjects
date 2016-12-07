@@ -116,7 +116,8 @@ def validMove(state,possibleActions):
             return False
 
 def main():
-    track = Track('R')
+    track = Track('O', 10, 0)
+    track.show()
 
 if __name__ == "__main__":
     main()
