@@ -9,20 +9,30 @@ Group 3
 @author: Sara Ounissi
 '''
 import Racecar
+import random
 
 class Track():
     ''' Define a class for simulating a racetrack, which is specified by an external
     ASCII text file.  Contains methods for evaluating current position of a RaceCar object
     on the track.
     '''
-    def __init__(self, trackShape, carX, carY):
+    def __init__(self, trackShape, car_position=None, restart_on_crash=False):
         ''' Initialize track using text found in one of three files, specified by the trackshape
         which can either be 'R', 'O', or 'L'.  Initializes a Racecar object at position defined by
-        carX and carY
+        tuple car_position, or if not specified sets it to a random start location,
+         and sets the restart penalty for car crashes.
         '''
-        # Self.track is a list of lists of character representing the track
-        self.track = list()
         
+        self.track = list()
+        # List of lists of character representing the track
+        
+        self.start_positions = list()
+        # List of tuples of (x,y) coordinates specifying potential starting locations
+        
+        self.restart = restart_on_crash
+        # Whether car must restart after a crash
+        
+        # Read in specified track file
         trackFile = ''
         if trackShape == 'R':
             trackFile = 'R-track.txt'
@@ -34,6 +44,7 @@ class Track():
             print("Incorrect track selection, defaulting to O Track")
             trackFile = 'O-track.txt'
         
+        # Parse and save track file
         with open(trackFile, 'r') as f:
             # First line specifies track dimensions
             line = f.readline()
@@ -47,8 +58,16 @@ class Track():
                 self.track.append(trackLine)
                 line = f.readline()
                 
+        # Find and save starting locations
+        for i, line in enumerate(self.track):
+            for j, char in enumerate(line):
+                if char == 'S':
+                    self.start_positions.append((j, len(self.track)-1-i))
+                
         # Initialize other class objects
-        self.car = Racecar.Racecar(carX, carY)
+        if not car_position:
+            car_position = random.choice(self.start_positions)
+        self.car = Racecar.Racecar(car_position[0], car_position[1], self)
                 
     def show(self):
         ''' Method for printing ASCII representation of the state of the track '''
@@ -59,5 +78,12 @@ class Track():
                     print('R', end="")
                 else:
                     print(char, end="")
+                    
+    def check_for_crash(self, start, end):
+        ''' Method to check spaces in a line between two (x,y) locations on the track.
+        If one of these spaces is a wall space, return the location the car would have
+        been right before the crash.  Otherwise return false
+        '''
+        return False
         
         
