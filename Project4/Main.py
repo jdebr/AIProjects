@@ -24,7 +24,7 @@ racer_Reward = {}
 '''
 possibleActions = [(1,0),(1,1),(0,1),(-1,0),(-1,-1),(0,-1),(1,-1),(-1,1)]
 raceTrack = []
-states = []
+states = defaultdict(list)
 startStates = []
 punishment = -1
 discount = 0.4
@@ -34,32 +34,38 @@ reward = {}
 def valueIteration(epsilon = 0.01):
 
     statesCopy = dict([(s,0) for s in racerStates()])
-    gamma = 0.9
+    discount = 0.9
     while True:
         sCopy = statesCopy.copy()
         delta = 0
         for s in racerStates():
-            statesCopy[s] = giveRewards(s) + gamma * max([sum([p * sCopy[s1] for(p, s1) in stateTransitions(s,a)]) for a in actions(s)])
-            delta = max(delta, abs(sCopy[s] - statesCopy[s]))
-            if delta < epsilon * (1-gamma) / gamma:
+            statesCopy[s] = giveRewards(s) + discount * max([sum([p * sCopy[s1] for(p, s1) in stateTransitions(s,a)]) for a in actions(s)])
+            delta = max(delta, abs(statesCopy[s] - sCopy[s]))
+            if delta < epsilon * (1-discount) / discount:
                 return sCopy
 
+def policyIdentification(sCopy):
+    pi = {}
+    for s in racerStates():
+        pi[s] = argmax(actions(s), lambda a:utilityFunction(a,s,sCopy))
+        
+def utilityFunction(a,s,sCopy):
+    return sum([p * sCopy[s1] for (p, s1) in stateTransitions(s, a)])
+
 '''
-Identify all possible states
+Identify all possible states and appending to each state all the possible velocity it can have from -5 to +5 in both x and y
 '''    
 def racerStates():
     for row in range(len(raceTrack)):
         for column in range(len(raceTrack)):
             if(raceTrack[row][column] != '#'):
                 state = (row,column)
-                states.append(state)
-                if raceTrack[row][column] != 'F':
-                    reward[state] = 0
-                else:
-                    reward[state] = 100
-    return states
+                for xVelocity in range(-5,6):
+                    for yVelocity in range(-5,6):
+                        states[state].append((xVelocity,yVelocity))
+    print(states)
 '''
-Identify the start position
+Identifying the start position
 '''
 def racerStart():
     for row in range(len(raceTrack)):
@@ -87,11 +93,12 @@ def actions(state):
 '''
 Providing Reward which is punihment in our world
 '''
-def giveRewards(state,action,nextState):
+def giveRewards(state):
     row,column = state
     if raceTrack[row][column] == 'F':
-        return 100
+        return 0
     return punishment
+
 
 def stateTransitions(state,action):
     
