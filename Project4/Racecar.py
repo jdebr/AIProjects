@@ -42,6 +42,18 @@ class Racecar():
             self.aY = accY 
         else:
             print("Invalid acceleration values")
+            
+    def get_state(self):
+        ''' Returns tuple (x, y, x_velocity, y_velocity) '''
+        state = (self.x, self.y, self.vX, self.vY)
+        return state
+    
+    def set_state(self, x, y, x_velocity, y_velocity):
+        ''' Manually sets the car's state '''
+        self.x = x 
+        self.y = y 
+        self.vX = x_velocity
+        self.vY = y_velocity
         
     def move(self):
         ''' Applies the current values of the car's acceleration to the velocity 

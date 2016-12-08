@@ -10,6 +10,7 @@ Group 3
 '''
 from Track import Track
 from Racecar import Racecar
+from QLearner import QLearner
 from collections import defaultdict
 
 '''
@@ -172,17 +173,8 @@ def fileReading():
 
 
 def main():
-    fileReading()
-    valueIteration()
-    track = Track('R')
-    track.show()
-    track.car.set_acceleration(0, 1)
-    track.car.move()
-    track.show()
-    track.car.move()
-    track.show()
-    track.car.move()
-    track.show()
+    q = QLearner(0.5, 0.9, "O")
+    print("Bye")
 
 if __name__ == "__main__":
     main()
