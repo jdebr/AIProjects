@@ -10,6 +10,8 @@ Group 3
 '''
 from Track import Track
 from Racecar import Racecar
+from collections import defaultdict
+
 '''
 Things to keep in mind
 
@@ -132,7 +134,6 @@ def main():
     track.show()
     track.car.move()
     track.show()
-    print(track.start_positions)
 
 if __name__ == "__main__":
     main()
