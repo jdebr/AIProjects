@@ -34,11 +34,18 @@ stateValue = {}
 velocityX = 0
 velocityY = 0
 
+
 def valueIteration(epsilon = 0.01):
     statesCopy = dict([])
+    '''
+    calling the function to initialize the states dictionary
+    '''
     racerStates()
     for Initialkey, InititalValue in states.items():
         #print(key)
+        '''
+        making a copy of states with value 0
+        '''
         statesCopy[Initialkey] = 0
     discount = 0.9
     while True:
@@ -46,7 +53,13 @@ def valueIteration(epsilon = 0.01):
         print(sCopy)
         delta = 0
         for key, value in states.items():
+            '''
+            to iterate over every available action for a key
+            '''
             for a in actions(key):
+                '''
+                returns  probability with new state
+                '''
                 for (probability,nextState) in stateTransitions(key, a): 
                     statesCopy[key] = giveRewards(key) + discount * max(sum([probability * sCopy[nextState]]))
                     delta = max(delta, abs(statesCopy[key] - sCopy[key]))
@@ -57,11 +70,11 @@ def valueIteration(epsilon = 0.01):
             
 def policyIdentification(sCopy):
     pi = {}
-    for s in racerStates():
-        pi[s] = argmax(actions(s), lambda a:utilityFunction(a,s,sCopy))
+    for Initialkey, InititalValue in states.items():
+        pi[Initialkey] = argmax(actions(Initialkey), lambda a:utilityFunction(a,Initialkey,sCopy))
         
-def utilityFunction(a,s,sCopy):
-    return sum([p * sCopy[s1] for (p, s1) in stateTransitions(s, a)])
+def utilityFunction(a,Initialkey,sCopy):
+    return sum([p * sCopy[s1] for (p, s1) in stateTransitions(Initialkey, a)])
 
 '''
 Identify all possible states and appending to each state all the possible velocity it can have from -5 to +5 in both x and y
@@ -129,6 +142,9 @@ def stateTransitions(state,action):
     if velocityY < -5:
         velocityY = -5
     end = raceTrack[x + velocityX][y + velocityY]
+    '''
+    This is just rough draft for testing
+    '''
     if(end!='#' and not probability):
         return (0.8,(x + velocityX,y + velocityY))
     else:
