@@ -50,25 +50,18 @@ def valueIteration(epsilon = 0.01):
         making a copy of states with value 0
         '''
         statesCopy[Initialkey] = 0
-    discount = 0.9
+    discount = 0.4
     while True:
         sCopy = statesCopy.copy()
         print(sCopy)
         delta = 0
         for key, value in states.items():
-            '''
-            to iterate over every available action for a key
-            '''
-            for a in actions(key):
-                '''
-                returns  probability with new state
-                '''
-                for (probability,nextState) in stateTransitions(key, a): 
-                    statesCopy[key] = giveRewards(key) + discount * max(sum([probability * sCopy[nextState]]))
-                    delta = max(delta, abs(statesCopy[key] - sCopy[key]))
-                    print(delta)
-                    if delta < epsilon * (1-discount) / discount:
-                        return sCopy
+                statesCopy[key] = giveRewards(key) + discount * max([sum([probability * sCopy[newState] for (probability, newState) in stateTransitions(key, a)])
+                                        for a in actions(key)])
+                delta = max(delta, abs(statesCopy[key] - sCopy[key]))
+                print(delta)
+                if delta < epsilon * (1-discount) / discount:
+                    return sCopy
                     
             
 def policyIdentification(sCopy):
@@ -148,21 +141,19 @@ def stateTransitions(state,action):
     '''
     This is just rough draft for testing
     '''
-    if(end!='#' and not probability):
-        return (0.8,(x + velocityX,y + velocityY))
-    else:
-        return (0.2,state)
+    print(x + velocityX,y + velocityY)
+    return [(0.8,(x + velocityX,y + velocityY)),(0.2,state)]
 
 '''      
 A temporary function just for simplicity
-Change path accordingly
 '''
+
 def fileReading():
     count = 0
-    trackFile = 'D:/Shriyansh_PostGraduation/Artificial Intelligence/Project 4/R-track.txt'
+    trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/R-track.txt'
     with open(trackFile, 'r') as f:
             # First line specifies track dimensions
-            f.readline()
+            line = f.readline()
             # Remaining lines specify track
             line = f.readline()
             while line:
@@ -172,7 +163,6 @@ def fileReading():
                     raceTrack[count].append(char)
                 count+=1
                 line = f.readline()
-
 
 def main():
     q = QLearner(0.5, 0.9, "O")
