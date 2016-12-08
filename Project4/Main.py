@@ -148,8 +148,30 @@ def stateTransitions(state,action):
     else:
         return (0.2,state)
 
+'''      
+A temporary function just for simplicity
+Change path accordingly
+'''
+def fileReading():
+    count = 0
+    trackFile = 'D:/Shriyansh_PostGraduation/Artificial Intelligence/Project 4/R-track.txt'
+    with open(trackFile, 'r') as f:
+            # First line specifies track dimensions
+            f.readline()
+            # Remaining lines specify track
+            line = f.readline()
+            while line:
+                raceTrack.append([])
+                line = line.rstrip('\n')
+                for char in line:
+                    raceTrack[count].append(char)
+                count+=1
+                line = f.readline()
+
 
 def main():
+    fileReading()
+    valueIteration()
     track = Track('R')
     track.show()
     track.car.set_acceleration(0, 1)
