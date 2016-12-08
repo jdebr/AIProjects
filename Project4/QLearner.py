@@ -9,7 +9,6 @@ Group 3
 @author: Sara Ounissi
 '''
 from Track import Track
-from Racecar import Racecar
 import random
 
 class QLearner():
@@ -25,10 +24,13 @@ class QLearner():
     
     def start(self):
         ''' Run the Q-learning algorithm '''
+        # Initialize Q Table
         
-        for i in range(1000):
+        
+        for i in range(10):
             # E-greedy action selection, decaying epsilon?
             action = self.select_action(0.9)
+            print(action)
             
             
     def select_action(self, epsilon):
@@ -44,6 +46,6 @@ class QLearner():
                 if self.Q[self.current_state][action] > self.Q[self.current_state][best_action]:
                     best_action = action
                     
-        return best_action
+            return best_action
             
         

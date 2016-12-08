@@ -29,6 +29,9 @@ class Track():
         self.start_positions = list()
         # List of tuples of (x,y) coordinates specifying potential starting locations
         
+        self.track_positions = list()
+        # List of tuples of (x,y) coordinates specifying potential starting locations
+        
         self.restart = restart_on_crash
         # Whether car must restart after a crash
         
@@ -58,11 +61,13 @@ class Track():
                 self.track.append(trackLine)
                 line = f.readline()
                 
-        # Find and save starting locations
+        # Find and save starting locations and track positions
         for i, line in enumerate(self.track):
             for j, char in enumerate(line):
                 if char == 'S':
                     self.start_positions.append((j, len(self.track)-1-i))
+                if char == '.':
+                    self.track_positions.append((j, len(self.track)-1-i))
                 
         # Initialize other class objects
         if not car_position:

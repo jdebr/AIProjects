@@ -12,6 +12,8 @@ from Track import Track
 from Racecar import Racecar
 from QLearner import QLearner
 from collections import defaultdict
+from numpy import argmax
+import random
 
 '''
 Things to keep in mind
@@ -174,7 +176,8 @@ def fileReading():
 
 def main():
     q = QLearner(0.5, 0.9, "O")
-    print("Bye")
+    #q.start()
+    q.track.show()
 
 if __name__ == "__main__":
     main()
