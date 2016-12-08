@@ -31,21 +31,30 @@ startStates = []
 punishment = -1
 discount = 0.4
 stateValue = {}
-reward = {}
+velocityX = 0
+velocityY = 0
 
 def valueIteration(epsilon = 0.01):
-
-    statesCopy = dict([(s,0) for s in racerStates()])
+    statesCopy = dict([])
+    racerStates()
+    for Initialkey, InititalValue in states.items():
+        #print(key)
+        statesCopy[Initialkey] = 0
     discount = 0.9
     while True:
         sCopy = statesCopy.copy()
+        print(sCopy)
         delta = 0
-        for s in racerStates():
-            statesCopy[s] = giveRewards(s) + discount * max([sum([p * sCopy[s1] for(p, s1) in stateTransitions(s,a)]) for a in actions(s)])
-            delta = max(delta, abs(statesCopy[s] - sCopy[s]))
-            if delta < epsilon * (1-discount) / discount:
-                return sCopy
-
+        for key, value in states.items():
+            for a in actions(key):
+                for (probability,nextState) in stateTransitions(key, a): 
+                    statesCopy[key] = giveRewards(key) + discount * max(sum([probability * sCopy[nextState]]))
+                    delta = max(delta, abs(statesCopy[key] - sCopy[key]))
+                    print(delta)
+                    if delta < epsilon * (1-discount) / discount:
+                        return sCopy
+                    
+            
 def policyIdentification(sCopy):
     pi = {}
     for s in racerStates():
@@ -65,7 +74,6 @@ def racerStates():
                 for xVelocity in range(-5,6):
                     for yVelocity in range(-5,6):
                         states[state].append((xVelocity,yVelocity))
-    print(states)
 '''
 Identifying the start position
 '''
@@ -101,28 +109,31 @@ def giveRewards(state):
         return 0
     return punishment
 
-
 def stateTransitions(state,action):
-    
-    row, column = state
-    if(raceTrack[row][column] == 'F'):
-        return 100
-    if(action == (0,0)):
-        return state
+    global velocityX
+    global velocityY
+    x,y = state
+    chance = random.random()
+    probability = chance > 0.8
+    if not probability:
+        velocityX += action[0]
+        velocityY += action[1]
+        
+        
+    if velocityX > 5:
+        velocityX = 5
+    if velocityX < -5:
+        velocityX = -5
+    if velocityY > 5:
+        velocityY = 5
+    if velocityY < -5:
+        velocityY = -5
+    end = raceTrack[x + velocityX][y + velocityY]
+    if(end!='#' and not probability):
+        return (0.8,(x + velocityX,y + velocityY))
     else:
-        return[(0.8, validMove(state,possibleActions)),
-               (0.2, validMove(state,[(0,0)]))]
+        return (0.2,state)
 
-def validMove(state,possibleActions):
-    row, column = state
-    for key in possibleActions:
-        newRow, newColumn = key
-        x = row+newRow
-        y = column+newColumn
-        if raceTrack[x][y] != '#':
-            return True
-        else:
-            return False
 
 def main():
     track = Track('R')
