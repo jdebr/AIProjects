@@ -79,7 +79,7 @@ class Racecar():
         else:
             if self.track.restart:
                 # Set to random starting position
-                pos = random.choice(track.start_positions)
+                pos = random.choice(self.track.start_positions)
                 self.x = pos[0]
                 self.y = pos[1]
             else:

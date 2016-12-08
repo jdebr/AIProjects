@@ -118,6 +118,13 @@ def validMove(state,possibleActions):
 def main():
     track = Track('R')
     track.show()
+    track.car.set_acceleration(0, 1)
+    track.car.move()
+    track.show()
+    track.car.move()
+    track.show()
+    track.car.move()
+    track.show()
     print(track.start_positions)
 
 if __name__ == "__main__":
