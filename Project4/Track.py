@@ -85,10 +85,45 @@ class Track():
                     print(char, end="")
                     
     def check_for_crash(self, start, end):
+        x0 = start[0]
+        x1 = start[1]
+        y0 = end[0]
+        y1 = end[1]
+        dx = abs(x1 - x0)
+        dy = abs(y1 - y0)
+        x = x0
+        y = y0
+        n = 1 + dx + dy
+        if x1 > x0 :
+            x_inc = 1
+        else :
+            x_inc = -1
+        if y1 > y0 :
+            y_inc = 1
+        else :
+            y_inc = -1
+        error = dx - dy
+        dx *= 2
+        dy *= 2
+        oldX = x
+        oldY = y
+
+        for i in range(n, 0):
+            if self.track[x][y]== '#' :
+                i = n
+                return (oldX,oldY)
+            else : 
+                if error > 0 :
+                    oldX = x
+                    x += x_inc
+                    error -= dy
+                else :
+                    oldY = y
+                    y += y_inc
+                    error += dx
+        return False 
         ''' Method to check spaces in a line between two (x,y) locations on the track.
         If one of these spaces is a wall space, return the location the car would have
         been right before the crash.  Otherwise return false
-        '''
-        return False
-        
+        '''       
         
