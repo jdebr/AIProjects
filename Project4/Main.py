@@ -191,6 +191,7 @@ def fileReading():
 def main():
     q = QLearner(0.5, 0.9, "O")
     q.track.show()
+    print(q.track.check_for_crash((7,1), (8,3)))
     #q.start()
     #q.track.show()
 

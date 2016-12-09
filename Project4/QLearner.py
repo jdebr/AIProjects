@@ -43,6 +43,8 @@ class QLearner():
             self.agent.move()
             new_state = self.agent.get_state()
             reward = self.get_reward(new_state)
+            # Update Q calculations
+            
             
             
     def select_action(self, epsilon):
