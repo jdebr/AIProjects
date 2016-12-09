@@ -45,6 +45,7 @@ def valueIteration(epsilon = 0.001):
     calling the function to initialize the states dictionary
     '''
     racerStates()
+    racerStart()
     print(len(states))
     for Initialkey, InititalValue in states.items():
         #print(key)
@@ -53,6 +54,8 @@ def valueIteration(epsilon = 0.001):
         '''
         statesCopy[Initialkey] = 0
     discount = 0.4
+    print(statesCopy)
+    print(statesWall)
     while True:
         sCopy = statesCopy.copy()
         #print(sCopy)
@@ -65,12 +68,16 @@ def valueIteration(epsilon = 0.001):
             #print(statesCopy)
             #print(len(statesCopy))
             if delta < epsilon * (1-discount) / discount:
+                return delta
+                '''
                     pi = {}
                     for Initialkey, InititalValue in states.items():
-                        print(argmax(actions(Initialkey)))
-                        pi[Initialkey] = argmax(actions(Initialkey), lambda a:utilityFunction(a,Initialkey,sCopy))
+                        #pi[Initialkey] = max(actions(Initialkey), lambda a:utilityFunction(a,Initialkey,sCopy))
+                        pi[Initialkey] = max(utilityFunction(a, Initialkey, sCopy) for a in actions(Initialkey))
                     print(pi)
+                    print(len(pi))
                     return pi
+                '''
             
 def policyIdentification(sCopy):
     pi = {}
@@ -133,8 +140,7 @@ def stateTransitions(state,action):
     global velocityX
     global velocityY
     x,y = state
-    failVelocityX = velocityX
-    failVelocityY = velocityY
+
     chance = random.random()
     probability = chance > 0.8
     if not probability:
@@ -150,28 +156,86 @@ def stateTransitions(state,action):
         velocityY = 5
     if velocityY < -5:
         velocityY = -5
-    if(raceTrack[x + velocityX][y + velocityY] in statesWall):
-        end = raceTrack[x + velocityX][y + velocityY]
-        if end == '.':
-            newStateX = x + velocityX
-            newStateY = y + velocityY
-        elif end =='#':
-            velocityX = 0
-            velocityY = 0
-            newStateX = x + velocityX
-            newStateY = y + velocityY
-            failVelocityX = velocityX
-            failVelocityY = velocityY
-            return [(0.8,(newStateX,newStateY)),(0.2,(x + failVelocityX,y + failVelocityY))]
+    #print(raceTrack[x + velocityX][y + velocityY])
+    if((x + velocityX,y + velocityY) in states):
+        end = (x + velocityX, y + velocityY)
+        crashed = check_for_crash((x , y), end)
+        print("In")
+        if not crashed:
+            return[(0.8,(end[0],end[1])),(0.2,(x,y))]
+        else:
+            if True:
+                pos = random.choice(startStates)
+                print(random.choice(startStates))
+                return[(0.8,(pos[0],pos[1])),(0.2,(x,y))]
+            else:
+                return[(0.8,(crashed[0],crashed[1])),(0.2,(x,y))]
     else:
-        velocityX = 0
-        velocityY = 0
-        newStateX = x + velocityX
-        newStateY = y + velocityY
-        failVelocityX = velocityX
-        failVelocityY = velocityY
-        return [(0.8,(newStateX,newStateY)),(0.2,(x + failVelocityX,y + failVelocityY))]
+        print("Out")
+        return[(0.8,(x,y)),(0.2,(x,y))]
+    
+    
+def check_for_crash(start, end):
+        ''' Method to check spaces in a line between two (x,y) locations on the track.
+        If one of these spaces is a wall space, return the location the car would have
+        been right before the crash.  Otherwise return false
+        '''      
+        x0 = start[0]
+        x1 = end[0]
+        y0 = start[1]
+        y1 = end[1]
+        dx = abs(x1 - x0)
+        dy = abs(y1 - y0)
+        x = x0
+        y = y0
+        n = 1 + dx + dy
+        if x1 > x0 :
+            x_inc = 1
+        else :
+            x_inc = -1
+        if y1 > y0 :
+            y_inc = 1
+        else :
+            y_inc = -1
+        error = dx - dy
+        dx *= 2
+        dy *= 2
+        oldX = x
+        oldY = y
 
+        for i in range(n, 0, -1):
+            if(raceTrack[x + velocityX][y + velocityY]) == '#' :
+                return (oldX,oldY)
+            else : 
+                oldX = x 
+                oldY = y
+                if error > 0 :
+                    x += x_inc
+                    error -= dy
+                else :
+                    y += y_inc
+                    error += dx
+        return False 
+
+'''      
+A temporary function just for simplicity
+'''
+
+def fileReading():
+    count = 0
+    trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/R-track.txt'
+    with open(trackFile, 'r') as f:
+            # First line specifies track dimensions
+            line = f.readline()
+            # Remaining lines specify track
+            line = f.readline()
+            while line:
+                raceTrack.append([])
+                line = line.rstrip('\n')
+                for char in line:
+                    raceTrack[count].append(char)
+                count+=1
+                line = f.readline()
 def fileReading():
     count = 0
     trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/R-track.txt'
