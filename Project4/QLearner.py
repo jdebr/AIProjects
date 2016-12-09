@@ -35,11 +35,14 @@ class QLearner():
                 self.Qtable[temp_state] = {}
                 for action in self.possible_actions:
                     self.Qtable[temp_state][action] = 0  
-        
-        for i in range(10):
+        # Main loop, when do we terminate?
+        for i in range(1000):
             # E-greedy action selection, decaying epsilon?
             action = self.select_action(0.5)
-            print(action)
+            self.agent.set_acceleration(action[0], action[1])
+            self.agent.move()
+            new_state = self.agent.get_state()
+            reward = self.get_reward(new_state)
             
             
     def select_action(self, epsilon):
@@ -57,5 +60,12 @@ class QLearner():
                     best_action = action
                     
             return best_action
+        
+    def get_reward(self, state):
+        ''' Checks position of car and delivers appropriate reward '''
+        if self.track.check_location(state[0], state[1]) == 'F':
+            return 0
+        else:
+            return -1
             
         

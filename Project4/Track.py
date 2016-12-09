@@ -84,6 +84,10 @@ class Track():
                 else:
                     print(char, end="")
                     
+    def check_location(self, x, y):
+        ''' Method that returns the character found at the current xy coordinate of the track '''
+        return self.track[len(self.track)-1-y][x]
+                    
     def check_for_crash(self, start, end):
         ''' Method to check spaces in a line between two (x,y) locations on the track.
         If one of these spaces is a wall space, return the location the car would have

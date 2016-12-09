@@ -166,7 +166,8 @@ def fileReading():
 
 def main():
     q = QLearner(0.5, 0.9, "O")
-    q.start()
+    q.track.show()
+    #q.start()
     #q.track.show()
 
 if __name__ == "__main__":
