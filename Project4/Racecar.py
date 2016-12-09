@@ -48,12 +48,16 @@ class Racecar():
         state = (self.x, self.y, self.vX, self.vY)
         return state
     
-    def set_state(self, x, y, x_velocity, y_velocity):
+    def set_state(self, state):
         ''' Manually sets the car's state '''
-        self.x = x 
-        self.y = y 
-        self.vX = x_velocity
-        self.vY = y_velocity
+        self.x = state[0] 
+        self.y = state[1]
+        self.vX = state[2]
+        self.vY = state[3]
+        
+    def check_location(self):
+        ''' Returns ASCII char of car's current location'''
+        return self.track.check_location(self.x, self.y)
         
     def move(self):
         ''' Applies the current values of the car's acceleration to the velocity 
@@ -80,15 +84,20 @@ class Racecar():
         if self.vY < -5:
             self.vY = -5
             
-        # Check for collisions
+        # Check for collisions or finish
         end = (self.x + self.vX, self.y + self.vY)
-        crashed = self.track.check_for_crash((self.x, self.y), end)
+        crash_or_finish = self.track.check_for_crash((self.x, self.y), end)
         
         # Update position
-        if not crashed:
+        if not crash_or_finish:
             self.x = end[0]
             self.y = end[1]
+        elif self.track.check_location(crash_or_finish[0],crash_or_finish[1]) == 'F':
+            # Cross the finish line
+            self.x = crash_or_finish[0]
+            self.y = crash_or_finish[1]
         else:
+            # Crashed
             if self.track.restart:
                 # Set to random starting position
                 pos = random.choice(self.track.start_positions)
@@ -96,8 +105,8 @@ class Racecar():
                 self.y = pos[1]
             else:
                 # Set to value returned by check_for_crash()
-                self.x = crashed[0]
-                self.y = crashed[1]
+                self.x = crash_or_finish[0]
+                self.y = crash_or_finish[1]
         
         
         

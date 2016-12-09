@@ -87,6 +87,11 @@ class Track():
     def check_location(self, x, y):
         ''' Method that returns the character found at the current xy coordinate of the track '''
         return self.track[len(self.track)-1-y][x]
+    
+    def get_random_start_state(self):
+        ''' Method to return a random starting location on this track '''
+        temp_loc = random.choice(self.start_positions)
+        return (temp_loc[0], temp_loc[1], 0, 0)
                     
     def check_for_crash(self, start, end):
         ''' Method to check spaces in a line between two (x,y) locations on the track.
@@ -117,7 +122,9 @@ class Track():
         oldY = y
 
         for i in range(n, 0, -1):
-            if self.check_location(x,y) == '#' :
+            if self.check_location(x, y) == 'F':
+                return (x,y)
+            if self.check_location(x,y) == '#':
                 return (oldX,oldY)
             else : 
                 oldX = x 

@@ -206,8 +206,16 @@ def crash_test():
     #q.start()
     #q.track.show()
     
+def Qlearning_test():
+    ''' Testing function for Q learning '''
+    q = QLearner(0.5, 0.9, "O")
+    q.track.show()
+    q.start((3,3,0,1))
+    q.start((21, 2, -1, 0))
+    
 def main():
-    crash_test()
+    #crash_test()
+    Qlearning_test()
 
 if __name__ == "__main__":
     main()
