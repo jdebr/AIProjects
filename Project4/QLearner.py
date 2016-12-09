@@ -35,7 +35,7 @@ class QLearner():
                 for action in self.possible_actions:
                     self.Qtable[temp_state][action] = 0  
     
-    def train(self, start_state=None, learning_rate=None, discount=None, epsilon=None, iterations=10000000):
+    def train(self, start_state=None, learning_rate=None, discount=None, epsilon=None, iterations=1000000):
         ''' Run the Q-learning algorithm, potentially setting car's location to some other area and updating 
         learning rate and discount'''
         print("Training...")
@@ -87,7 +87,7 @@ class QLearner():
                 
         #print(self.Qtable)
         
-    def trial_run(self, max_moves=10000):
+    def trial_run(self, max_moves=1000):
         ''' Attempts a trial run through the course, tracking total moves until the finish line is found or some max number is reached '''
         print("*** TRIAL RUN ***")
         num_moves = 0
@@ -105,8 +105,8 @@ class QLearner():
             # Track score
             num_moves += 1
             # Show track
-            #self.track.show()
-            #print()
+            self.track.show()
+            print()
             #time.sleep(0.1)
             #x = input()
             # Terminate on finish

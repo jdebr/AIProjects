@@ -226,7 +226,8 @@ def Qlearning_Ltest():
     q.train((32, 4, 0, 1))
     q.train()
     q.train()
-    print(q.trial_run())
+    for i in range(10):
+        print(q.trial_run())
     
 def main():
     #crash_test()
