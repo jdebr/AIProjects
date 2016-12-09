@@ -66,7 +66,7 @@ class Track():
             for j, char in enumerate(line):
                 if char == 'S':
                     self.start_positions.append((j, len(self.track)-1-i))
-                if char == '.':
+                if char == '.' or char == 'S' or char == 'F':
                     self.track_positions.append((j, len(self.track)-1-i))
                 
         # Initialize other class objects

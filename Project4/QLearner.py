@@ -18,18 +18,27 @@ class QLearner():
         self.discount = discount 
         self.track = Track(track)
         self.agent = self.track.car 
-        self.Q = {}
+        self.Qtable = {}
         self.current_state = self.agent.get_state()
         self.possible_actions = [(1,1),(1,0),(1,-1),(0,1),(0,0),(0,-1),(-1,1),(-1,0),(-1,-1)]
+        self.possible_velocities = []
+        for i in range(-5,6):
+            for j in range(-5,6):
+                self.possible_velocities.append((i,j))
     
     def start(self):
         ''' Run the Q-learning algorithm '''
         # Initialize Q Table
-        
+        for pos in self.track.track_positions:
+            for vel in self.possible_velocities:
+                temp_state = (pos[0], pos[1], vel[0], vel[1])
+                self.Qtable[temp_state] = {}
+                for action in self.possible_actions:
+                    self.Qtable[temp_state][action] = 0  
         
         for i in range(10):
             # E-greedy action selection, decaying epsilon?
-            action = self.select_action(0.9)
+            action = self.select_action(0.5)
             print(action)
             
             
@@ -41,9 +50,10 @@ class QLearner():
             return random.choice(self.possible_actions)
         else:
             # Exploitation
-            best_action = random.choice(self.Q[self.current_state])
-            for action in self.Q[self.current_state]:
-                if self.Q[self.current_state][action] > self.Q[self.current_state][best_action]:
+            best_action = (0,0)
+            best_value = self.Qtable[self.current_state][best_action]
+            for action, value in self.Qtable[self.current_state].items():
+                if value > best_value:
                     best_action = action
                     
             return best_action
