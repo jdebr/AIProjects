@@ -66,7 +66,7 @@ class Track():
             for j, char in enumerate(line):
                 if char == 'S':
                     self.start_positions.append((j, len(self.track)-1-i))
-                if char == '.':
+                if char == '.' or char == 'S' or char == 'F':
                     self.track_positions.append((j, len(self.track)-1-i))
                 
         # Initialize other class objects
@@ -83,6 +83,10 @@ class Track():
                     print('R', end="")
                 else:
                     print(char, end="")
+                    
+    def check_location(self, x, y):
+        ''' Method that returns the character found at the current xy coordinate of the track '''
+        return self.track[len(self.track)-1-y][x]
                     
     def check_for_crash(self, start, end):
         x0 = start[0]
