@@ -207,7 +207,7 @@ def crash_test():
     #q.track.show()
     
 def Qlearning_Otest():
-    ''' Testing function for Q learning '''
+    ''' Testing function for Q learning on O-Track'''
     q = QLearner(0.5, 0.9, 0.9,"O")
     q.track.show()
     q.train((3,3,0,1))
@@ -217,9 +217,22 @@ def Qlearning_Otest():
     q.train()
     print(q.trial_run())
     
+def Qlearning_Ltest():
+    ''' Testing function for Q learning on L-track'''
+    q = QLearner(0.5, 0.9, 0.9,"L")
+    q.track.show()
+    q.train((32, 1, 0, 1))
+    q.train((32, 2, 0, 1))
+    q.train((32, 3, 0, 1))
+    q.train((32, 4, 0, 1))
+    q.train()
+    q.train()
+    print(q.trial_run())
+    
 def main():
     #crash_test()
-    Qlearning_Otest()
+    #Qlearning_Otest()
+    Qlearning_Ltest()
 
 if __name__ == "__main__":
     main()

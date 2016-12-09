@@ -90,6 +90,7 @@ class Racecar():
         
         # Update position
         if not crash_or_finish:
+            # Safe move
             self.x = end[0]
             self.y = end[1]
         elif self.track.check_location(crash_or_finish[0],crash_or_finish[1]) == 'F':
@@ -98,6 +99,8 @@ class Racecar():
             self.y = crash_or_finish[1]
         else:
             # Crashed
+            self.vX = 0
+            self.vY = 0
             if self.track.restart:
                 # Set to random starting position
                 pos = random.choice(self.track.start_positions)

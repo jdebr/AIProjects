@@ -35,9 +35,10 @@ class QLearner():
                 for action in self.possible_actions:
                     self.Qtable[temp_state][action] = 0  
     
-    def train(self, start_state=None, learning_rate=None, discount=None, epsilon=None, iterations=10000):
+    def train(self, start_state=None, learning_rate=None, discount=None, epsilon=None, iterations=10000000):
         ''' Run the Q-learning algorithm, potentially setting car's location to some other area and updating 
         learning rate and discount'''
+        print("Training...")
         # Set state to restart learning if finish line is crossed during training
         if not start_state:
             start_state = self.track.get_random_start_state()
@@ -53,8 +54,8 @@ class QLearner():
         # Main loop, when do we terminate?
         for i in range(iterations):
             # E-greedy action selection, decaying epsilon and learning rate
-            if i % 1000 == 0:
-                epsilon -= 0.1
+            if i % (iterations/10) == 0:
+                epsilon -= 0.05
                 learning_rate -= 0.05
             action = self.select_action(epsilon)
             # Update car with action
@@ -79,15 +80,16 @@ class QLearner():
                 self.current_state = new_state
                 
             # Show track
-            self.track.show()
-            print()
-            time.sleep(0.1)
+            #self.track.show()
+            #print()
+            #time.sleep(0.1)
             #x = input()
                 
         #print(self.Qtable)
         
-    def trial_run(self, max_moves=1000):
+    def trial_run(self, max_moves=10000):
         ''' Attempts a trial run through the course, tracking total moves until the finish line is found or some max number is reached '''
+        print("*** TRIAL RUN ***")
         num_moves = 0
         # Set agent at starting line
         start_state = self.track.get_random_start_state()
@@ -102,6 +104,11 @@ class QLearner():
             self.current_state = self.agent.get_state()
             # Track score
             num_moves += 1
+            # Show track
+            #self.track.show()
+            #print()
+            #time.sleep(0.1)
+            #x = input()
             # Terminate on finish
             if self.agent.check_location() == 'F':
                 return num_moves
