@@ -30,6 +30,7 @@ racer_Reward = {}
 possibleActions = [(1,0),(1,1),(0,1),(-1,0),(-1,-1),(0,-1),(1,-1),(-1,1)]
 raceTrack = []
 states = defaultdict(list)
+statesWall = []
 startStates = []
 punishment = -1
 discount = 0.4
@@ -78,6 +79,8 @@ Identify all possible states and appending to each state all the possible veloci
 def racerStates():
     for row in range(len(raceTrack)):
         for column in range(len(raceTrack)):
+            wallState = (row,column)
+            statesWall.append(wallState)
             if(raceTrack[row][column] != '#'):
                 state = (row,column)
                 for xVelocity in range(-5,6):
@@ -122,6 +125,8 @@ def stateTransitions(state,action):
     global velocityX
     global velocityY
     x,y = state
+    failVelocityX = velocityX
+    failVelocityY = velocityY
     chance = random.random()
     probability = chance > 0.8
     if not probability:
@@ -137,12 +142,32 @@ def stateTransitions(state,action):
         velocityY = 5
     if velocityY < -5:
         velocityY = -5
-    end = raceTrack[x + velocityX][y + velocityY]
+    if(raceTrack[x + velocityX][y + velocityY] in statesWall):
+        end = raceTrack[x + velocityX][y + velocityY]
+        if end == '.':
+            newStateX = x + velocityX
+            newStateY = y + velocityY
+        elif end =='#':
+            velocityX = 0
+            velocityY = 0
+            newStateX = x + velocityX
+            newStateY = y + velocityY
+            failVelocityX = velocityX
+            failVelocityY = velocityY
+            return [(0.8,(newStateX,newStateY)),(0.2,(x + failVelocityX,y + failVelocityY))]
+    else:
+        velocityX = 0
+        velocityY = 0
+        newStateX = x + velocityX
+        newStateY = y + velocityY
+        failVelocityX = velocityX
+        failVelocityY = velocityY
+        return [(0.8,(newStateX,newStateY)),(0.2,(x + failVelocityX,y + failVelocityY))]
     '''
     This is just rough draft for testing
     '''
-    print(x + velocityX,y + velocityY)
-    return [(0.8,(x + velocityX,y + velocityY)),(0.2,state)]
+    #print(newStateX,newStateY)
+    
 
 '''      
 A temporary function just for simplicity
@@ -163,7 +188,6 @@ def fileReading():
                     raceTrack[count].append(char)
                 count+=1
                 line = f.readline()
-
 def main():
     q = QLearner(0.5, 0.9, "O")
     q.start()
