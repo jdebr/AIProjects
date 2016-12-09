@@ -118,15 +118,14 @@ class Track():
 
         for i in range(n, 0, -1):
             if self.check_location(x,y) == '#' :
-                i = n
                 return (oldX,oldY)
             else : 
+                oldX = x 
+                oldY = y
                 if error > 0 :
-                    oldX = x
                     x += x_inc
                     error -= dy
                 else :
-                    oldY = y
                     y += y_inc
                     error += dx
         return False  

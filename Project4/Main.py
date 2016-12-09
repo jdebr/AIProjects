@@ -188,12 +188,26 @@ def fileReading():
                     raceTrack[count].append(char)
                 count+=1
                 line = f.readline()
-def main():
+                
+def crash_test():
+    ''' Testing function for crash detection in simulator '''
     q = QLearner(0.5, 0.9, "O")
-    q.track.show()
-    print(q.track.check_for_crash((7,1), (8,3)))
+    start = (3, 21)
+    end = (7, 21)
+    c = q.track.check_for_crash(start, end)
+    if c:
+        print("Crashed!")
+        q.agent.set_state(c[0], c[1], 0, 0)
+        q.track.show()
+    else:
+        print("Safe!")
+        q.agent.set_state(end[0], end[1], 0, 0)
+        q.track.show()
     #q.start()
     #q.track.show()
+    
+def main():
+    crash_test()
 
 if __name__ == "__main__":
     main()
