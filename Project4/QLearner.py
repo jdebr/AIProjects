@@ -14,9 +14,10 @@ import time
 
 class QLearner():
     
-    def __init__(self, discount, learning_rate, track):
+    def __init__(self, discount, learning_rate, epsilon, track):
         self.learning_rate = learning_rate
         self.discount = discount 
+        self.epsilon = epsilon
         self.track = Track(track)
         self.agent = self.track.car 
         self.current_state = self.agent.get_state()
@@ -34,25 +35,31 @@ class QLearner():
                 for action in self.possible_actions:
                     self.Qtable[temp_state][action] = 0  
     
-    def start(self, start_state=None, learning_rate=None, discount=None):
+    def train(self, start_state=None, learning_rate=None, discount=None, epsilon=None, iterations=10000):
         ''' Run the Q-learning algorithm, potentially setting car's location to some other area and updating 
         learning rate and discount'''
         # Set state to restart learning if finish line is crossed during training
         if not start_state:
             start_state = self.track.get_random_start_state()
-        else:
-            self.agent.set_state(start_state)
+        self.agent.set_state(start_state)
         # Set other variables if passed in
         if not learning_rate:
             learning_rate = self.learning_rate
         if not discount:
             discount = self.discount
+        if not epsilon:
+            epsilon = self.epsilon
                     
         # Main loop, when do we terminate?
-        for i in range(10000):
-            # E-greedy action selection, decaying epsilon?
-            action = self.select_action(0.5)
+        for i in range(iterations):
+            # E-greedy action selection, decaying epsilon and learning rate
+            if i % 1000 == 0:
+                epsilon -= 0.1
+                learning_rate -= 0.05
+            action = self.select_action(epsilon)
+            # Update car with action
             self.agent.set_acceleration(action[0], action[1])
+            # Update state
             self.agent.move()
             new_state = self.agent.get_state()
             reward = self.get_reward(new_state)
@@ -75,9 +82,30 @@ class QLearner():
             self.track.show()
             print()
             time.sleep(0.1)
-            x = input()
+            #x = input()
                 
         #print(self.Qtable)
+        
+    def trial_run(self, max_moves=1000):
+        ''' Attempts a trial run through the course, tracking total moves until the finish line is found or some max number is reached '''
+        num_moves = 0
+        # Set agent at starting line
+        start_state = self.track.get_random_start_state()
+        self.agent.set_state(start_state)
+        # Begin trial
+        for i in range(max_moves):
+            action = self.select_action(0)
+            # Update car with action
+            self.agent.set_acceleration(action[0], action[1])
+            # Update state
+            self.agent.move()
+            self.current_state = self.agent.get_state()
+            # Track score
+            num_moves += 1
+            # Terminate on finish
+            if self.agent.check_location() == 'F':
+                return num_moves
+        return num_moves
             
     def select_action(self, epsilon):
         ''' Selects one of the possible actions based on e-greedy strategy '''
