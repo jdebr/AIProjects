@@ -27,7 +27,7 @@ racer_Reward = {}
 80% we accelerate hence 0.8 
 20% no acceleration hence 0.2
 '''
-possibleActions = [(1,0),(1,1),(0,1),(-1,0),(-1,-1),(0,-1),(1,-1),(-1,1)]
+possibleActions = [(1,0),(1,1),(0,1),(-1,0),(0,0),(-1,-1),(0,-1),(1,-1),(-1,1)]
 raceTrack = []
 states = defaultdict(list)
 statesWall = []
@@ -39,12 +39,13 @@ velocityX = 0
 velocityY = 0
 
 
-def valueIteration(epsilon = 0.01):
+def valueIteration(epsilon = 0.001):
     statesCopy = dict([])
     '''
     calling the function to initialize the states dictionary
     '''
     racerStates()
+    print(len(states))
     for Initialkey, InititalValue in states.items():
         #print(key)
         '''
@@ -54,24 +55,30 @@ def valueIteration(epsilon = 0.01):
     discount = 0.4
     while True:
         sCopy = statesCopy.copy()
-        print(sCopy)
+        #print(sCopy)
         delta = 0
         for key, value in states.items():
-                statesCopy[key] = giveRewards(key) + discount * max([sum([probability * sCopy[newState] for (probability, newState) in stateTransitions(key, a)])
-                                        for a in actions(key)])
-                delta = max(delta, abs(statesCopy[key] - sCopy[key]))
-                print(delta)
-                if delta < epsilon * (1-discount) / discount:
-                    return sCopy
-                    
+            statesCopy[key] = giveRewards(key) + discount * max([sum([probability * sCopy[newState] for (probability, newState) in stateTransitions(key, a)])
+                                    for a in actions(key)])
+            delta = max(delta, abs(statesCopy[key] - sCopy[key]))
+            #print("What" + str(delta))
+            #print(statesCopy)
+            #print(len(statesCopy))
+            if delta < epsilon * (1-discount) / discount:
+                    pi = {}
+                    for Initialkey, InititalValue in states.items():
+                        print(argmax(actions(Initialkey)))
+                        pi[Initialkey] = argmax(actions(Initialkey), lambda a:utilityFunction(a,Initialkey,sCopy))
+                    print(pi)
+                    return pi
             
 def policyIdentification(sCopy):
     pi = {}
-    for Initialkey, InititalValue in states.items():
+    for Initialkey, InititalValue in states.items():      
         pi[Initialkey] = argmax(actions(Initialkey), lambda a:utilityFunction(a,Initialkey,sCopy))
         
 def utilityFunction(a,Initialkey,sCopy):
-    return sum([p * sCopy[s1] for (p, s1) in stateTransitions(Initialkey, a)])
+    return sum([probability * sCopy[newState] for (probability, newState) in stateTransitions(Initialkey, a)])
 
 '''
 Identify all possible states and appending to each state all the possible velocity it can have from -5 to +5 in both x and y
@@ -105,15 +112,16 @@ List of all possible actions for a particular state
 '''
 def actions(state):
     row,column = state
-    if raceTrack[row][column] == 'F':
-        return exit
-    elif  raceTrack[row][column] == '#':
+    
+    #if raceTrack[row][column] == 'F':
+    #    return exit
+    if  raceTrack[row][column] == '#':
         #Function for previous position or start
         pass
     return possibleActions
 
 '''
-Providing Reward which is punihment in our world
+Providing Reward which is punishment in our world
 '''
 def giveRewards(state):
     row,column = state
@@ -163,15 +171,6 @@ def stateTransitions(state,action):
         failVelocityX = velocityX
         failVelocityY = velocityY
         return [(0.8,(newStateX,newStateY)),(0.2,(x + failVelocityX,y + failVelocityY))]
-    '''
-    This is just rough draft for testing
-    '''
-    #print(newStateX,newStateY)
-    
-
-'''      
-A temporary function just for simplicity
-'''
 
 def fileReading():
     count = 0
