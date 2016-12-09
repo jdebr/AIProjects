@@ -39,7 +39,7 @@ velocityX = 0
 velocityY = 0
 
 
-def valueIteration(epsilon = 0.001):
+def valueIteration(epsilon = 0.00001):
     statesCopy = dict([])
     '''
     calling the function to initialize the states dictionary
@@ -68,6 +68,7 @@ def valueIteration(epsilon = 0.001):
             #print(statesCopy)
             #print(len(statesCopy))
             if delta < epsilon * (1-discount) / discount:
+                print(sCopy)
                 return delta
                 '''
                     pi = {}
@@ -160,18 +161,15 @@ def stateTransitions(state,action):
     if((x + velocityX,y + velocityY) in states):
         end = (x + velocityX, y + velocityY)
         crashed = check_for_crash((x , y), end)
-        print("In")
         if not crashed:
             return[(0.8,(end[0],end[1])),(0.2,(x,y))]
         else:
             if True:
                 pos = random.choice(startStates)
-                print(random.choice(startStates))
                 return[(0.8,(pos[0],pos[1])),(0.2,(x,y))]
             else:
                 return[(0.8,(crashed[0],crashed[1])),(0.2,(x,y))]
     else:
-        print("Out")
         return[(0.8,(x,y)),(0.2,(x,y))]
     
     
@@ -216,26 +214,7 @@ def check_for_crash(start, end):
                     y += y_inc
                     error += dx
         return False 
-
-'''      
-A temporary function just for simplicity
-'''
-
-def fileReading():
-    count = 0
-    trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/R-track.txt'
-    with open(trackFile, 'r') as f:
-            # First line specifies track dimensions
-            line = f.readline()
-            # Remaining lines specify track
-            line = f.readline()
-            while line:
-                raceTrack.append([])
-                line = line.rstrip('\n')
-                for char in line:
-                    raceTrack[count].append(char)
-                count+=1
-                line = f.readline()
+    
 def fileReading():
     count = 0
     trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/R-track.txt'
