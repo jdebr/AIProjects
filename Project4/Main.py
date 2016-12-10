@@ -22,8 +22,7 @@ accelerationList = [-1,0,1]
 punishment = -1
 racer_State = {}
 racer_Reward = {}
-'''
-'''
+
 80% we accelerate hence 0.8 
 20% no acceleration hence 0.2
 '''
@@ -68,6 +67,7 @@ def valueIteration(epsilon = 0.00001):
             #print(statesCopy)
             #print(len(statesCopy))
             if delta < epsilon * (1-discount) / discount:
+                print(sCopy)
                 policyIdentification(sCopy)
                 return delta
                 '''
@@ -156,8 +156,9 @@ def stateTransitions(state,action):
         velocityY = 5
     if velocityY < -5:
         velocityY = -5
-    #print(raceTrack[x + velocityX][y + velocityY])
-    if((x + velocityX,y + velocityY) and (x+tempVelocityX,y+tempVelocityY) in state):
+    print(x,y)
+    print(x)
+    if((x + velocityX,y + velocityY) and (x+tempVelocityX,y+tempVelocityY) in states):
         end = (x + velocityX, y + velocityY)
         crashed = check_for_crash((x , y), end)
         if not crashed:
@@ -222,7 +223,7 @@ A temporary function just for simplicity
 
 def fileReading():
     count = 0
-    trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/O-track.txt'
+    trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/L-track.txt'
     with open(trackFile, 'r') as f:
             # First line specifies track dimensions
             line = f.readline()
