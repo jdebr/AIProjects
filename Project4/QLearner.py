@@ -118,8 +118,8 @@ class QLearner():
             # Track score
             num_moves += 1
             # Show track
-            self.track.show()
-            print()
+            #self.track.show()
+            #print()
             #time.sleep(0.1)
             #x = input()
             # Terminate on finish
