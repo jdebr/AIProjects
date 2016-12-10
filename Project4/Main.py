@@ -68,7 +68,7 @@ def valueIteration(epsilon = 0.00001):
             #print(statesCopy)
             #print(len(statesCopy))
             if delta < epsilon * (1-discount) / discount:
-                print(sCopy)
+                policyIdentification(sCopy)
                 return delta
                 '''
                     pi = {}
@@ -82,9 +82,14 @@ def valueIteration(epsilon = 0.00001):
             
 def policyIdentification(sCopy):
     pi = {}
-    for Initialkey, InititalValue in states.items():      
-        pi[Initialkey] = argmax(actions(Initialkey), lambda a:utilityFunction(a,Initialkey,sCopy))
-        
+    for Initialkey, InititalValue in states.items():
+        best_action = (0,0)
+        for value in actions(Initialkey):
+            if value > best_action:
+                best_action = value
+        a = best_action     
+        pi[Initialkey] = sum([probability * sCopy[newState] for (probability, newState) in stateTransitions(Initialkey, a)])
+    print(pi)
 def utilityFunction(a,Initialkey,sCopy):
     return sum([probability * sCopy[newState] for (probability, newState) in stateTransitions(Initialkey, a)])
 
@@ -119,13 +124,6 @@ def racerStart():
 List of all possible actions for a particular state
 '''
 def actions(state):
-    row,column = state
-    
-    #if raceTrack[row][column] == 'F':
-    #    return exit
-    if  raceTrack[row][column] == '#':
-        #Function for previous position or start
-        pass
     return possibleActions
 
 '''
@@ -141,7 +139,8 @@ def stateTransitions(state,action):
     global velocityX
     global velocityY
     x,y = state
-
+    tempVelocityX = velocityX
+    tempVelocityY = velocityY
     chance = random.random()
     probability = chance > 0.8
     if not probability:
@@ -158,17 +157,19 @@ def stateTransitions(state,action):
     if velocityY < -5:
         velocityY = -5
     #print(raceTrack[x + velocityX][y + velocityY])
-    if((x + velocityX,y + velocityY) in states):
+    if((x + velocityX,y + velocityY) and (x+tempVelocityX,y+tempVelocityY) in state):
         end = (x + velocityX, y + velocityY)
         crashed = check_for_crash((x , y), end)
         if not crashed:
-            return[(0.8,(end[0],end[1])),(0.2,(x,y))]
+            return[(0.8,(end[0],end[1])),(0.2,(x+tempVelocityX,y+tempVelocityY))]
         else:
+            velocityX = 0
+            velocityY = 0
             if True:
                 pos = random.choice(startStates)
-                return[(0.8,(pos[0],pos[1])),(0.2,(x,y))]
+                return[(0.8,(pos[0],pos[1])),(0.2,(pos[0],pos[1]))]
             else:
-                return[(0.8,(crashed[0],crashed[1])),(0.2,(x,y))]
+                return[(0.8,(crashed[0],crashed[1])),(0.2,(crashed[0],crashed[1]))]
     else:
         return[(0.8,(x,y)),(0.2,(x,y))]
     
@@ -202,7 +203,7 @@ def check_for_crash(start, end):
         oldY = y
 
         for i in range(n, 0, -1):
-            if(raceTrack[x + velocityX][y + velocityY]) == '#' :
+            if(raceTrack[x1][y1]) == '#' :
                 return (oldX,oldY)
             else : 
                 oldX = x 
@@ -215,13 +216,13 @@ def check_for_crash(start, end):
                     error += dx
         return False 
 
-
 '''      
 A temporary function just for simplicity
 '''
+
 def fileReading():
     count = 0
-    trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/R-track.txt'
+    trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/O-track.txt'
     with open(trackFile, 'r') as f:
             # First line specifies track dimensions
             line = f.readline()
