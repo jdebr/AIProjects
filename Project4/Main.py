@@ -32,13 +32,14 @@ states = defaultdict(list)
 statesWall = []
 startStates = []
 punishment = -1
-discount = 0.4
+discount = 0.9
 stateValue = {}
 velocityX = 0
 velocityY = 0
 
 
-def valueIteration(epsilon = 0.00001):
+def valueIteration(epsilon = 0.001):
+    LoopCounter = 0
     statesCopy = dict([])
     '''
     calling the function to initialize the states dictionary
@@ -52,7 +53,7 @@ def valueIteration(epsilon = 0.00001):
         making a copy of states with value 0
         '''
         statesCopy[Initialkey] = 0
-    discount = 0.4
+    #discount = 0.1
     print(statesCopy)
     print(statesWall)
     while True:
@@ -70,15 +71,6 @@ def valueIteration(epsilon = 0.00001):
                 print(sCopy)
                 policyIdentification(sCopy)
                 return delta
-                '''
-                    pi = {}
-                    for Initialkey, InititalValue in states.items():
-                        #pi[Initialkey] = max(actions(Initialkey), lambda a:utilityFunction(a,Initialkey,sCopy))
-                        pi[Initialkey] = max(utilityFunction(a, Initialkey, sCopy) for a in actions(Initialkey))
-                    print(pi)
-                    print(len(pi))
-                    return pi
-                '''
             
 def policyIdentification(sCopy):
     pi = {}
@@ -156,22 +148,33 @@ def stateTransitions(state,action):
         velocityY = 5
     if velocityY < -5:
         velocityY = -5
+    '''    
+    print("-----------")
     print(x,y)
-    print(x)
-    if((x + velocityX,y + velocityY) and (x+tempVelocityX,y+tempVelocityY) in states):
-        end = (x + velocityX, y + velocityY)
-        crashed = check_for_crash((x , y), end)
-        if not crashed:
-            return[(0.8,(end[0],end[1])),(0.2,(x+tempVelocityX,y+tempVelocityY))]
-        else:
-            velocityX = 0
-            velocityY = 0
-            if True:
-                pos = random.choice(startStates)
-                return[(0.8,(pos[0],pos[1])),(0.2,(pos[0],pos[1]))]
+    print(x+velocityX,y+velocityY)
+    print((x+tempVelocityX,y+tempVelocityY))
+    '''
+    if((x + velocityX,y + velocityY) in states):
+        if((x+tempVelocityX,y+tempVelocityY) in states):
+            end = (x + velocityX, y + velocityY)
+            crashed = check_for_crash((x , y), end)
+            if not crashed:
+                return[(0.8,(end[0],end[1])),(0.2,(x+tempVelocityX,y+tempVelocityY))]
             else:
-                return[(0.8,(crashed[0],crashed[1])),(0.2,(crashed[0],crashed[1]))]
+                velocityX = 0
+                velocityY = 0
+                if True:
+                    pos = random.choice(startStates)
+                    return[(0.8,(pos[0],pos[1])),(0.2,(pos[0],pos[1]))]
+                else:
+                    return[(0.8,(crashed[0],crashed[1])),(0.2,(crashed[0],crashed[1]))]
+        else:
+            #i am confused here
+            #return[(0.0,(x,y))]
+            return[(0.8,(x,y)),(0.2,(x,y))]
     else:
+        #i am confused here
+        #return[(0.0,(x,y))]
         return[(0.8,(x,y)),(0.2,(x,y))]
     
     
@@ -204,6 +207,9 @@ def check_for_crash(start, end):
         oldY = y
 
         for i in range(n, 0, -1):
+            '''
+            This needs to be checked it says x,y so what it should be
+            '''
             if(raceTrack[x1][y1]) == '#' :
                 return (oldX,oldY)
             else : 
@@ -223,7 +229,7 @@ A temporary function just for simplicity
 
 def fileReading():
     count = 0
-    trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/L-track.txt'
+    trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/O-track.txt'
     with open(trackFile, 'r') as f:
             # First line specifies track dimensions
             line = f.readline()
@@ -236,6 +242,7 @@ def fileReading():
                     raceTrack[count].append(char)
                 count+=1
                 line = f.readline()
+                
                 
 def crash_test():
     ''' Testing function for crash detection in simulator '''
