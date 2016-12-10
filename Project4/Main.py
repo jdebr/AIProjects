@@ -236,21 +236,6 @@ def fileReading():
                     raceTrack[count].append(char)
                 count+=1
                 line = f.readline()
-def fileReading():
-    count = 0
-    trackFile = 'D:/Shriyansh_PostGraduation/Artifical Intelligence/Project 4/R-track.txt'
-    with open(trackFile, 'r') as f:
-            # First line specifies track dimensions
-            line = f.readline()
-            # Remaining lines specify track
-            line = f.readline()
-            while line:
-                raceTrack.append([])
-                line = line.rstrip('\n')
-                for char in line:
-                    raceTrack[count].append(char)
-                count+=1
-                line = f.readline()
                 
 def crash_test():
     ''' Testing function for crash detection in simulator '''
@@ -273,21 +258,24 @@ def Qlearning_Otest():
     ''' Testing function for Q learning on O-Track'''
     q = QLearner(0.5, 0.9, 0.9,"O")
     q.track.show()
-    q.train((3,3,0,1))
-    q.train((21, 2, -1, 0))
-    q.train((20, 23, 0, -1))
-    q.train((3, 22, 1, 0))
+    q.train((3,4,0,1))
+    q.train((4,3,0,1))
+    q.train((20, 2, -1, 0))
+    q.train((21, 4, -1, -1))
+    q.train((20, 20, 0, -1))
+    q.train((18, 22, 1, -1))
+    q.train((4, 22, 1, 0))
+    q.train((3, 20, 1, 1))
     q.train()
-    print(q.trial_run())
+    for i in range(10):
+        print(q.trial_run())
     
 def Qlearning_Ltest():
     ''' Testing function for Q learning on L-track'''
     q = QLearner(0.5, 0.9, 0.9,"L")
     q.track.show()
-    q.train((32, 1, 0, 1))
     q.train((32, 2, 0, 1))
     q.train((32, 3, 0, 1))
-    q.train((32, 4, 0, 1))
     q.train()
     q.train()
     for i in range(10):
@@ -295,8 +283,8 @@ def Qlearning_Ltest():
     
 def main():
     #crash_test()
-    #Qlearning_Otest()
-    Qlearning_Ltest()
+    Qlearning_Otest()
+    #Qlearning_Ltest()
 
 if __name__ == "__main__":
     main()

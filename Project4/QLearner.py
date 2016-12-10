@@ -41,9 +41,17 @@ class QLearner():
         print("Training...")
         # Set state to restart learning if finish line is crossed during training
         if not start_state:
-            start_state = self.track.get_random_start_state()
-        self.agent.set_state(start_state)
+            self.agent.set_state(self.track.get_random_start_state())
+        else:
+            # Set up a group of starting states to train from
+            starting_states = [(start_state)]
+            starting_states.append((start_state[0]+1,start_state[1], start_state[2], start_state[3]))
+            starting_states.append((start_state[0]-1,start_state[1], start_state[2], start_state[3]))
+            starting_states.append((start_state[0],start_state[1]-1, start_state[2], start_state[3]))
+            starting_states.append((start_state[0],start_state[1]+1, start_state[2], start_state[3]))
+            self.agent.set_state(random.choice(starting_states))
         # Set other variables if passed in
+        self.current_state = self.agent.get_state()
         if not learning_rate:
             learning_rate = self.learning_rate
         if not discount:
@@ -74,9 +82,14 @@ class QLearner():
             self.Qtable[self.current_state][action] = newQ
             # Update state
             if self.agent.check_location() == 'F':
-                self.current_state = start_state
-                self.agent.set_state(start_state)
+                # Restart if at the finish
+                if not start_state:
+                    self.agent.set_state(self.track.get_random_start_state())
+                else:
+                    self.agent.set_state(random.choice(starting_states))
+                self.current_state = self.agent.get_state()
             else:
+                # Else keep training from new position
                 self.current_state = new_state
                 
             # Show track
