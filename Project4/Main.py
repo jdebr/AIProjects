@@ -292,11 +292,28 @@ def Qlearning_Ltest():
     q.train()
     for i in range(10):
         print(q.trial_run())
+        
+def Qlearning_Rtest():
+    ''' Testing function for Q learning on R-track'''
+    q = QLearner(0.5, 0.9, 0.9, "R", True)
+    q.track.show()
+    q.train((23,11, 1, -1))
+    q.train((12,17, 1, -1))
+    q.train((13,17, 1, -1))
+    q.train((21,25, 0, -1))
+    q.train((21,23, -1, -1))
+    q.train((5, 24, 1, 0))
+    q.train((4, 23, 1, 1))
+    q.train()
+    q.train()
+    for i in range(10):
+        print(q.trial_run())
     
 def main():
     #crash_test()
-    Qlearning_Otest()
+    #Qlearning_Otest()
     #Qlearning_Ltest()
+    Qlearning_Rtest()
 
 if __name__ == "__main__":
     main()
