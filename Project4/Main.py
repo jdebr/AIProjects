@@ -36,11 +36,13 @@ discount = 0.9
 stateValue = {}
 velocityX = 0
 velocityY = 0
-
+LoopCounter = 0
+statesCopy = dict([])
+sCopy = dict([])
 
 def valueIteration(epsilon = 0.001):
-    LoopCounter = 0
-    statesCopy = dict([])
+    global LoopCounter
+    
     '''
     calling the function to initialize the states dictionary
     '''
@@ -54,13 +56,13 @@ def valueIteration(epsilon = 0.001):
         '''
         statesCopy[Initialkey] = 0
     #discount = 0.1
-    print(statesCopy)
-    print(statesWall)
     while True:
+        #LoopCounter+=1
         sCopy = statesCopy.copy()
         #print(sCopy)
         delta = 0
         for key, value in states.items():
+            LoopCounter+=1
             statesCopy[key] = giveRewards(key) + discount * max([sum([probability * sCopy[newState] for (probability, newState) in stateTransitions(key, a)])
                                     for a in actions(key)])
             delta = max(delta, abs(statesCopy[key] - sCopy[key]))
@@ -69,8 +71,8 @@ def valueIteration(epsilon = 0.001):
             #print(len(statesCopy))
             if delta < epsilon * (1-discount) / discount:
                 print(sCopy)
-                policyIdentification(sCopy)
-                return delta
+                pi = policyIdentification(sCopy)
+                return pi
             
 def policyIdentification(sCopy):
     pi = {}
@@ -160,6 +162,8 @@ def stateTransitions(state,action):
             crashed = check_for_crash((x , y), end)
             if not crashed:
                 return[(0.8,(end[0],end[1])),(0.2,(x+tempVelocityX,y+tempVelocityY))]
+            elif raceTrack[crashed[0]][crashed[1]] == 'F':
+                return[(0.8,(crashed[0],crashed[1])),(0.2,(crashed[0],crashed[1]))]
             else:
                 velocityX = 0
                 velocityY = 0
@@ -210,8 +214,10 @@ def check_for_crash(start, end):
             '''
             This needs to be checked it says x,y so what it should be
             '''
-            if(raceTrack[x1][y1]) == '#' :
-                return (oldX,oldY)
+            if(raceTrack[x1][y1]) == 'F' :
+                return (x1,y1)
+            elif(raceTrack[x1][y1]) == '#' :
+                return(oldX,oldY)
             else : 
                 oldX = x 
                 oldY = y
@@ -241,8 +247,7 @@ def fileReading():
                 for char in line:
                     raceTrack[count].append(char)
                 count+=1
-                line = f.readline()
-                
+                line = f.readline()                
                 
 def crash_test():
     ''' Testing function for crash detection in simulator '''
