@@ -40,6 +40,7 @@ class Racecar():
         if accX in Racecar.possible_acc and accY in Racecar.possible_acc:
             self.aX = accX 
             self.aY = accY 
+
         else:
             print("Invalid acceleration values")
             
@@ -59,16 +60,16 @@ class Racecar():
         ''' Returns ASCII char of car's current location'''
         return self.track.check_location(self.x, self.y)
         
-    def move(self, restart_states=None):
+    def move(self):
         ''' Applies the current values of the car's acceleration to the velocity 
         values (with a success rate of 80%), then attempts to update the car's 
         position based on the current velocity while checking for potential 
         collisions with the track walls
         '''
         # Generate random number between 0 and 1 to see if acceleration is successful
+
         chance = random.random()
-        acc_fail = chance > 0.8 
-        
+        acc_fail = chance > 0.8
         # Apply acceleration to velocity
         if not acc_fail:
             self.vX += self.aX
@@ -104,14 +105,69 @@ class Racecar():
             if self.track.restart:
                 # Set to random starting position
                 pos = random.choice(self.track.start_positions)
-                if restart_states:
-                    pos = random.choice(restart_states)
                 self.x = pos[0]
                 self.y = pos[1]
             else:
                 # Set to value returned by check_for_crash()
                 self.x = crash_or_finish[0]
                 self.y = crash_or_finish[1]
+    #A variant I implemented earlier, Maybe it can be helpful for VI           
+    def moveValueIteration(self,staters):
+        ''' Applies the current values of the car's acceleration to the velocity 
+        values (with a success rate of 80%), then attempts to update the car's 
+        position based on the current velocity while checking for potential 
+        collisions with the track walls
+        '''
+        x,y,vX,vY = staters
+        # Generate random number between 0 and 1 to see if acceleration is successful
+        chance = random.random()
+        acc_fail = chance > 0.8
+        # Apply acceleration to velocity
+        tempVx = self.vX
+        tempVy = self.vY
+        if not acc_fail:
+            self.vX += self.aX
+            self.vY += self.aY 
+            
+        # Bound velocity between -5 and 5
+        if self.vX > 5:
+            self.vX = 5
+        if self.vX < -5:
+            self.vX = -5
+        if self.vY > 5:
+            self.vY = 5
+        if self.vY < -5:
+            self.vY = -5
+            
+        # Check for collisions or finish
+        end = (x + self.vX, y + self.vY)
+        crash_or_finish = self.track.check_for_crash((x, y), end)
         
-        
-        
+        # Update position
+        if not crash_or_finish:
+            # Safe move
+            tempX = x
+            tempY = y
+            #self.x = end[0]
+            #self.y = end[1]
+            return[(0.8,(end[0],end[1], self.vX, self.vY)),(0.2,(tempX,tempY, tempVx, tempVy))]
+        elif self.track.check_location(crash_or_finish[0],crash_or_finish[1]) == 'F':
+            # Cross the finish line
+            #self.x = crash_or_finish[0]
+            #self.y = crash_or_finish[1]
+            return[(0.8,(crash_or_finish[0],crash_or_finish[1], self.vX, self.vY)),(0.2,(crash_or_finish[0],crash_or_finish[1], self.vX, self.vY))]
+        else:
+            # Crashed
+            self.vX = 0
+            self.vY = 0
+            if self.track.restart:
+                # Set to random starting position
+                pos = random.choice(self.track.start_positions)
+                #self.x = pos[0]
+                #self.y = pos[1]
+                return[(0.8,(pos[0],pos[1], self.vX, self.vY)),(0.2,(pos[0],pos[1], self.vX, self.vY))]
+            else:
+                # Set to value returned by check_for_crash()
+                #self.x = crash_or_finish[0]
+                #self.y = crash_or_finish[1]
+                return[(0.8,(crash_or_finish[0],crash_or_finish[1], self.vX, self.vY)),(0.2,(crash_or_finish[0],crash_or_finish[1], self.vX, self.vY))]
