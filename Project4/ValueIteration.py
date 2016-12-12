@@ -13,6 +13,7 @@ from Track import Track
 import random
 
 class ValueIteration():
+
     def __init__(self, discount, epsilon, track):
         self.discount = discount 
         self.epsilon = epsilon
@@ -72,8 +73,7 @@ class ValueIteration():
             delta = 0
             for key, value in self.Vtable.items():
                 #for move, reward in value.items():
-                self.statesCopy[key] = self.get_reward(key) + discount * max([sum([probability * self.sCopy[newState] for (probability, newState) in self.stateTransitions(key, a)])
-                                        for a in self.possible_actions])
+                self.statesCopy[key] = self.get_reward(key) + discount * max([sum([probability * self.sCopy[newState] for (probability, newState) in self.stateTransitions(key, a)]) for a in self.possible_actions])
                 delta = max(delta, abs(self.statesCopy[key] - self.sCopy[key]))
                 #print(self.delta)
                 #print(statesCopy)

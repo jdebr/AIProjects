@@ -53,8 +53,7 @@ class ValueIteration() :
             delta = 0
             for key, value in self.states.items():
                 self.LoopCounter+=1
-            self.statesCopy[key] = giveRewards(key) + self.discount * max([sum([probability * self.sCopy[newState] for (probability, newState) in stateTransitions(key, a)])
-                                    for a in actions(key)])
+            self.statesCopy[key] = giveRewards(key) + self.discount * max([sum([probability * self.sCopy[newState] for (probability, newState) in stateTransitions(key, a)]) for a in actions(key)])
             delta = max(delta, abs(self.statesCopy[key] - self.sCopy[key]))
             #print("What" + str(delta))
             #print(statesCopy)
