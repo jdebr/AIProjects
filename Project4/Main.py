@@ -54,8 +54,8 @@ def Qlearning_Ltest():
     q.train((32, 3, 0, 1))
     q.train()
     q.train()
-    for i in range(1):
-        q.trial_run(show_track=True)
+    for i in range(10):
+        print(q.trial_run())
 		
         
 def Qlearning_Rtest():
@@ -77,8 +77,8 @@ def Qlearning_Rtest():
 def ValueIteration_Otest():
     VI = ValueIteration(0.0000000001, 0.5, "O")
     VI.valueIteration(0.0000000001,0.5)
-    for i in range(1):
-        VI.trial_run(show_track=True)
+    for i in range(10):
+        print(VI.trial_run())
 
 def ValueIteration_Ltest():
     pass 
@@ -87,8 +87,8 @@ def main():
     #print("hi")
     #crash_test()
     #Qlearning_Otest()
-    Qlearning_Ltest()
-    #ValueIteration_Otest()
+    #Qlearning_Ltest()
+    ValueIteration_Otest()
     #Qlearning_Rtest()
 
 if __name__ == "__main__":

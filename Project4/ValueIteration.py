@@ -45,9 +45,9 @@ class ValueIteration():
     
     def valueIteration(self, epsilon , discount):
         print("*** Begin Value Iteration ***")
-        print("Threshold for convergence: " + str(epsilon))
-        print("Discount factor: " + str(discount))
-        print("Initializing Value Table to zero...")
+        #print("Threshold for convergence: " + str(epsilon))
+        #print("Discount factor: " + str(discount))
+        #print("Initializing Value Table to zero...")
         for Initialkey, InititalValue in self.Vtable.items():
             
             '''
@@ -77,9 +77,9 @@ class ValueIteration():
             
             # Iterate all states
             for state in self.Vtable.keys():
-                if state == (3, 20, 0, 0) and conv_count % 5 == 0:
-                    print("*** Example Temporal Difference Calculation ***")
-                    print(" ~ Current State: " + str(state))
+#                 if state == (3, 20, 0, 0) and conv_count % 5 == 0:
+#                     print("*** Example Temporal Difference Calculation ***")
+#                     print(" ~ Current State: " + str(state))
                 # Main calculation
                 a_values = {}
                 for action in self.possible_actions:
@@ -89,20 +89,19 @@ class ValueIteration():
                     for pstate in pos_states:
                         v_sum += pstate[0] * (self.get_reward(pstate[1]) + discount*V_prev[pstate[1]])
                     a_values[action] = v_sum
-                    if state == (3, 20, 0, 0) and conv_count % 5 == 0:
-                        print(" ~ Possible State Transitions for action " + str(action) +": " + str(pos_states))
-                        print(" ~ Calculated Value for action " + str(action) + ": " + str(v_sum))
+#                     if state == (3, 20, 0, 0) and conv_count % 5 == 0:
+#                         print(" ~ Possible State Transitions for action " + str(action) +": " + str(pos_states))
+#                         print(" ~ Calculated Value for action " + str(action) + ": " + str(v_sum))
                 # Find action with max value and store it in current V
                 best_value = max(a_values.values())
                 V_current[state] = best_value
-                if state == (3, 20, 0, 0) and conv_count % 5 == 0:
-                    print(" ~ Updating V-Table with max value: " + str(best_value))
+#                 if state == (3, 20, 0, 0) and conv_count % 5 == 0:
+#                     print(" ~ Updating V-Table with max value: " + str(best_value))
                     
                 # Check for convergence
                 if abs(V_current[state]-V_prev[state]) > epsilon:
                     converging = True
         # Build Policy
-        print()
         print("*** Value Iteration Complete, Building Action Policy***")
         printExample = True
         for state in self.Vtable.keys():
@@ -121,16 +120,15 @@ class ValueIteration():
                 if value > best_value:
                     best_value = value 
                     best_action = action 
-            if printExample and state == (3, 20, 0, 0):
-                printExample = False
-                print("*** Example policy calculation ***")
-                print(" ~ Finding best action for state " + str(state))
-                print(" ~ Possible actions and resulting values for argMax calculation: " + str(argMax))
-                print(" ~ Best action for state: " + str(state) + ": "+ str(best_action))
+#             if printExample and state == (3, 20, 0, 0):
+#                 printExample = False
+#                 print("*** Example policy calculation ***")
+#                 print(" ~ Finding best action for state " + str(state))
+#                 print(" ~ Possible actions and resulting values for argMax calculation: " + str(argMax))
+#                 print(" ~ Best action for state: " + str(state) + ": "+ str(best_action))
             # Assign Policy
             self.pi[state] = best_action
         print("Done")
-        print()
     
     
     def stateTransitions(self,state,action):

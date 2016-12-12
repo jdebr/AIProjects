@@ -58,9 +58,9 @@ class QLearner():
             discount = self.discount
         if not epsilon:
             epsilon = self.epsilon
-        print("Initial learning rate: " + str(learning_rate))
-        print("Initial discount: " + str(discount))
-        print("Initial e-greedy epsilon: " + str(epsilon))
+        #print("Initial learning rate: " + str(learning_rate))
+        #print("Initial discount: " + str(discount))
+        #print("Initial e-greedy epsilon: " + str(epsilon))
                     
         # Main loop, when do we terminate?
         for i in range(iterations):
@@ -68,10 +68,10 @@ class QLearner():
             if i % (iterations/10) == 0:
                 epsilon -= 0.05
                 learning_rate -= 0.05
-                print()
-                print("*** Decaying epsilon and learning rate ***")
-                print(" ~ E-greedy epsilon decreased to " + str(epsilon))
-                print(" ~ Learning rate decreased to " + str(epsilon))
+                #print()
+                #print("*** Decaying epsilon and learning rate ***")
+                #print(" ~ E-greedy epsilon decreased to " + str(epsilon))
+                #print(" ~ Learning rate decreased to " + str(epsilon))
             action = self.select_action(epsilon)
             # Update car with action
             self.agent.set_acceleration(action[0], action[1])
@@ -103,16 +103,16 @@ class QLearner():
                 # Else keep training from new position
                 self.current_state = new_state
             
-            if i == 50000:
-                print()
-                print("***EXAMPLE Q LEARNING CALCULATION***") 
-                print(" ~ Current state (x, y, Vx, Vy): " + str(old_state)) 
-                print(" ~ E-greedy action selection: " + str(action)) 
-                print(" ~ New state: " + str(new_state))
-                print(" ~ Current Q-Table value for state and action: " + str(Qsa))
-                print(" ~ Reward: " + str(reward)) 
-                print(" ~ Estimate of future reward: " + str(future_value))
-                print(" ~ Updated Q-Table value for state and action: " + str(newQ))
+#             if i == 50000:
+#                 print()
+#                 print("***EXAMPLE Q LEARNING CALCULATION***") 
+#                 print(" ~ Current state (x, y, Vx, Vy): " + str(old_state)) 
+#                 print(" ~ E-greedy action selection: " + str(action)) 
+#                 print(" ~ New state: " + str(new_state))
+#                 print(" ~ Current Q-Table value for state and action: " + str(Qsa))
+#                 print(" ~ Reward: " + str(reward)) 
+#                 print(" ~ Estimate of future reward: " + str(future_value))
+#                 print(" ~ Updated Q-Table value for state and action: " + str(newQ))
             # Show track
             #self.track.show()
             #print()
