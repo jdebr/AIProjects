@@ -102,8 +102,8 @@ def main():
     print("hi")
     #crash_test()
     #Qlearning_Otest()
-    #Qlearning_Ltest()
-    ValueIteration_Otest()
+    Qlearning_Ltest()
+    #ValueIteration_Otest()
     #Qlearning_Rtest()
 
 if __name__ == "__main__":
