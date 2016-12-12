@@ -1,4 +1,13 @@
+'''
+CSCI 446 
+Fall 2016
+Project 4
+Group 3
 
+@author: Joe DeBruycker
+@author: Shriyansh Kothari
+@author: Sara Ounissi
+'''
 
 from Track import Track
 
@@ -160,4 +169,3 @@ class ValueIteration() :
             #i am confused here
             #return[(0.0,(x,y))]
             return[(0.8,(x,y)),(0.2,(x,y))]             
-=======
