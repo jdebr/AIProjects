@@ -12,14 +12,13 @@ Group 3
 from Track import Track
 import random
 
-class ValueIteration():
 
+class ValueIteration():
     def __init__(self, discount, epsilon, track):
         self.discount = discount 
         self.epsilon = epsilon
         self.track = Track(track)
         self.agent = self.track.car 
-        self.current_state = self.agent.get_state()
         self.sCopy = {}
         self.pi = {}
         self.statesCopy = {}
@@ -56,8 +55,6 @@ class ValueIteration():
             return -1
     
     def valueIteration(self, epsilon , discount):
-        print(epsilon)
-        print(discount)
         for Initialkey, InititalValue in self.Vtable.items():
             '''
             making a copy of states with value 0
@@ -67,7 +64,7 @@ class ValueIteration():
                 self.statesCopy[Initialkey][action] = 0
 
         #discount = 0.1
-        #print(self.statesCopy)
+        print(len(self.statesCopy))
         self.sCopy = self.statesCopy.copy()
         while True:
             delta = 0
@@ -76,11 +73,24 @@ class ValueIteration():
                     self.statesCopy[key][move] = self.get_reward(key) + discount * max([sum([probability * self.sCopy[newState][a] for (probability, newState) in self.stateTransitions(key, a)])
                                             for a in self.possible_actions])
                     delta = max(delta, abs(self.statesCopy[key][move] - self.sCopy[key][move]))
-                    if  delta < (epsilon * (1-discount) / discount):
-                        print(self.sCopy)
-                        return delta
-                        
-                
+                    #print(self.sCopy[key][move])
+                    #print(self.statesCopy[key][move])
+            #print(self.sCopy)
+            for Initialkey, InititalValue in self.Vtable.items():
+                best_action = (0,0)
+                best_value = self.sCopy[Initialkey][best_action]
+                self.pi[Initialkey] = {}
+                for action, value in InititalValue.items():
+                    if value > best_value:
+                        best_action = action
+                        best_value = value
+                a = best_action 
+                self.pi[Initialkey][a] = sum([probability * self.sCopy[newState][a] for (probability, newState) in self.stateTransitions(Initialkey, a)])
+            print(self.pi)
+            print(len(self.pi))
+            return self.pi
+        
+    #Not using for time being                
     def policyIdentification(self, sCopy):
         for Initialkey, InititalValue in self.Vtable.items():
             best_action = (0,0)
@@ -96,16 +106,28 @@ class ValueIteration():
     
         
     def stateTransitions(self,state,action):
-        if(action == (0,0)):
-            return[(0.0,state)]
-        else:
-            self.agent.set_state(state)
-            self.agent.set_acceleration(action[0], action[1])
-            # Update state
-            self.agent.move()
-            new_state = self.agent.get_state()
-            return[(0.8,new_state),(0.2,state)]
-
+        self.agent.set_state(state)
+        self.agent.set_acceleration(action[0], action[1])
+        # Update state
+        self.agent.move()
+        new_state = self.agent.get_state()
+        return[(0.8,new_state),(0.2,state)]
+        '''
+        #self.agent.set_state(state)
+        self.agent.set_acceleration(action[0], action[1])
+        # Update state
+        new_Return = self.agent.moveValueIteration(state)
+        #self.agent.set_state(new_Return[0][1])
+        #print(new_Return[0][1])
+        #print(new_Return[0])
+        return[(new_Return[0]),(new_Return[1])]
+        
+        new_state = self.agent.get_state()
+        self.agent.set_state(new_state)
+        return[(0.8,new_state),(0.2,state)]
+        '''
+            
+        
     def trial_run(self, max_moves=0):
         ''' Attempts a trial run through the course, tracking total moves until the finish line is found or some max number is reached '''
         print("*** TRIAL RUN ***")
