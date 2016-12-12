@@ -184,7 +184,6 @@ class ValueIteration():
         self.sCopy = {}
         self.pi = {}
         self.statesCopy = {}
-        self.delta = 0.0
         self.possible_actions = [(1,1),(1,0),(1,-1),(0,1),(0,0),(0,-1),(-1,1),(-1,0),(-1,-1)]
         self.possible_velocities = []
         for i in range(-5,6):
@@ -195,9 +194,9 @@ class ValueIteration():
         for pos in self.track.track_positions:
             for vel in self.possible_velocities:
                 temp_state = (pos[0], pos[1], vel[0], vel[1])
-                self.Vtable[temp_state] = {}
-                for action in self.possible_actions:
-                    self.Vtable[temp_state][action] = 0
+                self.Vtable[temp_state] = 0
+                #for action in self.possible_actions:
+                #    self.Vtable[temp_state][action] = 0
         
     def select_action(self):
         # Exploitation
@@ -224,27 +223,34 @@ class ValueIteration():
             '''
             making a copy of states with value 0
             '''
-            self.statesCopy[Initialkey] = {}
-            for action, value in InititalValue.items():
-                self.statesCopy[Initialkey][action] = 0
+            self.statesCopy[Initialkey] = 0
+            #for action, value in InititalValue.items():
+            #    self.statesCopy[Initialkey][action] = 0
 
         #discount = 0.1
-        
+        #print(self.statesCopy)
+        self.sCopy = self.statesCopy.copy()
         while True:
-            self.sCopy = self.statesCopy.copy()
+            delta = 0
             for key, value in self.Vtable.items():
-                for move, reward in value.items():
-                    self.statesCopy[key][move] = self.get_reward(key) + discount * max([sum([probability * self.sCopy[newState][a] for (probability, newState) in self.stateTransitions(key, a)])
-                                            for a in self.possible_actions])
-                    delta = max(self.delta, abs(self.statesCopy[key][move] - self.sCopy[key][move]))
-                    #print(statesCopy)
-                    #print(len(statesCopy))
-                    if self.delta < (epsilon * (1-discount) / discount):
-                        print(self.delta)
-                        print(self.sCopy)
-                        carap = self.policyIdentification(self.sCopy)
-                        return carap
-                        
+                #for move, reward in value.items():
+                self.statesCopy[key] = self.get_reward(key) + discount * max([sum([probability * self.sCopy[newState] for (probability, newState) in self.stateTransitions(key, a)])
+                                        for a in self.possible_actions])
+                delta = max(delta, abs(self.statesCopy[key] - self.sCopy[key]))
+                #print(self.delta)
+                #print(statesCopy)
+                #print(len(statesCopy))
+                if  delta < (epsilon * (1-discount) / discount):
+                    print(delta)
+                    print(epsilon * (1-discount) / discount)
+                    #print(self.sCopy)
+                    '''
+                    carap = self.policyIdentification(self.sCopy)
+                    return carap
+                    '''
+                    print(self.sCopy)
+                    return delta
+                    
                 
     def policyIdentification(self, sCopy):
         for Initialkey, InititalValue in self.Vtable.items():
@@ -261,14 +267,15 @@ class ValueIteration():
     
         
     def stateTransitions(self,state,action):
-        
-        self.agent.set_state(state)
-        self.agent.set_acceleration(action[0], action[1])
-        # Update state
-        self.agent.move()
-        #print(self.current_state)
-        new_state = self.agent.get_state()
-        return[(0.8,new_state),(0.2,state)]
+        if(action == (0,0)):
+            return[(0.0,state)]
+        else:
+            self.agent.set_state(state)
+            self.agent.set_acceleration(action[0], action[1])
+            # Update state
+            self.agent.move()
+            new_state = self.agent.get_state()
+            return[(0.8,new_state),(0.2,state)]
 
     def trial_run(self, max_moves=0):
         ''' Attempts a trial run through the course, tracking total moves until the finish line is found or some max number is reached '''
