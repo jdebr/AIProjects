@@ -8,25 +8,10 @@ Group 3
 @author: Shriyansh Kothari
 @author: Sara Ounissi
 '''
-from Track import Track
-from Racecar import Racecar
 from QLearner import QLearner
 from ValueIteration import ValueIteration
-from collections import defaultdict
-from numpy import argmax
 import random
 
-'''
-Things to keep in mind
-
-accelerationList = [-1,0,1]
-punishment = -1
-racer_State = {}
-racer_Reward = {}
-
-80% we accelerate hence 0.8 
-20% no acceleration hence 0.2
-'''
 
 def crash_test():
     ''' Testing function for crash detection in simulator '''
@@ -64,13 +49,13 @@ def Qlearning_Otest():
 def Qlearning_Ltest():
     ''' Testing function for Q learning on L-track'''
     q = QLearner(0.5, 0.9, 0.9,"L")
-    q.track.show()
+    #q.track.show()
     q.train((32, 2, 0, 1))
     q.train((32, 3, 0, 1))
     q.train()
     q.train()
-    for i in range(10):
-        print(q.trial_run())
+    for i in range(1):
+        q.trial_run(show_track=True)
 		
         
 def Qlearning_Rtest():
@@ -92,14 +77,14 @@ def Qlearning_Rtest():
 def ValueIteration_Otest():
     VI = ValueIteration(0.0000000001, 0.5, "O")
     VI.valueIteration(0.0000000001,0.5)
-    for i in range(10):
-        print(VI.trial_run())
+    for i in range(1):
+        VI.trial_run(show_track=True)
 
 def ValueIteration_Ltest():
     pass 
     
 def main():
-    print("hi")
+    #print("hi")
     #crash_test()
     #Qlearning_Otest()
     Qlearning_Ltest()

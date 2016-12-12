@@ -35,7 +35,7 @@ class QLearner():
                 for action in self.possible_actions:
                     self.Qtable[temp_state][action] = 0  
     
-    def train(self, start_state=None, learning_rate=None, discount=None, epsilon=None, iterations=10000000):
+    def train(self, start_state=None, learning_rate=None, discount=None, epsilon=None, iterations=1000000):
         ''' Run the Q-learning algorithm, potentially setting car's location to some other area and updating 
         learning rate and discount'''
         print("Training...")
@@ -68,6 +68,7 @@ class QLearner():
             if i % (iterations/10) == 0:
                 epsilon -= 0.05
                 learning_rate -= 0.05
+                print()
                 print("*** Decaying epsilon and learning rate ***")
                 print(" ~ E-greedy epsilon decreased to " + str(epsilon))
                 print(" ~ Learning rate decreased to " + str(epsilon))
@@ -103,6 +104,7 @@ class QLearner():
                 self.current_state = new_state
             
             if i == 50000:
+                print()
                 print("***EXAMPLE Q LEARNING CALCULATION***") 
                 print(" ~ Current state (x, y, Vx, Vy): " + str(old_state)) 
                 print(" ~ E-greedy action selection: " + str(action)) 
@@ -121,6 +123,7 @@ class QLearner():
         
     def trial_run(self, max_moves=10000, show_track=False):
         ''' Attempts a trial run through the course, tracking total moves until the finish line is found or some max number is reached '''
+        print()
         print("*** TRIAL RUN ***")
         num_moves = 0
         # Set agent at starting line

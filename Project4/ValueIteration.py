@@ -44,9 +44,12 @@ class ValueIteration():
             return -1
     
     def valueIteration(self, epsilon , discount):
-        print(epsilon)
-        print(discount)
+        print("*** Begin Value Iteration ***")
+        print("Threshold for convergence: " + str(epsilon))
+        print("Discount factor: " + str(discount))
+        print("Initializing Value Table to zero...")
         for Initialkey, InititalValue in self.Vtable.items():
+            
             '''
             making a copy of states with value 0
             '''
@@ -63,7 +66,7 @@ class ValueIteration():
         conv_count = 0
         while converging:
             conv_count += 1
-            print("Converging..." + str(conv_count))
+            print("Converging...iteration " + str(conv_count))
             converging = False
             if V_current is self.statesCopy:
                 V_prev = self.statesCopy
@@ -74,6 +77,9 @@ class ValueIteration():
             
             # Iterate all states
             for state in self.Vtable.keys():
+                if state == (3, 20, 0, 0) and conv_count % 5 == 0:
+                    print("*** Example Temporal Difference Calculation ***")
+                    print(" ~ Current State: " + str(state))
                 # Main calculation
                 a_values = {}
                 for action in self.possible_actions:
@@ -83,13 +89,22 @@ class ValueIteration():
                     for pstate in pos_states:
                         v_sum += pstate[0] * (self.get_reward(pstate[1]) + discount*V_prev[pstate[1]])
                     a_values[action] = v_sum
+                    if state == (3, 20, 0, 0) and conv_count % 5 == 0:
+                        print(" ~ Possible State Transitions for action " + str(action) +": " + str(pos_states))
+                        print(" ~ Calculated Value for action " + str(action) + ": " + str(v_sum))
                 # Find action with max value and store it in current V
                 best_value = max(a_values.values())
                 V_current[state] = best_value
+                if state == (3, 20, 0, 0) and conv_count % 5 == 0:
+                    print(" ~ Updating V-Table with max value: " + str(best_value))
+                    
                 # Check for convergence
                 if abs(V_current[state]-V_prev[state]) > epsilon:
                     converging = True
         # Build Policy
+        print()
+        print("*** Value Iteration Complete, Building Action Policy***")
+        printExample = True
         for state in self.Vtable.keys():
             # Argmax
             argMax = {}
@@ -106,9 +121,16 @@ class ValueIteration():
                 if value > best_value:
                     best_value = value 
                     best_action = action 
+            if printExample and state == (3, 20, 0, 0):
+                printExample = False
+                print("*** Example policy calculation ***")
+                print(" ~ Finding best action for state " + str(state))
+                print(" ~ Possible actions and resulting values for argMax calculation: " + str(argMax))
+                print(" ~ Best action for state: " + str(state) + ": "+ str(best_action))
             # Assign Policy
             self.pi[state] = best_action
         print("Done")
+        print()
     
     
     def stateTransitions(self,state,action):
@@ -131,7 +153,7 @@ class ValueIteration():
         return transitions
             
 
-    def trial_run(self, max_moves=1000):
+    def trial_run(self, max_moves=1000, show_track=False):
         ''' Attempts a trial run through the course, tracking total moves until the finish line is found or some max number is reached '''
         print("*** TRIAL RUN ***")
         num_moves = 0
@@ -149,11 +171,15 @@ class ValueIteration():
             # Track score
             num_moves += 1
             # Show track
-            self.track.show()
-            print()
-            #time.sleep(0.1)
-            x = input()
+            if show_track:
+                print(" ~ Action selected from policy: " + str(action))
+                self.track.show()
+                print()
+                #time.sleep(0.1)
+                #x = input()
             # Terminate on finish
             if self.agent.check_location() == 'F':
+                if show_track:
+                    print("*** Finished course in " + str(num_moves) + " actions***")
                 return num_moves
         return num_moves
