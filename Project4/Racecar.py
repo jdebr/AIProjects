@@ -114,4 +114,52 @@ class Racecar():
                 self.y = crash_or_finish[1]
         
         
+    def move_deterministic(self, restart_states=None):
+        ''' Applies the current values of the car's acceleration to the velocity 
+        values, then attempts to update the car's 
+        position based on the current velocity while checking for potential 
+        collisions with the track walls
+        '''
+       
+        # Apply acceleration to velocity
+        self.vX += self.aX
+        self.vY += self.aY 
         
+        # Bound velocity between -5 and 5
+        if self.vX > 5:
+            self.vX = 5
+        if self.vX < -5:
+            self.vX = -5
+        if self.vY > 5:
+            self.vY = 5
+        if self.vY < -5:
+            self.vY = -5
+            
+        # Check for collisions or finish
+        end = (self.x + self.vX, self.y + self.vY)
+        crash_or_finish = self.track.check_for_crash((self.x, self.y), end)
+        
+        # Update position
+        if not crash_or_finish:
+            # Safe move
+            self.x = end[0]
+            self.y = end[1]
+        elif self.track.check_location(crash_or_finish[0],crash_or_finish[1]) == 'F':
+            # Cross the finish line
+            self.x = crash_or_finish[0]
+            self.y = crash_or_finish[1]
+        else:
+            # Crashed
+            self.vX = 0
+            self.vY = 0
+            if self.track.restart:
+                # Set to random starting position
+                pos = random.choice(self.track.start_positions)
+                if restart_states:
+                    pos = random.choice(restart_states)
+                self.x = pos[0]
+                self.y = pos[1]
+            else:
+                # Set to value returned by check_for_crash()
+                self.x = crash_or_finish[0]
+                self.y = crash_or_finish[1]

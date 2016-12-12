@@ -94,16 +94,17 @@ def ValueIteration_Otest():
     VI.track.show()
     VI.valueIteration(0.001,0.9)
     VI.track.show()
-	#to do
+    #to do
 
 def ValueIteration_Ltest():
     pass 
     
 def main():
+    print("hi")
     #crash_test()
     #Qlearning_Otest()
     #Qlearning_Ltest()
-	ValueIteration_Otest()
+    ValueIteration_Otest()
     #Qlearning_Rtest()
 
 if __name__ == "__main__":
