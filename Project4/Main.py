@@ -292,11 +292,20 @@ def Qlearning_Ltest():
     q.train()
     for i in range(10):
         print(q.trial_run())
+		
+def ValueItteration_Otest():
+    t = Track("O")
+    t.show()
+
+def ValueItteration_Ltest():
+    pass
     
 def main():
     #crash_test()
-    Qlearning_Otest()
+    #Qlearning_Otest()
     #Qlearning_Ltest()
+	ValueItteration_Otest()
+	
 
 if __name__ == "__main__":
     main()
