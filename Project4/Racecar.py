@@ -59,7 +59,7 @@ class Racecar():
         ''' Returns ASCII char of car's current location'''
         return self.track.check_location(self.x, self.y)
         
-    def move(self):
+    def move(self, restart_states=None):
         ''' Applies the current values of the car's acceleration to the velocity 
         values (with a success rate of 80%), then attempts to update the car's 
         position based on the current velocity while checking for potential 
@@ -104,6 +104,8 @@ class Racecar():
             if self.track.restart:
                 # Set to random starting position
                 pos = random.choice(self.track.start_positions)
+                if restart_states:
+                    pos = random.choice(restart_states)
                 self.x = pos[0]
                 self.y = pos[1]
             else:
