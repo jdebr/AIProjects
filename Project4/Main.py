@@ -90,11 +90,10 @@ def Qlearning_Rtest():
         print(q.trial_run())
 
 def ValueIteration_Otest():
-    VI = ValueIteration(0.001, 0.9, "O")
-    VI.track.show()
-    VI.valueIteration(0.001,0.9)
-    VI.track.show()
-    #to do
+    VI = ValueIteration(0.0000000001, 0.5, "O")
+    VI.valueIteration(0.0000000001,0.5)
+    for i in range(10):
+        print(VI.trial_run())
 
 def ValueIteration_Ltest():
     pass 
