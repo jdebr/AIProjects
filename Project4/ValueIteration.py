@@ -14,10 +14,10 @@ from Racecar import Racecar
 import random
 
 class ValueIteration():
-    def __init__(self, epsilon, discount, track):
+    def __init__(self, epsilon, discount, track, restart=False):
         self.discount = discount 
         self.epsilon = epsilon
-        self.track = Track(track)
+        self.track = Track(track, restart_on_crash=restart)
         self.agent = self.track.car 
         self.current_state = self.agent.get_state()
         self.sCopy = {}

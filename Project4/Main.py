@@ -82,14 +82,21 @@ def ValueIteration_Otest():
 
 def ValueIteration_Ltest():
     pass 
+
+def VI_R_reset():
+    VI = ValueIteration(0.00000000001, 0.5, "R", restart=True)
+    VI.valueIteration(0.00000000001, 0.5)
+    for i in range(10):
+        print(VI.trial_run())
     
 def main():
     #print("hi")
     #crash_test()
     #Qlearning_Otest()
     #Qlearning_Ltest()
-    ValueIteration_Otest()
+    #ValueIteration_Otest()
     #Qlearning_Rtest()
+    VI_R_reset()
 
 if __name__ == "__main__":
     main()
