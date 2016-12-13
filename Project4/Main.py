@@ -75,13 +75,22 @@ def Qlearning_Rtest():
         print(q.trial_run())
 
 def ValueIteration_Otest():
-    VI = ValueIteration(0.0000000001, 0.5, "O")
-    VI.valueIteration(0.0000000001,0.5)
+    VI = ValueIteration(0.00000000001, 0.5, "O")
+    VI.valueIteration(0.00000000001,0.5)
     for i in range(10):
         print(VI.trial_run())
 
 def ValueIteration_Ltest():
-    pass 
+    VI = ValueIteration(0.00000000001, 0.5, "L")
+    VI.valueIteration(0.00000000001,0.5)
+    for i in range(10):
+        print(VI.trial_run())
+        
+def ValueIteration_Rtest():
+    VI = ValueIteration(0.00000000001, 0.5, "R")
+    VI.valueIteration(0.00000000001,0.5)
+    for i in range(10):
+        print(VI.trial_run())
 
 def VI_R_reset():
     VI = ValueIteration(0.00000000001, 0.5, "R", restart=True)
