@@ -8,25 +8,10 @@ Group 3
 @author: Shriyansh Kothari
 @author: Sara Ounissi
 '''
-from Track import Track
-from Racecar import Racecar
 from QLearner import QLearner
 from ValueIteration import ValueIteration
-from collections import defaultdict
-from numpy import argmax
 import random
 
-'''
-Things to keep in mind
-
-accelerationList = [-1,0,1]
-punishment = -1
-racer_State = {}
-racer_Reward = {}
-
-80% we accelerate hence 0.8 
-20% no acceleration hence 0.2
-'''
 
 def crash_test():
     ''' Testing function for crash detection in simulator '''
@@ -64,7 +49,7 @@ def Qlearning_Otest():
 def Qlearning_Ltest():
     ''' Testing function for Q learning on L-track'''
     q = QLearner(0.5, 0.9, 0.9,"L")
-    q.track.show()
+    #q.track.show()
     q.train((32, 2, 0, 1))
     q.train((32, 3, 0, 1))
     q.train()
@@ -90,21 +75,37 @@ def Qlearning_Rtest():
         print(q.trial_run())
 
 def ValueIteration_Otest():
-    VI = ValueIteration(0.001, 0.9, "O")
-    VI.track.show()
-    VI.valueIteration(0.001,0.9)
-    VI.track.show()
-	#to do
+    VI = ValueIteration(0.00000000001, 0.5, "O")
+    VI.valueIteration(0.00000000001,0.5)
+    for i in range(10):
+        print(VI.trial_run())
 
 def ValueIteration_Ltest():
-    pass 
+    VI = ValueIteration(0.00000000001, 0.5, "L")
+    VI.valueIteration(0.00000000001,0.5)
+    for i in range(10):
+        print(VI.trial_run())
+        
+def ValueIteration_Rtest():
+    VI = ValueIteration(0.00000000001, 0.5, "R")
+    VI.valueIteration(0.00000000001,0.5)
+    for i in range(10):
+        print(VI.trial_run())
+
+def VI_R_reset():
+    VI = ValueIteration(0.00000000001, 0.5, "R", restart=True)
+    VI.valueIteration(0.00000000001, 0.5)
+    for i in range(10):
+        print(VI.trial_run())
     
 def main():
+    #print("hi")
     #crash_test()
     #Qlearning_Otest()
     #Qlearning_Ltest()
-	ValueIteration_Otest()
+    #ValueIteration_Otest()
     #Qlearning_Rtest()
+    VI_R_reset()
 
 if __name__ == "__main__":
     main()

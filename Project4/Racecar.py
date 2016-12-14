@@ -111,6 +111,7 @@ class Racecar():
                 # Set to value returned by check_for_crash()
                 self.x = crash_or_finish[0]
                 self.y = crash_or_finish[1]
+                
     #A variant I implemented earlier, Maybe it can be helpful for VI           
     def moveValueIteration(self,staters):
         ''' Applies the current values of the car's acceleration to the velocity 
@@ -142,7 +143,7 @@ class Racecar():
         # Check for collisions or finish
         end = (x + self.vX, y + self.vY)
         crash_or_finish = self.track.check_for_crash((x, y), end)
-        
+
         # Update position
         if not crash_or_finish:
             # Safe move
@@ -156,6 +157,40 @@ class Racecar():
             #self.x = crash_or_finish[0]
             #self.y = crash_or_finish[1]
             return[(0.8,(crash_or_finish[0],crash_or_finish[1], self.vX, self.vY)),(0.2,(crash_or_finish[0],crash_or_finish[1], self.vX, self.vY))]
+        
+    def move_deterministic(self, restart_states=None):
+        ''' Applies the current values of the car's acceleration to the velocity 
+        values, then attempts to update the car's 
+        position based on the current velocity while checking for potential 
+        collisions with the track walls
+        '''
+        # Apply acceleration to velocity
+        self.vX += self.aX
+        self.vY += self.aY 
+        
+        # Bound velocity between -5 and 5
+        if self.vX > 5:
+            self.vX = 5
+        if self.vX < -5:
+            self.vX = -5
+        if self.vY > 5:
+            self.vY = 5
+        if self.vY < -5:
+            self.vY = -5
+            
+        # Check for collisions or finish
+        end = (self.x + self.vX, self.y + self.vY)
+        crash_or_finish = self.track.check_for_crash((self.x, self.y), end)
+        
+        # Update position
+        if not crash_or_finish:
+            # Safe move
+            self.x = end[0]
+            self.y = end[1]
+        elif self.track.check_location(crash_or_finish[0],crash_or_finish[1]) == 'F':
+            # Cross the finish line
+            self.x = crash_or_finish[0]
+            self.y = crash_or_finish[1]
         else:
             # Crashed
             self.vX = 0
@@ -163,11 +198,11 @@ class Racecar():
             if self.track.restart:
                 # Set to random starting position
                 pos = random.choice(self.track.start_positions)
-                #self.x = pos[0]
-                #self.y = pos[1]
-                return[(0.8,(pos[0],pos[1], self.vX, self.vY)),(0.2,(pos[0],pos[1], self.vX, self.vY))]
+                if restart_states:
+                    pos = random.choice(restart_states)
+                self.x = pos[0]
+                self.y = pos[1]
             else:
                 # Set to value returned by check_for_crash()
-                #self.x = crash_or_finish[0]
-                #self.y = crash_or_finish[1]
-                return[(0.8,(crash_or_finish[0],crash_or_finish[1], self.vX, self.vY)),(0.2,(crash_or_finish[0],crash_or_finish[1], self.vX, self.vY))]
+                self.x = crash_or_finish[0]
+                self.y = crash_or_finish[1]
