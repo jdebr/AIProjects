@@ -10,7 +10,9 @@ Group 3
 '''
 from QLearner import QLearner
 from ValueIteration import ValueIteration
-import random
+import matplotlib.pyplot as plt
+from statistics import mean
+from statistics import median
 
 
 def crash_test():
@@ -48,101 +50,168 @@ def blah():
     
 def Qlearning_Otest(iter=50000):
     ''' Testing function for Q learning on O-Track'''
-    q = QLearner(0.5, 0.9, 0.9,"O")
-    ep = 0.9
-    lrate = 0.9
-    scores = []
-    #q.track.show()
-    for j in range(20):
-        scores.append([])
-        q.train((3,4,0,1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((4,3,0,1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((20, 2, -1, 0), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((21, 4, -1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((20, 20, 0, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((18, 22, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((4, 22, 1, 0), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((3, 20, 1, 1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
-        for i in range(10):
-            score = q.trial_run()
-            scores[j].append(score)
-        ep -= 0.02
-        lrate -= 0.02
-            
-    #print(scores)
-    
-def Qlearning_Ltest(iter=50000):
-    ''' Testing function for Q learning on L-track'''
-    q = QLearner(0.5, 0.9, 0.9,"L")
-    ep = 0.9
-    lrate = 0.9
-    scores = []
-    #q.track.show()
-    for j in range(20):
-        scores.append([])
+    averages = []
+    for k in range(20):
+        averages.append([])
+        
+    for k in range(10):
+        q = QLearner(0.5, 0.9, 0.9,"O")
+        ep = 0.9
+        lrate = 0.9
+        scores = []
         #q.track.show()
-        q.train((32, 2, 0, 1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((32, 3, 0, 1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
-        for i in range(10):
-            score = q.trial_run()
-            scores[j].append(score)
-        ep -= 0.02
-        lrate -= 0.02
-    print(scores)
+        for j in range(20):
+            scores.append([])
+            q.train((3,4,0,1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((4,3,0,1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((20, 2, -1, 0), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((21, 4, -1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((20, 20, 0, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((18, 22, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((4, 22, 1, 0), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((3, 20, 1, 1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
+            for i in range(10):
+                score = q.trial_run()
+                scores[j].append(score)
+            ep -= 0.02
+            lrate -= 0.02
+                
+        z = [mean(l) for l in scores]
+        for j in range(len(z)):
+            averages[j].append(z[j])
         
-def Qlearning_Rtest(iter=50000):
-    ''' Testing function for Q learning on R-track'''
-    q = QLearner(0.5, 0.9, 0.9, "R")
-    ep = 0.9
-    lrate = 0.9
-    scores = []
-    #q.track.show()
-    for j in range(20):
-        scores.append([])
-        q.train((23,11, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((12,17, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((13,17, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((21,25, 0, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((21,23, -1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((5, 24, 1, 0), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train((4, 23, 1, 1), learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
-        q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
-        for i in range(10):
-            score = q.trial_run()
-            scores[j].append(score)
-        ep -= 0.02
-        lrate -= 0.02
-    print(scores)
+    print(averages)
+    x = [e*iter for e in range(20)]
+    y = [median(l) for l in averages]
+    print(y)
+    plt.plot(x, y, marker='o', linestyle='-', color='r')
+    plt.ylabel('Score')
+    plt.xlabel('Training Samples Per Location')
+    plt.show()
+    
+def Qlearning_Ltest(iter=30000):
+    ''' Testing function for Q learning on L-track'''
+    averages = []
+    for k in range(20):
+        averages.append([])
         
-def Qlearning_Rtest_withReset(iter=100000):
+    for k in range(10):
+        q = QLearner(0.5, 0.9, 0.9,"L")
+        ep = 0.9
+        lrate = 0.9
+        scores = []
+        #q.track.show()
+        for j in range(20):
+            scores.append([])
+            #q.track.show()
+            q.train((32, 2, 0, 1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((32, 3, 0, 1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
+            for i in range(10):
+                score = q.trial_run()
+                scores[j].append(score)
+            ep -= 0.02
+            lrate -= 0.02
+            
+        z = [mean(l) for l in scores]
+        for j in range(len(z)):
+            averages[j].append(z[j])
+        
+    print(averages)
+    x = [e*iter for e in range(20)]
+    y = [median(l) for l in averages]
+    print(y)
+    plt.plot(x, y, marker='o', linestyle='-', color='r')
+    plt.ylabel('Score')
+    plt.xlabel('Training Samples Per Location')
+    plt.show()
+        
+def Qlearning_Rtest(iter=100000):
     ''' Testing function for Q learning on R-track'''
-    q = QLearner(0.5, 0.9, 0.9, "R", True)
-    ep = 0.9
-    lrate = 0.9
-    scores = []
-    #q.track.show()
-    for j in range(20):
-        scores.append([])
-        q.train((23,11, 1, -1), iterations=iter)
-        q.train((12,17, 1, -1), iterations=iter)
-        q.train((13,17, 1, -1), iterations=iter)
-        q.train((21,25, 0, -1), iterations=iter)
-        q.train((21,23, -1, -1), iterations=iter)
-        q.train((5, 24, 1, 0), iterations=iter)
-        q.train((4, 23, 1, 1), iterations=iter)
-        q.train(iterations=iter)
-        q.train(iterations=iter)
-        for i in range(10):
-            score = q.trial_run()
-            scores[j].append(score)
-        ep -= 0.02
-        lrate -= 0.02
-    print(scores)
+    averages = []
+    for k in range(20):
+        averages.append([])
+        
+    for k in range(10):
+        q = QLearner(0.5, 0.9, 0.9, "R")
+        ep = 0.9
+        lrate = 0.9
+        scores = []
+        #q.track.show()
+        for j in range(20):
+            scores.append([])
+            q.train((23,11, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((12,17, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((13,17, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((21,25, 0, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((21,23, -1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((5, 24, 1, 0), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((4, 23, 1, 1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
+            for i in range(10):
+                score = q.trial_run()
+                scores[j].append(score)
+            ep -= 0.02
+            lrate -= 0.02
+            
+        z = [mean(l) for l in scores]
+        for j in range(len(z)):
+            averages[j].append(z[j])
+        
+    print(averages)
+    x = [e*iter for e in range(20)]
+    y = [median(l) for l in averages]
+    print(y)
+    plt.plot(x, y, marker='o', linestyle='-', color='r')
+    plt.ylabel('Score')
+    plt.xlabel('Training Samples Per Location')
+    plt.show()
+        
+def Qlearning_Rtest_withReset(iter=500000):
+    ''' Testing function for Q learning on R-track'''
+    averages = []
+    for k in range(20):
+        averages.append([])
+        
+    for k in range(10):
+        q = QLearner(0.5, 0.9, 0.9, "R", True)
+        ep = 0.9
+        lrate = 0.9
+        scores = []
+        #q.track.show()
+        for j in range(20):
+            scores.append([])
+            q.train((23,11, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((12,17, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((13,17, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((21,25, 0, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((21,23, -1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((5, 24, 1, 0), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train((4, 23, 1, 1), learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
+            q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
+            for i in range(10):
+                score = q.trial_run()
+                scores[j].append(score)
+            ep -= 0.02
+            lrate -= 0.02
+            
+        z = [mean(l) for l in scores]
+        for j in range(len(z)):
+            averages[j].append(z[j])
+        
+    print(averages)
+    x = [e*iter for e in range(20)]
+    y = [median(l) for l in averages]
+    print(y)
+    plt.plot(x, y, marker='o', linestyle='-', color='r')
+    plt.ylabel('Score')
+    plt.xlabel('Training Samples Per Location')
+    plt.show()
 
 def ValueIteration_Otest():
     VI = ValueIteration(0.00000000001, 0.5, "O")
