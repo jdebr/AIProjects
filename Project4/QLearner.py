@@ -65,9 +65,9 @@ class QLearner():
         # Main loop, when do we terminate?
         for i in range(iterations):
             # E-greedy action selection, decaying epsilon and learning rate
-            if i % (iterations/10) == 0:
-                epsilon -= 0.05
-                learning_rate -= 0.05
+            #if i % (iterations/10) == 0:
+            #    epsilon -= 0.05
+            #    learning_rate -= 0.05
                 #print()
                 #print("*** Decaying epsilon and learning rate ***")
                 #print(" ~ E-greedy epsilon decreased to " + str(epsilon))
