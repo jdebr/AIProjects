@@ -30,10 +30,8 @@ def crash_test():
     #q.start()
     #q.track.show()
     
-def Qlearning_Otest():
-    ''' Testing function for Q learning on O-Track'''
-    q = QLearner(0.5, 0.9, 0.9,"O")
-    q.track.show()
+def blah():
+    q = QLearner(0.5,0.9,0.9,"O")
     q.train((3,4,0,1))
     q.train((4,3,0,1))
     q.train((20, 2, -1, 0))
@@ -43,34 +41,88 @@ def Qlearning_Otest():
     q.train((4, 22, 1, 0))
     q.train((3, 20, 1, 1))
     q.train()
+    q.train()
     for i in range(10):
-        print(q.trial_run())
+        score = q.trial_run()
+        print(score)
     
-def Qlearning_Ltest():
+def Qlearning_Otest(iter=50000):
+    ''' Testing function for Q learning on O-Track'''
+    q = QLearner(0.5, 0.9, 0.9,"O")
+    ep = 0.9
+    lrate = 0.9
+    scores = []
+    #q.track.show()
+    for j in range(20):
+        scores.append([])
+        q.train((3,4,0,1), learning_rate=lrate, epsilon=ep, iterations=iter)
+        q.train((4,3,0,1), learning_rate=lrate, epsilon=ep, iterations=iter)
+        q.train((20, 2, -1, 0), learning_rate=lrate, epsilon=ep, iterations=iter)
+        q.train((21, 4, -1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+        q.train((20, 20, 0, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+        q.train((18, 22, 1, -1), learning_rate=lrate, epsilon=ep, iterations=iter)
+        q.train((4, 22, 1, 0), learning_rate=lrate, epsilon=ep, iterations=iter)
+        q.train((3, 20, 1, 1), learning_rate=lrate, epsilon=ep, iterations=iter)
+        q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
+        q.train(learning_rate=lrate, epsilon=ep, iterations=iter)
+        for i in range(10):
+            score = q.trial_run()
+            scores[j].append(score)
+        ep -= 0.02
+        lrate -= 0.02
+            
+    print(scores)
+    
+def Qlearning_Ltest(iter=10000):
     ''' Testing function for Q learning on L-track'''
     q = QLearner(0.5, 0.9, 0.9,"L")
+    ep = 0.9
+    lrate = 0.9
+    scores = []
     #q.track.show()
-    q.train((32, 2, 0, 1))
-    q.train((32, 3, 0, 1))
-    q.train()
-    q.train()
+    for j in range(20):
+        scores.append([])
+        #q.track.show()
+        q.train((32, 2, 0, 1), iterations=iter)
+        q.train((32, 3, 0, 1), iterations=iter)
+        q.train(iterations=iter)
+        q.train(iterations=iter)
+        for i in range(10):
+            score = q.trial_run()
+            scores[j].append(score)
+        ep -= 0.05
+        lrate -= 0.05
+
+        
+def Qlearning_Rtest(iter):
+    ''' Testing function for Q learning on R-track'''
+    q = QLearner(0.5, 0.9, 0.9, "R")
+    #q.track.show()
+    q.train((23,11, 1, -1), iterations=iter)
+    q.train((12,17, 1, -1), iterations=iter)
+    q.train((13,17, 1, -1), iterations=iter)
+    q.train((21,25, 0, -1), iterations=iter)
+    q.train((21,23, -1, -1), iterations=iter)
+    q.train((5, 24, 1, 0), iterations=iter)
+    q.train((4, 23, 1, 1), iterations=iter)
+    q.train(iterations=iter)
+    q.train(iterations=iter)
     for i in range(10):
         print(q.trial_run())
-		
         
-def Qlearning_Rtest():
+def Qlearning_Rtest_withReset(iter):
     ''' Testing function for Q learning on R-track'''
     q = QLearner(0.5, 0.9, 0.9, "R", True)
-    q.track.show()
-    q.train((23,11, 1, -1))
-    q.train((12,17, 1, -1))
-    q.train((13,17, 1, -1))
-    q.train((21,25, 0, -1))
-    q.train((21,23, -1, -1))
-    q.train((5, 24, 1, 0))
-    q.train((4, 23, 1, 1))
-    q.train()
-    q.train()
+    #q.track.show()
+    q.train((23,11, 1, -1), iterations=iter)
+    q.train((12,17, 1, -1), iterations=iter)
+    q.train((13,17, 1, -1), iterations=iter)
+    q.train((21,25, 0, -1), iterations=iter)
+    q.train((21,23, -1, -1), iterations=iter)
+    q.train((5, 24, 1, 0), iterations=iter)
+    q.train((4, 23, 1, 1), iterations=iter)
+    q.train(iterations=iter)
+    q.train(iterations=iter)
     for i in range(10):
         print(q.trial_run())
 
@@ -99,13 +151,11 @@ def VI_R_reset():
         print(VI.trial_run())
     
 def main():
-    #print("hi")
-    #crash_test()
-    #Qlearning_Otest()
-    #Qlearning_Ltest()
-    #ValueIteration_Otest()
-    #Qlearning_Rtest()
-    VI_R_reset()
+    #blah()
+    Qlearning_Otest()
+    #Qlearning_Ltest(iter)
+    #Qlearning_Rtest(iter)
+    #Qlearning_Rtest_withReset(iter)
 
 if __name__ == "__main__":
     main()
